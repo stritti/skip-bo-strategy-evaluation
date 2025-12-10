@@ -3,7 +3,7 @@
  * Handles all simulation state, logic, and data management
  */
 
-import { ref, computed, reactive, nextTick, watch, onMounted } from 'vue';
+import { ref, computed, reactive, onMounted } from 'vue';
 import { SkipBoGame } from '../game/SkipBoGame';
 import type { SimulationApp, GameResult, Strategy, LogEntry } from '../game/types';
 
