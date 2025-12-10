@@ -32,9 +32,19 @@
           </router-link>
           
           <router-link to="/strategy" active-class="bg-skipbo-red/10 text-skipbo-red font-bold"
-            class="px-3 py-2 rounded-md transition-colors hover:bg-gray-50 hover:text-skipbo-red">
+            class="px-3 py-2 rounded-md transition-colors hover:bg-gray-50 hover:text-skipbo-red text-grey-500">
             Strategie
           </router-link>
+
+          <router-link to="/about" active-class="bg-purple-100 text-purple-700 font-bold"
+            class="px-3 py-2 rounded-md transition-colors hover:bg-purple-50 hover:text-purple-600 flex items-center gap-1 ml-2">
+            <i class="ph ph-info"></i> Über
+          </router-link>
+
+          <a href="https://github.com/stritti/skip-bo-strategy-evaluation" target="_blank" rel="noopener noreferrer"
+            class="ml-4 p-2 text-gray-400 hover:text-gray-900 transition-colors" title="GitHub Repository">
+            <i class="ph-bold ph-github-logo text-2xl"></i>
+          </a>
         </div>
       </div>
     </div>
