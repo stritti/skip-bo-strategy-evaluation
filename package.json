@@ -19,6 +19,7 @@
     "@phosphor-icons/vue": "^2.2.1",
     "@vitejs/plugin-vue": "^6.0.2",
     "chart.js": "^4.5.1",
-    "idb": "^8.0.3"
+    "idb": "^8.0.3",
+    "vue-router": "^4.6.3"
   }
 }

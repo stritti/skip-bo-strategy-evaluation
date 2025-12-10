@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import LogDisplay from '../components/dashboard/LogDisplay.vue';
 import ProgressBar from '../components/dashboard/ProgressBar.vue';
 import KPICards from '../components/dashboard/KPICards.vue';
@@ -11,10 +12,7 @@ import StrategySelect from '../components/dashboard/StrategySelect.vue';
 import { useSimulation } from '../composables/useSimulation';
 import { useCharts } from '../composables/useCharts';
 
-const emit = defineEmits<{
-  changeView: [view: string];
-}>();
-
+const router = useRouter();
 const simulation = useSimulation();
 const charts = useCharts();
 
@@ -89,30 +87,30 @@ const handleResetSimulation = () => {
         <!-- Settings -->
         <div class="lg:col-span-1 border-r pr-6 border-gray-100 hidden lg:block">
           <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <i class="ph-bold ph-gear-six text-xl text-red-600"></i>Simulationseinstellungen
+            <i class="ph-bold ph-gear-six text-xl text-skipbo-red"></i>Simulationseinstellungen
           </h3>
-          <div class="bg-red-50 p-4 rounded-lg border border-red-200">
-            <label for="gameCountSlider" class="block text-sm font-medium text-red-800 mb-2">
+          <div class="bg-skipbo-red/5 p-4 rounded-lg border border-skipbo-red/20">
+            <label for="gameCountSlider" class="block text-sm font-medium text-skipbo-red mb-2">
               Anzahl der Spielrunden:
               <span class="font-bold text-lg">{{ simulation.maxGamesConfig.value.toLocaleString('de-DE') }}</span>
             </label>
             <input id="gameCountSlider" type="range" v-model.number="simulation.maxGamesConfig.value"
               :min="simulation.minGames" :max="simulation.maxGamesLimit" :step="simulation.stepGames"
               :disabled="simulation.isSimulating.value">
-            <div class="flex justify-between text-xs text-red-700 mt-2 font-mono font-bold">
+            <div class="flex justify-between text-xs text-skipbo-red mt-2 font-mono font-bold">
               <span>{{ simulation.minGames }}</span>
               <span>{{ simulation.maxGamesLimit.toLocaleString('de-DE') }}</span>
             </div>
-            <p class="text-xs text-red-700/80 mt-2">
+            <p class="text-xs text-skipbo-red/70 mt-2">
               Je höher die Zahl, desto genauer die Statistik (aber länger die Laufzeit).
             </p>
 
             <!-- Strategy Selectors -->
-            <div class="mt-6 pt-6 border-t border-red-100">
+            <div class="mt-6 pt-6 border-t border-skipbo-red/10">
               <div class="space-y-5">
                 <!-- P1 -->
                 <div>
-                  <label class="block text-xs font-bold text-red-900 uppercase tracking-wider mb-2">Strategie Spieler 1</label>
+                  <label class="block text-xs font-bold text-skipbo-red uppercase tracking-wider mb-2">Strategie Spieler 1</label>
                   <StrategySelect 
                     v-model="simulation.strategyP1.value" 
                     :disabled="simulation.isSimulating.value" 
@@ -121,7 +119,7 @@ const handleResetSimulation = () => {
 
                 <!-- P2 -->
                 <div>
-                  <label class="block text-xs font-bold text-red-900 uppercase tracking-wider mb-2">Strategie Spieler 2</label>
+                  <label class="block text-xs font-bold text-skipbo-red uppercase tracking-wider mb-2">Strategie Spieler 2</label>
                   <StrategySelect 
                     v-model="simulation.strategyP2.value" 
                     :disabled="simulation.isSimulating.value" 
@@ -175,15 +173,15 @@ const handleResetSimulation = () => {
           <DurationChart ref="durationChartComponent" />
         </div>
 
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="bg-skipbo-blue/5 border border-skipbo-blue/20 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div class="flex items-center gap-3">
-            <i class="ph-fill ph-database text-red-600 text-xl"></i>
-            <span class="text-sm text-red-800 font-medium">Die Rohdaten der {{
+            <i class="ph-fill ph-database text-skipbo-blue text-xl"></i>
+            <span class="text-sm text-skipbo-blue font-bold">Die Rohdaten der {{
               simulation.maxGamesConfig.value.toLocaleString('de-DE') }} Spiele wurden generiert und die Statistik
               hochgerechnet.</span>
           </div>
-          <button @click="emit('changeView', 'data')"
-            class="text-sm bg-white text-red-600 px-4 py-2 rounded-lg border border-red-200 font-bold hover:bg-red-50 shadow-sm transition w-full sm:w-auto">
+          <button @click="router.push('/data')"
+            class="text-sm bg-white text-skipbo-blue px-4 py-2 rounded-lg border border-skipbo-blue/20 font-bold hover:bg-skipbo-blue/10 shadow-sm transition w-full sm:w-auto">
             Zur Datentabelle →
           </button>
         </div>
