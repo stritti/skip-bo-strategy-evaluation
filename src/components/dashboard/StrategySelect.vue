@@ -24,6 +24,15 @@ const getIcon = (s: Strategy) => {
   }
 };
 
+const getColor = (s: Strategy) => {
+  switch (s) {
+    case 'Optimiert': return 'text-skipbo-blue';
+    case 'Zufall': return 'text-skipbo-green';
+    case 'Spontan': return 'text-skipbo-red';
+    default: return 'text-gray-400';
+  }
+};
+
 const toggle = () => {
   if (!props.disabled) {
     isOpen.value = !isOpen.value;
@@ -50,14 +59,14 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside));
   <div ref="containerRef" class="relative">
     <!-- Trigger Button -->
     <button type="button" @click="toggle" :disabled="disabled"
-      class="relative w-full bg-white border-2 border-red-100 rounded-xl py-3 pl-3 pr-10 text-left cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm transition-all duration-200"
-      :class="{ 'opacity-60 cursor-not-allowed': disabled, 'border-red-500 ring-2 ring-red-200': isOpen }">
+      class="relative w-full bg-white border-2 border-skipbo-red/20 rounded-xl py-3 pl-3 pr-10 text-left cursor-pointer focus:outline-none focus:ring-2 focus:ring-skipbo-red focus:border-skipbo-red sm:text-sm transition-all duration-200"
+      :class="{ 'opacity-60 cursor-not-allowed': disabled, 'border-skipbo-red ring-2 ring-skipbo-red/20': isOpen }">
       <span class="flex items-center gap-3">
-        <i :class="getIcon(modelValue)" class="ph-bold text-xl text-red-500"></i>
-        <span class="block truncate font-medium text-gray-900">{{ modelValue }}</span>
+        <i :class="[getIcon(modelValue), getColor(modelValue)]" class="ph-bold text-xl"></i>
+        <span class="block truncate font-bold text-gray-900">{{ modelValue }}</span>
       </span>
       <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-        <i class="ph-bold ph-caret-down text-red-300 transition-transform duration-200" :class="{ 'rotate-180': isOpen }"></i>
+        <i class="ph-bold ph-caret-down text-skipbo-red transition-transform duration-200" :class="{ 'rotate-180': isOpen }"></i>
       </span>
     </button>
 
@@ -74,19 +83,19 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside));
         class="absolute z-[100] mt-1 w-full bg-white shadow-xl max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
         <li v-for="option in options" :key="option"
           @click="select(option)"
-          class="cursor-pointer select-none relative py-3 pl-3 pr-9 hover:bg-red-50 transition-colors"
-          :class="{ 'bg-red-50': option === modelValue }">
+          class="cursor-pointer select-none relative py-3 pl-3 pr-9 hover:bg-skipbo-red/5 transition-colors"
+          :class="{ 'bg-skipbo-red/10': option === modelValue }">
           <div class="flex items-center gap-3">
-            <i :class="[getIcon(option), option === modelValue ? 'text-red-600' : 'text-gray-400']" 
+            <i :class="[getIcon(option), getColor(option)]" 
                class="ph-bold text-xl"></i>
             <span class="font-medium block truncate"
-                  :class="option === modelValue ? 'text-red-900' : 'text-gray-900'">
+                  :class="option === modelValue ? 'text-skipbo-red font-bold' : 'text-gray-900'">
               {{ option }}
             </span>
           </div>
 
           <span v-if="option === modelValue"
-            class="absolute inset-y-0 right-0 flex items-center pr-4 text-red-600">
+            class="absolute inset-y-0 right-0 flex items-center pr-4 text-skipbo-red">
             <i class="ph-bold ph-check text-lg"></i>
           </span>
         </li>
