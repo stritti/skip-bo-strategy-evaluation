@@ -291,6 +291,12 @@ export function useSimulation() {
                     // Auto-load the new run directly
                     const runWithId = { ...runData, id: newId };
                     loadRun(runWithId);
+
+                    // Randomize strategies for the next run (Request from User)
+                    const strategies: Strategy[] = ['Optimiert', 'Zufall', 'Spontan'];
+                    strategyP1.value = strategies[Math.floor(Math.random() * strategies.length)];
+                    strategyP2.value = strategies[Math.floor(Math.random() * strategies.length)];
+                    logEvent('INFO', `Strategien neu gewürfelt: ${strategyP1.value} vs ${strategyP2.value}`);
                 });
 
                 isSimulating.value = false;

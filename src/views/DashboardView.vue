@@ -7,9 +7,9 @@ import WinRateChart from '../components/dashboard/WinRateChart.vue';
 import DurationChart from '../components/dashboard/DurationChart.vue';
 import HistoryTable from '../components/dashboard/HistoryTable.vue';
 import CumulativeStats from '../components/dashboard/CumulativeStats.vue';
+import StrategySelect from '../components/dashboard/StrategySelect.vue';
 import { useSimulation } from '../composables/useSimulation';
 import { useCharts } from '../composables/useCharts';
-import type { Strategy } from '../game/types';
 
 const emit = defineEmits<{
   changeView: [view: string];
@@ -17,8 +17,6 @@ const emit = defineEmits<{
 
 const simulation = useSimulation();
 const charts = useCharts();
-
-const strategyOptions: Strategy[] = ['Optimiert', 'Zufall', 'Spontan'];
 
 const winRateChartComponent = ref<InstanceType<typeof WinRateChart> | null>(null);
 const durationChartComponent = ref<InstanceType<typeof DurationChart> | null>(null);
@@ -72,8 +70,8 @@ const handleResetSimulation = () => {
 <template>
   <div class="max-w-7xl mx-auto px-4 py-8 space-y-12">
     <!-- Simulation Control Panel -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-      <div class="border-b border-gray-100 bg-gray-50/50 px-6 py-4 flex justify-between items-center">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200">
+      <div class="border-b border-gray-100 bg-gray-50/50 px-6 py-4 flex justify-between items-center rounded-t-2xl">
         <div>
           <h2 class="text-lg font-bold text-gray-900">Simulation Control Center</h2>
           <p class="text-sm text-gray-500">Modellierung von {{ simulation.maxGamesConfig.value }} echten Spielrunden</p>
@@ -110,20 +108,25 @@ const handleResetSimulation = () => {
             </p>
 
             <!-- Strategy Selectors -->
-            <div class="mt-6 space-y-4 pt-4 border-t border-red-200/50">
-              <div>
-                <label class="block text-sm font-medium text-red-800 mb-1">Strategie Spieler 1</label>
-                <select v-model="simulation.strategyP1.value" :disabled="simulation.isSimulating.value"
-                  class="w-full rounded-md border-red-200 bg-white text-gray-900 text-sm focus:border-red-500 focus:ring-red-500">
-                  <option v-for="s in strategyOptions" :key="s" :value="s">{{ s }}</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-red-800 mb-1">Strategie Spieler 2</label>
-                <select v-model="simulation.strategyP2.value" :disabled="simulation.isSimulating.value"
-                  class="w-full rounded-md border-red-200 bg-white text-gray-900 text-sm focus:border-red-500 focus:ring-red-500">
-                  <option v-for="s in strategyOptions" :key="s" :value="s">{{ s }}</option>
-                </select>
+            <div class="mt-6 pt-6 border-t border-red-100">
+              <div class="space-y-5">
+                <!-- P1 -->
+                <div>
+                  <label class="block text-xs font-bold text-red-900 uppercase tracking-wider mb-2">Strategie Spieler 1</label>
+                  <StrategySelect 
+                    v-model="simulation.strategyP1.value" 
+                    :disabled="simulation.isSimulating.value" 
+                  />
+                </div>
+
+                <!-- P2 -->
+                <div>
+                  <label class="block text-xs font-bold text-red-900 uppercase tracking-wider mb-2">Strategie Spieler 2</label>
+                  <StrategySelect 
+                    v-model="simulation.strategyP2.value" 
+                    :disabled="simulation.isSimulating.value" 
+                  />
+                </div>
               </div>
             </div>
           </div>
