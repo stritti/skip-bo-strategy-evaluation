@@ -2,6 +2,10 @@
 
 Eine moderne Web-Anwendung zur Simulation und Auswertung verschiedener Strategien im Kartenspiel Skip-Bo. Entwickelt mit Vue 3, TypeScript und TailwindCSS.
 
+> [!NOTE]
+> **Pure Vibe Coding**: Diese gesamte Anwendung wurde vollständig "Vibe Coded" – ohne jeglichen manuellen Eingriff in den Code.  
+> Erstellt mit **Gemini 3 Pro** in **Antigravity**.
+
 ## 🚀 Features
 
 ### Simulation
