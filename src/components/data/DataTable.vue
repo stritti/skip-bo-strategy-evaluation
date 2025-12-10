@@ -3,28 +3,50 @@ import type { GameResult } from '../../game/types';
 
 defineProps<{
   data: GameResult[];
-  isFinished: boolean;
+  isFinished: boolean; // Kept for legacy compatibility if needed, though used less now
+  sortColumn?: keyof GameResult;
+  sortDirection?: 'asc' | 'desc';
 }>();
+
+const emit = defineEmits<{
+  toggleSort: [column: keyof GameResult];
+}>();
+
+const headers: { key: keyof GameResult; label: string }[] = [
+  { key: 'id', label: 'Game ID' },
+  { key: 'winner', label: 'Sieger' },
+  { key: 'turns', label: 'Züge' },
+  { key: 'duration', label: 'Dauer (Sim)' },
+  { key: 'starter', label: 'Startspieler' },
+  { key: 'jokers', label: 'Joker benutzt' },
+  { key: 'strategy', label: 'Strategie Typ' },
+];
 </script>
 
 <template>
-  <div class="overflow-x-auto flex-grow">
-    <table class="w-full data-table">
-      <thead>
+  <div class="overflow-x-auto flex-grow rounded-lg border border-gray-200 shadow-sm">
+    <table class="w-full data-table text-left border-collapse">
+      <thead class="bg-gray-50 text-gray-600 font-semibold text-xs uppercase tracking-wider">
         <tr>
-          <th class="w-24">Game ID</th>
-          <th>Sieger</th>
-          <th>Züge</th>
-          <th>Dauer (Sim)</th>
-          <th>Startspieler</th>
-          <th>Joker benutzt</th>
-          <th>Strategie Typ</th>
+          <th v-for="header in headers" :key="header.key" 
+              @click="emit('toggleSort', header.key)"
+              class="px-4 py-3 cursor-pointer hover:bg-gray-100 transition select-none group">
+            <div class="flex items-center gap-1">
+              {{ header.label }}
+              <div class="flex flex-col text-[8px] leading-[8px] text-gray-300">
+                <i class="ph-fill ph-caret-up" 
+                   :class="{ 'text-blue-600': sortColumn === header.key && sortDirection === 'asc' }"></i>
+                <i class="ph-fill ph-caret-down" 
+                   :class="{ 'text-blue-600': sortColumn === header.key && sortDirection === 'desc' }"></i>
+              </div>
+            </div>
+          </th>
         </tr>
       </thead>
-      <tbody v-if="isFinished">
-        <tr v-for="row in data" :key="row.id" class="transition-colors">
-          <td class="font-mono text-xs text-gray-500">#{{ row.id }}</td>
-          <td>
+      <tbody v-if="data.length > 0" class="divide-y divide-gray-100 bg-white">
+        <tr v-for="row in data" :key="row.id" class="hover:bg-blue-50/50 transition-colors">
+          <td class="px-4 py-2 font-mono text-xs text-gray-500">#{{ row.id }}</td>
+          <td class="px-4 py-2">
             <span
               :class="row.winner === 'Spieler 1 (KI)' ? 'text-green-600 bg-green-50' : 'text-blue-600 bg-blue-50'"
               class="px-2 py-1 rounded text-xs font-bold">

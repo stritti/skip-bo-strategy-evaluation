@@ -1,0 +1,87 @@
+<script setup lang="ts">
+import type { SimulationRun } from '../../services/dbService';
+
+const props = defineProps<{
+  history: SimulationRun[];
+  currentRunId: number | null;
+}>();
+
+const emit = defineEmits<{
+  clearHistory: [];
+  loadRun: [run: SimulationRun];
+}>();
+
+const formatDate = (timestamp: number) => {
+  return new Date(timestamp).toLocaleString('de-DE', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+</script>
+
+<template>
+  <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden" v-if="history.length > 0">
+    <div class="border-b border-gray-100 bg-gray-50/50 px-6 py-4 flex justify-between items-center">
+      <h3 class="font-bold text-gray-800 flex items-center gap-2">
+        <i class="ph-bold ph-clock-counter-clockwise text-xl text-blue-600"></i>
+        Simulations-Historie
+      </h3>
+      <button @click="emit('clearHistory')"
+        class="text-xs text-red-600 hover:text-red-800 font-bold hover:underline transition">
+        Historie löschen
+      </button>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left">
+        <thead class="bg-gray-50 text-gray-500 font-medium">
+          <tr>
+            <th class="px-6 py-3">Datum</th>
+            <th class="px-6 py-3 text-right">Spiele</th>
+            <th class="px-6 py-3 text-right">P1 (KI) Win %</th>
+            <th class="px-6 py-3">Strategie P1</th>
+            <th class="px-6 py-3">Strategie P2</th>
+            <th class="px-6 py-3 text-right">Ø Züge</th>
+            <th class="px-6 py-3 text-right">Aktion</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr v-for="run in history" :key="run.id" class="transition"
+              :class="run.id === currentRunId ? 'bg-blue-50/60' : 'hover:bg-gray-50'">
+            <td class="px-6 py-3 whitespace-nowrap text-gray-900 flex items-center gap-2">
+              <i v-if="run.id === currentRunId" class="ph-fill ph-check-circle text-blue-600"></i>
+              {{ formatDate(run.timestamp) }}
+            </td>
+            <td class="px-6 py-3 text-right font-mono">{{ run.gamesCount.toLocaleString('de-DE') }}</td>
+            <td class="px-6 py-3 text-right font-bold"
+              :class="run.winsP1 > run.winsP2 ? 'text-green-600' : 'text-red-600'">
+              {{ ((run.winsP1 / run.gamesCount) * 100).toFixed(1) }}%
+            </td>
+            <td class="px-6 py-3">
+              <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs font-semibold border border-blue-100">
+                {{ run.strategyP1 }}
+              </span>
+            </td>
+            <td class="px-6 py-3">
+               <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-semibold border border-gray-200">
+                {{ run.strategyP2 }}
+               </span>
+            </td>
+            <td class="px-6 py-3 text-right">{{ (run.totalTurns / run.gamesCount).toFixed(1) }}</td>
+            <td class="px-6 py-3 text-right">
+              <button v-if="run.id !== currentRunId" @click="emit('loadRun', run)"
+                class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-blue-600 px-3 py-1 rounded-lg text-xs font-bold transition shadow-sm flex items-center gap-1 ml-auto">
+                <i class="ph-bold ph-eye"></i> Laden
+              </button>
+              <span v-else class="text-xs font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-lg border border-blue-200 inline-flex items-center gap-1">
+                <i class="ph-weight-bold ph-check"></i> Aktiv
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</template>

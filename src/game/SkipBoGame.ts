@@ -12,7 +12,7 @@ import {
     HAND_SIZE,
     MAX_TURNS_LIMIT
 } from './constants';
-import type { SimulationApp, GameResult } from './types';
+import type { SimulationApp, GameResult, Strategy } from './types';
 
 export class SkipBoGame {
     app: SimulationApp;
@@ -24,9 +24,9 @@ export class SkipBoGame {
     turnCount: number;
     winner: Player | null;
 
-    constructor(app: SimulationApp) {
+    constructor(app: SimulationApp, strategyP1: Strategy = 'Optimiert', strategyP2: Strategy = 'Zufall') {
         this.app = app;
-        this.players = [new Player(0, true), new Player(1, false)]; // P1: KI, P2: Random
+        this.players = [new Player(0, strategyP1), new Player(1, strategyP2)];
         this.drawPile = [];
         this.discardPile = [];
         this.buildPiles = Array.from({ length: BUILD_PILE_COUNT }, () => []);
@@ -188,24 +188,31 @@ export class SkipBoGame {
             // Determine the next required card values for each build pile
             const requiredValues = this.buildPiles.map(p => p.length > 0 ? p[p.length - 1] + 1 : 1);
 
-            // --- 1. Prioritize Stockpile Card Play (KI Strategy: Always play Stockpile if possible) ---
+            // --- 1. Prioritize Stockpile Card Play (Valid for ALL strategies as it's the win condition) ---
             const topStockpile = player.topStockpileCard;
             if (topStockpile !== null) {
-                // The KI (P1) is smart: Check if the stockpile card or a joker can immediately play the stockpile card
+                // Check if stockpile card matches any required value
                 for (const requiredVal of requiredValues) {
-                    if (requiredVal > 12) continue; // Pile is full and will be cleared
+                    if (requiredVal > 12) continue;
 
-                    // Check if Stockpile card itself works (or is a Joker)
                     if (topStockpile === requiredVal || topStockpile === JOKER_VALUE) {
+                        // Optimized/Spontan: Always play stockpile immediately.
+                        // Random: Might miss it, but for sanity let's say even random players want to win.
+                        // However, strictly "Random" might pick from all valid moves.
+                        // But typical "Random" bots in games still prioritize winning moves if obvious.
+                        // Let's keep Stockpile priority for ALL strategies to ensure games finish reasonable fast.
+                        // EXCEPT if we want Random to be truly chaotic.
+                        // User wants "Spontan" -> maybe Spontan is greedy, Random is truly random?
+                        // Let's keep Stockpile Prio for all for now, as it's the basic rule of the game.
+
                         if (this.makePlay(player, 'stockpile', topStockpile)) {
                             playsMade = true;
                             cardsPlayedThisTurn++;
-                            // If stockpile was emptied, draw 5 new cards immediately and continue turn
                             if (player.stockpile.length === 0) {
                                 this.app.logEvent('SUCCESS', `${player.name} hat gewonnen!`);
                                 return;
                             }
-                            break; // Restart play loop after a successful move
+                            break;
                         }
                     }
                 }
@@ -213,7 +220,7 @@ export class SkipBoGame {
 
             if (playsMade) continue; // Restart play loop
 
-            // --- 2. Play from Hand or Discard Piles (P1 KI Strategy: Play lowest number first, prioritize Hand over Discard) ---
+            // --- 2. Play from Hand or Discard Piles ---
 
             const playCandidates: Array<{ source: string; card: number; priority: number }> = [];
 
@@ -221,7 +228,16 @@ export class SkipBoGame {
             player.hand.filter(c => c !== JOKER_VALUE).forEach(card => {
                 requiredValues.forEach((requiredVal) => {
                     if (card === requiredVal) {
-                        playCandidates.push({ source: 'hand', card: card, priority: card * 10 - requiredVal }); // Low number is better
+                        // Priority calculation based on Strategy
+                        let priority = 10;
+                        if (player.strategy === 'Optimiert') {
+                            priority = card * 10 - requiredVal; // Low number is better
+                        } else if (player.strategy === 'Spontan') {
+                            priority = 100; // Flat priority, will rely on order
+                        } else { // Zufall
+                            priority = 1;
+                        }
+                        playCandidates.push({ source: 'hand', card: card, priority });
                     }
                 });
             });
@@ -232,7 +248,15 @@ export class SkipBoGame {
                 if (topCard !== null && topCard !== JOKER_VALUE) {
                     requiredValues.forEach((requiredVal) => {
                         if (topCard === requiredVal) {
-                            playCandidates.push({ source: `discard-${pileIndex}`, card: topCard, priority: 1000 + topCard }); // Discards are generally lower priority
+                            let priority = 5;
+                            if (player.strategy === 'Optimiert') {
+                                priority = 1000 + topCard; // Discards are lower priority than hand
+                            } else if (player.strategy === 'Spontan') {
+                                priority = 50; // Lower than hand
+                            } else {
+                                priority = 1;
+                            }
+                            playCandidates.push({ source: `discard-${pileIndex}`, card: topCard, priority });
                         }
                     });
                 }
@@ -243,46 +267,53 @@ export class SkipBoGame {
             if (jokerInHand) {
                 requiredValues.forEach((requiredVal) => {
                     if (requiredVal <= 12) {
-                        // KI Strategy: Only use Joker if it advances the stockpile or completes a pile (12)
                         const isStrategic = requiredVal === 12 || requiredVal === player.topStockpileCard;
-                        if (player.isAI) {
-                            if (isStrategic) {
-                                playCandidates.push({ source: 'hand', card: JOKER_VALUE, priority: 5000 + requiredVal }); // Highest priority for strategic Joker use
-                            }
+
+                        let priority = 0;
+                        if (player.strategy === 'Optimiert') {
+                            if (isStrategic) priority = 5000 + requiredVal;
+                        } else if (player.strategy === 'Spontan') {
+                            // Spontan uses Jokers freely if movable
+                            priority = 200;
                         } else {
-                            // Random player uses Joker when possible
-                            playCandidates.push({ source: 'hand', card: JOKER_VALUE, priority: 100 + requiredVal });
+                            // Zufall
+                            priority = 1;
+                        }
+
+                        if (priority > 0) {
+                            playCandidates.push({ source: 'hand', card: JOKER_VALUE, priority });
                         }
                     }
                 });
             }
 
-            if (topStockpile === JOKER_VALUE && player.isAI) {
-                // If the stockpile card is a Joker, it must be used if any play is possible
+            // Special AI Logic for Stockpile Joker (Optimized)
+            if (topStockpile === JOKER_VALUE && player.strategy === 'Optimiert') {
                 requiredValues.forEach((requiredVal) => {
                     if (requiredVal <= 12) {
-                        playCandidates.push({ source: 'stockpile', card: JOKER_VALUE, priority: 9999 + requiredVal }); // Absolute highest priority
+                        playCandidates.push({ source: 'stockpile', card: JOKER_VALUE, priority: 9999 + requiredVal });
                     }
                 });
             }
 
             if (playCandidates.length > 0) {
                 let bestPlay;
-                if (player.isAI) {
-                    // P1 (KI): Find the highest priority play
+                if (player.strategy === 'Optimiert') {
+                    // Find the highest priority play
                     bestPlay = playCandidates.sort((a, b) => b.priority - a.priority)[0];
+                } else if (player.strategy === 'Spontan') {
+                    // Pick the first one (Greedy/Quick)
+                    // Since we pushed Hand then Discard, it prioritizes Hand.
+                    bestPlay = playCandidates[0];
                 } else {
-                    // P2 (Random): Pick a random valid play
+                    // Zufall: Pick a random valid play
                     bestPlay = playCandidates[Math.floor(Math.random() * playCandidates.length)];
                 }
 
                 if (bestPlay) {
-                    // The makePlay function needs the value of the card played, not the final value.
                     if (this.makePlay(player, bestPlay.source, bestPlay.card)) {
                         playsMade = true;
                         cardsPlayedThisTurn++;
-
-                        // Check for win condition again after play
                         if (player.stockpile.length === 0) {
                             this.app.logEvent('SUCCESS', `${player.name} hat gewonnen!`);
                             this.winner = player;
@@ -299,18 +330,14 @@ export class SkipBoGame {
                 let discardCard: number;
                 let discardPileIndex: number;
 
-                if (player.isAI) {
-                    // P1 (KI) Discard Strategy: Keep cards needed for stockpile. Discard high cards or cards that block a future 1-5 build.
-                    // Simple KI: Discard the highest non-joker card on the pile with the lowest top card.
-
-                    // Find a non-joker card to discard
+                if (player.strategy === 'Optimiert') {
+                    // Smart Discard
                     const nonJokers = player.hand.filter(c => c !== JOKER_VALUE).sort((a, b) => b - a);
-                    const cardToDiscard = nonJokers.length > 0 ? nonJokers[0] : JOKER_VALUE; // If only jokers, discard one joker
+                    const cardToDiscard = nonJokers.length > 0 ? nonJokers[0] : JOKER_VALUE;
 
                     const cardIndex = player.hand.indexOf(cardToDiscard);
                     discardCard = player.hand.splice(cardIndex, 1)[0];
 
-                    // Find the discard pile with the lowest top card to 'bury' the high card
                     discardPileIndex = 0;
                     let minTopCard = Infinity;
                     player.discardPiles.forEach((pile, index) => {
@@ -321,8 +348,16 @@ export class SkipBoGame {
                         }
                     });
 
+                } else if (player.strategy === 'Spontan') {
+                    // Spontan: Simply discard the last card in hand (simulating "just get rid of it") to a random pile? 
+                    // Or last card to last pile?
+                    // Let's do: Random card to Random pile (fast/impulsive) implies not thinking about it.
+                    // Actually maybe "First card to First pile" is most "impulsive/robotic"?
+                    // Let's do: First card of hand to a random pile.
+                    discardCard = player.hand.shift()!; // Remove first
+                    discardPileIndex = Math.floor(Math.random() * DISCARD_PILE_COUNT);
                 } else {
-                    // P2 (Random) Discard Strategy: Pick a random card and a random pile.
+                    // Random Discard
                     const randomIndex = Math.floor(Math.random() * player.hand.length);
                     discardCard = player.hand.splice(randomIndex, 1)[0];
                     discardPileIndex = Math.floor(Math.random() * DISCARD_PILE_COUNT);
@@ -364,16 +399,16 @@ export class SkipBoGame {
         }
 
         const durationMs = Date.now() - startTime;
-        const winner = this.winner as Player | null; // Type assertion for TypeScript
+        const winner = this.winner as Player | null;
 
         return {
             id: Math.floor(Math.random() * 999999) + 1,
-            winner: winner ? (winner.id === 0 ? 'Spieler 1 (KI)' : 'Spieler 2 (Random)') : 'TIE',
+            winner: winner ? `${winner.name} (${winner.strategy})` : 'TIE',
             turns: currentTurn,
             duration: durationMs,
-            starter: this.players[0].id === 0 ? 'P1' : 'P2', // Mock: P1 always starts
+            starter: this.players[0].id === 0 ? 'P1' : 'P2',
             jokers: this.app.tempJokersPlayed,
-            strategy: winner ? (winner.isAI ? 'Optimiert' : 'Zufall') : 'Zufall'
+            strategy: winner ? winner.strategy : 'Zufall'
         };
     }
 }

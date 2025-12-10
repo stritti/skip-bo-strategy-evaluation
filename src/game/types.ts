@@ -2,6 +2,8 @@
  * Skip-Bo Game Types and Interfaces
  */
 
+export type Strategy = 'Optimiert' | 'Zufall' | 'Spontan';
+
 export interface GameResult {
     id: number;
     winner: string;

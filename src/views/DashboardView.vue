@@ -5,8 +5,11 @@ import ProgressBar from '../components/dashboard/ProgressBar.vue';
 import KPICards from '../components/dashboard/KPICards.vue';
 import WinRateChart from '../components/dashboard/WinRateChart.vue';
 import DurationChart from '../components/dashboard/DurationChart.vue';
+import HistoryTable from '../components/dashboard/HistoryTable.vue';
+import CumulativeStats from '../components/dashboard/CumulativeStats.vue';
 import { useSimulation } from '../composables/useSimulation';
 import { useCharts } from '../composables/useCharts';
+import type { Strategy } from '../game/types';
 
 const emit = defineEmits<{
   changeView: [view: string];
@@ -14,6 +17,8 @@ const emit = defineEmits<{
 
 const simulation = useSimulation();
 const charts = useCharts();
+
+const strategyOptions: Strategy[] = ['Optimiert', 'Zufall', 'Spontan'];
 
 const winRateChartComponent = ref<InstanceType<typeof WinRateChart> | null>(null);
 const durationChartComponent = ref<InstanceType<typeof DurationChart> | null>(null);
@@ -36,6 +41,20 @@ watch(() => simulation.maxGamesConfig.value, () => {
   if (!simulation.isSimulating.value && simulation.isFinished.value) {
     charts.destroyAllCharts();
     simulation.resetSimulation();
+  }
+});
+
+// Watch for loaded run changes to update charts
+watch(() => simulation.currentRunId.value, (newRunId) => {
+  if (newRunId) {
+    nextTick(() => {
+      // Re-initialize charts with the loaded data
+      if (winRateChartComponent.value?.canvasRef && durationChartComponent.value?.canvasRef) {
+        charts.winRateChartRef.value = winRateChartComponent.value.canvasRef;
+        charts.durationChartRef.value = durationChartComponent.value.canvasRef;
+        charts.initCharts(simulation.winRateP1.value, simulation.averageTurns.value);
+      }
+    });
   }
 });
 
@@ -89,6 +108,24 @@ const handleResetSimulation = () => {
             <p class="text-xs text-red-700/80 mt-2">
               Je höher die Zahl, desto genauer die Statistik (aber länger die Laufzeit).
             </p>
+
+            <!-- Strategy Selectors -->
+            <div class="mt-6 space-y-4 pt-4 border-t border-red-200/50">
+              <div>
+                <label class="block text-sm font-medium text-red-800 mb-1">Strategie Spieler 1</label>
+                <select v-model="simulation.strategyP1.value" :disabled="simulation.isSimulating.value"
+                  class="w-full rounded-md border-red-200 bg-white text-gray-900 text-sm focus:border-red-500 focus:ring-red-500">
+                  <option v-for="s in strategyOptions" :key="s" :value="s">{{ s }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-red-800 mb-1">Strategie Spieler 2</label>
+                <select v-model="simulation.strategyP2.value" :disabled="simulation.isSimulating.value"
+                  class="w-full rounded-md border-red-200 bg-white text-gray-900 text-sm focus:border-red-500 focus:ring-red-500">
+                  <option v-for="s in strategyOptions" :key="s" :value="s">{{ s }}</option>
+                </select>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -118,7 +155,11 @@ const handleResetSimulation = () => {
 
     <!-- Results Section -->
     <transition name="fade">
-      <div v-show="simulation.isFinished.value">
+      <div v-show="simulation.isFinished.value" class="space-y-8">
+        
+        <!-- Cumulative Analysis (New) -->
+        <CumulativeStats :stats="simulation.cumulativeStats.value" />
+
         <KPICards 
           :averageTurns="simulation.averageTurns.value"
           :winRateP1="simulation.winRateP1.value"
@@ -126,7 +167,7 @@ const handleResetSimulation = () => {
         />
 
         <!-- Charts Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <WinRateChart ref="winRateChartComponent" />
           <DurationChart ref="durationChartComponent" />
         </div>
@@ -145,5 +186,13 @@ const handleResetSimulation = () => {
         </div>
       </div>
     </transition>
+
+    <!-- History Tables (Always visible if history exists) -->
+    <HistoryTable 
+      :history="simulation.history.value" 
+      :currentRunId="simulation.currentRunId.value"
+      @clearHistory="simulation.clearHistory()" 
+      @loadRun="simulation.loadRun"
+    />
   </div>
 </template>

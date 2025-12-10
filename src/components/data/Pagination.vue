@@ -13,7 +13,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="border-t border-gray-200 p-4 bg-gray-50 flex justify-between items-center" v-if="isFinished">
+  <div class="border-t border-gray-200 p-4 bg-gray-50 flex justify-between items-center">
     <div class="text-xs text-gray-500">
       Zeige <span class="font-bold text-gray-900">{{ (currentPage - 1) * pageSize + 1 }}</span>
       bis <span class="font-bold text-gray-900">{{ Math.min(currentPage * pageSize, totalRows) }}</span> 

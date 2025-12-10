@@ -45,16 +45,22 @@ const handleDownloadCSV = () => {
           <i class="ph-bold ph-funnel"></i> Filter: Alle
         </div>
         <div class="flex items-center gap-2 bg-white border border-gray-300 rounded px-2 py-1 text-xs text-gray-600">
-          <i class="ph-bold ph-arrows-down-up"></i> Sortierung: ID (DESC)
+          <i class="ph-bold ph-arrows-down-up"></i> Sortierung: {{ simulation.sortColumn.value }} ({{ simulation.sortDirection.value.toUpperCase() }})
         </div>
       </div>
 
-      <DataTable :data="simulation.paginatedData.value" :is-finished="simulation.isFinished.value" />
+      <DataTable 
+        :data="simulation.paginatedData.value" 
+        :is-finished="simulation.isFinished.value"
+        :sort-column="simulation.sortColumn.value"
+        :sort-direction="simulation.sortDirection.value"
+        @toggleSort="simulation.toggleSort"
+      />
       
       <Pagination 
         :current-page="simulation.currentPage.value"
         :page-size="simulation.pageSize"
-        :total-rows="simulation.totalRows"
+        :total-rows="simulation.rawData.value.length"
         :is-finished="simulation.isFinished.value"
         @next-page="simulation.nextPage"
         @prev-page="simulation.prevPage"

@@ -3,20 +3,21 @@
  */
 
 import { DISCARD_PILE_COUNT } from './constants';
+import type { Strategy } from './types';
 
 export class Player {
     id: number;
     name: string;
-    isAI: boolean;
+    strategy: Strategy;
     stockpile: number[];
     hand: number[];
     discardPiles: number[][];
     jokersPlayed: number;
 
-    constructor(id: number, isAI: boolean) {
+    constructor(id: number, strategy: Strategy) {
         this.id = id;
         this.name = `Spieler ${id + 1}`;
-        this.isAI = isAI;
+        this.strategy = strategy;
         this.stockpile = [];
         this.hand = [];
         this.discardPiles = Array.from({ length: DISCARD_PILE_COUNT }, () => []);
