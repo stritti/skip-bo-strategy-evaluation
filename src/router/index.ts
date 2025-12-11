@@ -4,6 +4,7 @@ import DataExplorerView from '../views/DataExplorerView.vue';
 import RulesView from '../views/RulesView.vue';
 import StrategyView from '../views/StrategyView.vue';
 import AnalysisView from '../views/AnalysisView.vue';
+import ValidationView from '../views/ValidationView.vue';
 import AboutView from '../views/AboutView.vue';
 
 const router = createRouter({
@@ -38,6 +39,11 @@ const router = createRouter({
             path: '/analysis',
             name: 'analysis',
             component: AnalysisView
+        },
+        {
+            path: '/validation',
+            name: 'validation',
+            component: ValidationView
         }
     ]
 });

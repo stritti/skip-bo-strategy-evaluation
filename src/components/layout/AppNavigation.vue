@@ -53,6 +53,10 @@ const closeMobileMenu = () => {
             <i class="ph ph-lightbulb"></i> Analyse
           </router-link>
 
+          <router-link to="/validation" active-class="bg-green-100 text-green-700 font-bold"
+            class="px-3 py-2 rounded-md transition-colors hover:bg-gray-50 hover:text-green-600 flex items-center gap-1">
+            <i class="ph ph-seal-check"></i> Validierung
+          </router-link>
 
           <router-link to="/about" active-class="bg-purple-100 text-purple-700 font-bold"
             class="px-3 py-2 rounded-md transition-colors hover:bg-purple-50 hover:text-purple-600 flex items-center gap-1 ml-2">
@@ -116,6 +120,12 @@ const closeMobileMenu = () => {
             active-class="bg-skipbo-blue/10 text-skipbo-blue font-bold"
             class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-skipbo-blue transition-colors">
             <i class="ph ph-lightbulb mr-2"></i>Analyse
+          </router-link>
+
+          <router-link to="/validation" @click="closeMobileMenu"
+            active-class="bg-green-100 text-green-700 font-bold"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-green-600 transition-colors">
+            <i class="ph ph-seal-check mr-2"></i>Validierung
           </router-link>
 
           <router-link to="/about" @click="closeMobileMenu"
