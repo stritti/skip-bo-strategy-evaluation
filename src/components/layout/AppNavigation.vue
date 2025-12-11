@@ -16,7 +16,7 @@ const closeMobileMenu = () => {
   <nav class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm backdrop-blur-md bg-opacity-90">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
-        <div class="flex items-center gap-2">
+        <router-link to="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <div class="bg-skipbo-red text-white p-1.5 rounded-lg shadow-sm">
             <i class="ph-bold ph-cards text-xl"></i>
           </div>
@@ -24,7 +24,7 @@ const closeMobileMenu = () => {
             <h1 class="text-lg font-bold tracking-tight text-gray-900 leading-tight">Skip-Bo Analyst</h1>
             <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Echte Simulation</div>
           </div>
-        </div>
+        </router-link>
 
         <!-- Desktop Navigation -->
         <div class="hidden md:flex items-center space-x-1 text-sm font-medium text-gray-500">
@@ -53,6 +53,7 @@ const closeMobileMenu = () => {
             <i class="ph ph-lightbulb"></i> Analyse
           </router-link>
 
+
           <router-link to="/about" active-class="bg-purple-100 text-purple-700 font-bold"
             class="px-3 py-2 rounded-md transition-colors hover:bg-purple-50 hover:text-purple-600 flex items-center gap-1 ml-2">
             <i class="ph ph-info"></i> Über
@@ -63,6 +64,7 @@ const closeMobileMenu = () => {
             <i class="ph-bold ph-github-logo text-2xl"></i>
           </a>
         </div>
+
 
         <!-- Mobile Menu Button -->
         <div class="md:hidden flex items-center">
