@@ -49,8 +49,11 @@ const closeMobileMenu = () => {
           </router-link>
 
           <router-link to="/analysis" active-class="bg-skipbo-blue/10 text-skipbo-blue font-bold"
-            class="px-3 py-2 rounded-md transition-colors hover:bg-gray-50 hover:text-skipbo-blue flex items-center gap-1">
+            class="px-3 py-2 rounded-md transition-colors hover:bg-gray-50 hover:text-skipbo-blue flex items-center gap-1 relative">
             <i class="ph ph-lightbulb"></i> Analyse
+            <span class="absolute -top-1 -right-1 bg-yellow-400 text-yellow-900 text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+              8 Tips
+            </span>
           </router-link>
 
           <router-link to="/validation" active-class="bg-green-100 text-green-700 font-bold"

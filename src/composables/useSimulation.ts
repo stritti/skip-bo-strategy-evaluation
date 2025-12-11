@@ -6,6 +6,14 @@
 import { ref, computed, reactive, onMounted } from 'vue';
 import { SkipBoGame } from '../game/SkipBoGame';
 import type { SimulationApp, GameResult, Strategy, LogEntry } from '../game/types';
+import {
+    calculateConfidenceInterval,
+    calculateQuartiles,
+    chiSquareTest,
+    formatConfidenceInterval,
+    calculateCohenD,
+    calculateStandardDeviation
+} from '../utils/statistics';
 
 import { dbService, type SimulationRun } from '../services/dbService';
 
@@ -82,6 +90,109 @@ export function useSimulation() {
             avgTurns: totalGames > 0 ? totalTurns / totalGames : 0,
             avgJokers: totalGames > 0 ? totalJokers / totalGames : 0
         };
+    });
+
+    // --- Statistical Metrics (Confidence Intervals) ---
+    const winRateP1CI = computed(() => {
+        if (gameCounter.value < 30) {
+            return { margin: 0, lower: winRateP1.value, upper: winRateP1.value };
+        }
+        return calculateConfidenceInterval(winRateP1.value, gameCounter.value);
+    });
+
+    const averageTurnsCI = computed(() => {
+        if (rawData.value.length < 30) {
+            return { margin: 0, lower: averageTurns.value, upper: averageTurns.value };
+        }
+        // For means (not proportions), use t-distribution approximation
+        // Simplified: use proportion CI formula as approximation
+        const turns = rawData.value.map(r => r.turns);
+        const mean = averageTurns.value;
+        const n = turns.length;
+
+        // Standard error of the mean
+        const variance = turns.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / n;
+        const stdError = Math.sqrt(variance / n);
+        const margin = 1.96 * stdError; // 95% CI
+
+        return {
+            margin,
+            lower: Math.max(0, mean - margin),
+            upper: mean + margin
+        };
+    });
+
+    // --- Distribution Metrics (Quartiles for Box Plots) ---
+    const turnsDistribution = computed(() => {
+        if (rawData.value.length === 0) {
+            return { min: 0, q1: 0, median: 0, q3: 0, max: 0, iqr: 0 };
+        }
+        const turns = rawData.value.map(r => r.turns);
+        return calculateQuartiles(turns);
+    });
+
+    const durationDistribution = computed(() => {
+        if (rawData.value.length === 0) {
+            return { min: 0, q1: 0, median: 0, q3: 0, max: 0, iqr: 0 };
+        }
+        const durations = rawData.value.map(r => r.duration);
+        return calculateQuartiles(durations);
+    });
+
+    // --- Chi-Square Significance Test ---
+    const chiSquareResult = computed(() => {
+        // Only meaningful when comparing different strategies
+        if (strategyP1.value === strategyP2.value || gameCounter.value < 30) {
+            return {
+                statistic: 0,
+                pValue: 1,
+                isSignificant: false,
+                degreesOfFreedom: 1,
+                applicable: false
+            };
+        }
+
+        const wins1 = realResults.winsP1;
+        const losses1 = realResults.winsP2; // P1 losses = P2 wins
+        const wins2 = realResults.winsP2;
+        const losses2 = realResults.winsP1;
+
+        const result = chiSquareTest(wins1, losses1, wins2, losses2);
+        return { ...result, applicable: true };
+    });
+
+    // --- Effect Size (Cohen's d) ---
+    const effectSizeResult = computed(() => {
+        // Only meaningful when comparing different strategies
+        if (strategyP1.value === strategyP2.value || rawData.value.length < 30) {
+            return {
+                d: 0,
+                interpretation: 'Nicht berechenbar',
+                magnitude: 'negligible' as const,
+                applicable: false
+            };
+        }
+
+        // Calculate turns by strategy
+        const turnsP1 = rawData.value.filter(r => r.winner.includes(strategyP1.value)).map(r => r.turns);
+        const turnsP2 = rawData.value.filter(r => r.winner.includes(strategyP2.value)).map(r => r.turns);
+
+        if (turnsP1.length < 10 || turnsP2.length < 10) {
+            return {
+                d: 0,
+                interpretation: 'Zu wenig Daten',
+                magnitude: 'negligible' as const,
+                applicable: false
+            };
+        }
+
+        const mean1 = turnsP1.reduce((sum, v) => sum + v, 0) / turnsP1.length;
+        const mean2 = turnsP2.reduce((sum, v) => sum + v, 0) / turnsP2.length;
+        const std1 = calculateStandardDeviation(turnsP1);
+        const std2 = calculateStandardDeviation(turnsP2);
+
+        const result = calculateCohenD(mean1, mean2, std1, std2, turnsP1.length, turnsP2.length);
+        return { ...result, applicable: true };
     });
 
     // --- Computed UI Helpers ---
@@ -464,6 +575,14 @@ export function useSimulation() {
         buttonText,
         buttonClass,
         paginatedData,
+
+        // Statistical Metrics
+        winRateP1CI,
+        averageTurnsCI,
+        turnsDistribution,
+        durationDistribution,
+        chiSquareResult,
+        effectSizeResult,
 
         // Methods
         logEvent,

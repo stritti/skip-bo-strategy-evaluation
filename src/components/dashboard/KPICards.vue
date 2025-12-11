@@ -3,6 +3,8 @@ defineProps<{
   averageTurns: number;
   winRateP1: number;
   averageJokers: number;
+  winRateCI?: { margin: number; lower: number; upper: number };
+  turnsCI?: { margin: number; lower: number; upper: number };
 }>();
 </script>
 
@@ -14,6 +16,9 @@ defineProps<{
         <span class="text-xs font-bold text-gray-400 uppercase">Ø Züge (Real)</span>
       </div>
       <div class="text-3xl font-bold text-gray-900">{{ averageTurns.toFixed(1) }}</div>
+      <div v-if="turnsCI && turnsCI.margin > 0" class="text-xs text-gray-500 mt-1">
+        ± {{ turnsCI.margin.toFixed(1) }} (95% CI)
+      </div>
     </div>
     <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
       <div class="flex items-center gap-2 mb-2">
@@ -21,6 +26,9 @@ defineProps<{
         <span class="text-xs font-bold text-gray-400 uppercase">Win-Rate KI</span>
       </div>
       <div class="text-3xl font-bold text-red-600">{{ (winRateP1 * 100).toFixed(1) }}%</div>
+      <div v-if="winRateCI && winRateCI.margin > 0" class="text-xs text-gray-500 mt-1">
+        ± {{ (winRateCI.margin * 100).toFixed(1) }}% (95% CI)
+      </div>
     </div>
     <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
       <div class="flex items-center gap-2 mb-2">

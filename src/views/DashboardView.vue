@@ -8,6 +8,11 @@ import WinRateChart from '../components/dashboard/WinRateChart.vue';
 import DurationChart from '../components/dashboard/DurationChart.vue';
 import HistoryTable from '../components/dashboard/HistoryTable.vue';
 import AggregateAnalysis from '../components/dashboard/AggregateAnalysis.vue';
+import StatisticalSignificance from '../components/dashboard/StatisticalSignificance.vue';
+import BoxPlotChart from '../components/dashboard/BoxPlotChart.vue';
+import EffectSize from '../components/dashboard/EffectSize.vue';
+import DataExport from '../components/dashboard/DataExport.vue';
+import PowerAnalysis from '../components/dashboard/PowerAnalysis.vue';
 import StrategySelect from '../components/dashboard/StrategySelect.vue';
 import { useSimulation } from '../composables/useSimulation';
 import { useCharts } from '../composables/useCharts';
@@ -67,7 +72,124 @@ const handleResetSimulation = () => {
 
 <template>
   <div class="max-w-7xl mx-auto px-4 py-8 space-y-12">
+    
+    <!-- Welcome Introduction -->
+    <div class="bg-gradient-to-r from-red-50 via-blue-50 to-green-50 rounded-2xl border-2 border-gray-200 p-6 shadow-sm">
+      <div class="flex items-start gap-4 mb-6">
+        <div class="bg-white p-3 rounded-xl shadow-sm">
+          <i class="ph-fill ph-cards text-4xl text-red-600"></i>
+        </div>
+        <div class="flex-1">
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">Willkommen beim Skip-Bo Strategy Analyzer</h2>
+          <p class="text-gray-700 leading-relaxed mb-3">
+            Diese App simuliert <strong>echte Skip-Bo Spiele</strong> mit verschiedenen KI-Strategien und liefert 
+            wissenschaftlich fundierte Analysen. Vergleichen Sie Gewinnraten, analysieren Sie Spielverläufe 
+            und entdecken Sie optimale Strategien.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <div class="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-full text-sm font-medium text-gray-700 shadow-sm">
+              <i class="ph-fill ph-check-circle text-green-600"></i>
+              100% regelkonform
+            </div>
+            <div class="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-full text-sm font-medium text-gray-700 shadow-sm">
+              <i class="ph-fill ph-chart-line text-blue-600"></i>
+              Statistische Signifikanz
+            </div>
+            <div class="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-full text-sm font-medium text-gray-700 shadow-sm">
+              <i class="ph-fill ph-database text-purple-600"></i>
+              Persistente Historie
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistical Highlights -->
+      <div v-if="simulation.cumulativeStats.value && simulation.history.value.length > 0" 
+           class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-gray-200">
+        <div class="bg-white p-4 rounded-xl shadow-sm text-center">
+          <div class="text-xs font-bold text-gray-500 uppercase mb-1">Spiele Total</div>
+          <div class="text-2xl font-mono font-bold text-gray-900">
+            {{ simulation.cumulativeStats.value.totalGames.toLocaleString('de-DE') }}
+          </div>
+          <div class="text-xs text-gray-500 mt-1">Simuliert</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm text-center">
+          <div class="text-xs font-bold text-gray-500 uppercase mb-1">Simulationen</div>
+          <div class="text-2xl font-mono font-bold text-blue-600">
+            {{ simulation.cumulativeStats.value.totalRuns }}
+          </div>
+          <div class="text-xs text-gray-500 mt-1">Durchläufe</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm text-center">
+          <div class="text-xs font-bold text-gray-500 uppercase mb-1">Ø Züge</div>
+          <div class="text-2xl font-mono font-bold text-green-600">
+            {{ simulation.cumulativeStats.value.avgTurns.toFixed(1) }}
+          </div>
+          <div class="text-xs text-gray-500 mt-1">Pro Spiel</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm text-center">
+          <div class="text-xs font-bold text-gray-500 uppercase mb-1">Ø Joker</div>
+          <div class="text-2xl font-mono font-bold text-purple-600">
+            {{ simulation.cumulativeStats.value.avgJokers.toFixed(1) }}
+          </div>
+          <div class="text-xs text-gray-500 mt-1">Pro Spiel</div>
+        </div>
+      </div>
+
+      <!-- Call to Action (if no data) -->
+      <div v-else class="pt-6 border-t border-gray-200 text-center">
+        <p class="text-gray-600 mb-4">
+          <strong>Noch keine Simulationen durchgeführt.</strong> Starten Sie jetzt Ihre erste Analyse!
+        </p>
+        <div class="inline-flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:bg-red-700 transition cursor-pointer">
+          <i class="ph-bold ph-play-circle"></i>
+          Erste Simulation starten
+          <i class="ph-bold ph-arrow-down"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expert Tips Teaser -->
+    <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl border-2 border-yellow-300 p-6 shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+         @click="router.push('/analysis')">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="bg-yellow-400 p-3 rounded-xl shadow-md">
+            <i class="ph-fill ph-lightbulb text-3xl text-white"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-gray-900 mb-1 flex items-center gap-2">
+              🏆 Die 8 Skip-Bo Expertentipps
+              <span class="bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full">NEU</span>
+            </h3>
+            <p class="text-gray-700 text-sm">
+              Entdecken Sie die optimalen Strategien basierend auf 1.000.000 simulierten Runden
+            </p>
+          </div>
+        </div>
+        <div class="hidden lg:flex items-center gap-2 text-yellow-700 font-bold">
+          Jetzt entdecken
+          <i class="ph-bold ph-arrow-right text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <span class="bg-white px-3 py-1 rounded-full text-xs font-medium text-gray-700 shadow-sm">
+          📊 Vorratsstapel-Priorisierung
+        </span>
+        <span class="bg-white px-3 py-1 rounded-full text-xs font-medium text-gray-700 shadow-sm">
+          🃏 Joker-Strategie
+        </span>
+        <span class="bg-white px-3 py-1 rounded-full text-xs font-medium text-gray-700 shadow-sm">
+          📉 Absteigende Ablage
+        </span>
+        <span class="bg-white px-3 py-1 rounded-full text-xs font-medium text-gray-700 shadow-sm">
+          ⚡ Maximale Aggression
+        </span>
+      </div>
+    </div>
+
     <!-- Simulation Control Panel -->
+
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200">
       <div class="border-b border-gray-100 bg-gray-50/50 px-6 py-4 flex justify-between items-center rounded-t-2xl">
         <div>
@@ -206,7 +328,69 @@ const handleResetSimulation = () => {
             :averageTurns="simulation.averageTurns.value"
             :winRateP1="simulation.winRateP1.value"
             :averageJokers="simulation.averageJokers.value"
+            :winRateCI="simulation.winRateP1CI.value"
+            :turnsCI="simulation.averageTurnsCI.value"
             />
+            
+            <!-- Statistical Significance Test -->
+            <StatisticalSignificance
+              :chiSquare="simulation.chiSquareResult.value.statistic"
+              :pValue="simulation.chiSquareResult.value.pValue"
+              :isSignificant="simulation.chiSquareResult.value.isSignificant"
+              :applicable="simulation.chiSquareResult.value.applicable"
+              :strategyA="simulation.strategyP1.value"
+              :strategyB="simulation.strategyP2.value"
+            />
+
+            <!-- Distribution Analysis -->
+            <div class="space-y-6">
+              <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <i class="ph-bold ph-chart-bar text-blue-600"></i>
+                Verteilungsanalyse
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <BoxPlotChart
+                  :data="simulation.turnsDistribution.value"
+                  label="Züge pro Spiel"
+                  color="#3b82f6"
+                  unit=""
+                />
+                <BoxPlotChart
+                  :data="simulation.durationDistribution.value"
+                  label="Dauer pro Spiel"
+                  color="#8b5cf6"
+                  unit="ms"
+                />
+              </div>
+            </div>
+
+            <!-- Advanced Statistical Metrics -->
+            <div class="space-y-6">
+              <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <i class="ph-bold ph-flask text-purple-600"></i>
+                Erweiterte Analysen
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Effect Size -->
+                <EffectSize
+                  v-if="simulation.effectSizeResult.value.applicable"
+                  :effectSize="simulation.effectSizeResult.value.d"
+                  :interpretation="simulation.effectSizeResult.value.interpretation"
+                  :magnitude="simulation.effectSizeResult.value.magnitude"
+                  label="Effektstärke (Züge)"
+                />
+                
+                <!-- Data Export -->
+                <DataExport
+                  :data="simulation.rawData.value"
+                  :strategyP1="simulation.strategyP1.value"
+                  :strategyP2="simulation.strategyP2.value"
+                />
+              </div>
+
+              <!-- Power Analysis -->
+              <PowerAnalysis />
+            </div>
 
             <!-- Charts Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
