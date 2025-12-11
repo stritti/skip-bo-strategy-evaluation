@@ -196,6 +196,89 @@ export function useSimulation() {
         logEvent('INFO', 'Simulations-Historie gelöscht.');
     };
 
+    // --- Aggregated Analysis State ---
+    const aggregatedResults = ref<{
+        strategyP1: string;
+        strategyP2: string;
+        games: number;
+        winsP1: number;
+        winsP2: number;
+        winRateP1: number;
+    }[]>([]);
+
+    const loadAllRuns = () => {
+        if (history.value.length === 0) return;
+
+        // Prevent watcher from triggering reset during update
+        isFinished.value = false;
+
+        // Reset state
+        realResults.winsP1 = 0;
+        realResults.winsP2 = 0;
+        realResults.totalTurns = 0;
+        realResults.totalJokers = 0;
+        rawData.value = [];
+        aggregatedResults.value = []; // Reset aggregation
+
+        let totalGames = 0;
+        const groupingMap = new Map<string, {
+            p1: string;
+            p2: string;
+            games: number;
+            w1: number;
+            w2: number;
+        }>();
+
+        // Aggregate all runs
+        history.value.forEach(run => {
+            // Global Totals
+            realResults.winsP1 += run.winsP1;
+            realResults.winsP2 += run.winsP2;
+            realResults.totalTurns += run.totalTurns;
+            realResults.totalJokers += run.totalJokers;
+            totalGames += run.gamesCount;
+
+            // Grouping Logic
+            const key = `${run.strategyP1}|${run.strategyP2}`;
+            if (!groupingMap.has(key)) {
+                groupingMap.set(key, {
+                    p1: run.strategyP1,
+                    p2: run.strategyP2,
+                    games: 0,
+                    w1: 0,
+                    w2: 0
+                });
+            }
+            const group = groupingMap.get(key)!;
+            group.games += run.gamesCount;
+            group.w1 += run.winsP1;
+            group.w2 += run.winsP2;
+
+            if (run.results) {
+                // Performance warning: This might be heavy
+                rawData.value.push(...run.results);
+            }
+        });
+
+        aggregatedResults.value = Array.from(groupingMap.values()).map(g => ({
+            strategyP1: g.p1,
+            strategyP2: g.p2,
+            games: g.games,
+            winsP1: g.w1,
+            winsP2: g.w2,
+            winRateP1: g.games > 0 ? g.w1 / g.games : 0
+        })).sort((a, b) => b.games - a.games); // Most played first
+
+        currentRunId.value = -1; // -1 indicates "All Runs"
+        gameCounter.value = totalGames;
+        maxGamesConfig.value = totalGames; // Show total as goal
+        isSimulating.value = false;
+        isFinished.value = true;
+        progress.value = 100;
+
+        logEvent('SUCCESS', `${history.value.length} Simulationen erfolgreich aggregiert geladen.`);
+    };
+
     // --- Simulation Core ---
     const runSimulation = (): void => {
         if (isSimulating.value || isFinished.value) return;
@@ -370,6 +453,7 @@ export function useSimulation() {
         sortDirection,
         strategyP1,
         strategyP2,
+        aggregatedResults,
 
         // Computed
         winRateP1,
@@ -387,6 +471,7 @@ export function useSimulation() {
         resetSimulation,
         clearHistory,
         loadRun,
+        loadAllRuns,
         nextPage,
         prevPage,
         toggleSort

@@ -1,9 +1,9 @@
-
 import { createRouter, createWebHistory } from 'vue-router';
 import DashboardView from '../views/DashboardView.vue';
 import DataExplorerView from '../views/DataExplorerView.vue';
 import RulesView from '../views/RulesView.vue';
 import StrategyView from '../views/StrategyView.vue';
+import AnalysisView from '../views/AnalysisView.vue';
 import AboutView from '../views/AboutView.vue';
 
 const router = createRouter({
@@ -33,6 +33,11 @@ const router = createRouter({
             path: '/strategy',
             name: 'strategy',
             component: StrategyView
+        },
+        {
+            path: '/analysis',
+            name: 'analysis',
+            component: AnalysisView
         }
     ]
 });

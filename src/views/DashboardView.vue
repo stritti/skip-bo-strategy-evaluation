@@ -7,7 +7,7 @@ import KPICards from '../components/dashboard/KPICards.vue';
 import WinRateChart from '../components/dashboard/WinRateChart.vue';
 import DurationChart from '../components/dashboard/DurationChart.vue';
 import HistoryTable from '../components/dashboard/HistoryTable.vue';
-import CumulativeStats from '../components/dashboard/CumulativeStats.vue';
+import AggregateAnalysis from '../components/dashboard/AggregateAnalysis.vue';
 import StrategySelect from '../components/dashboard/StrategySelect.vue';
 import { useSimulation } from '../composables/useSimulation';
 import { useCharts } from '../composables/useCharts';
@@ -34,7 +34,7 @@ watch(() => computed(() => simulation.isFinished.value), (isFinished) => {
 
 // Watch for game count changes to auto-reset simulation
 watch(() => simulation.maxGamesConfig.value, () => {
-  if (!simulation.isSimulating.value && simulation.isFinished.value) {
+  if (!simulation.isSimulating.value && simulation.isFinished.value && simulation.currentRunId.value !== -1) {
     charts.destroyAllCharts();
     simulation.resetSimulation();
   }
@@ -71,8 +71,15 @@ const handleResetSimulation = () => {
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200">
       <div class="border-b border-gray-100 bg-gray-50/50 px-6 py-4 flex justify-between items-center rounded-t-2xl">
         <div>
-          <h2 class="text-lg font-bold text-gray-900">Simulation Control Center</h2>
-          <p class="text-sm text-gray-500">Modellierung von {{ simulation.maxGamesConfig.value }} echten Spielrunden</p>
+          <h2 class="text-lg font-bold text-gray-900">
+            {{ simulation.currentRunId.value === -1 ? 'Gesamtanalyse aller Simulationen' : 'Simulation Control Center' }}
+          </h2>
+          <p class="text-sm text-gray-500">
+            {{ simulation.currentRunId.value === -1 
+               ? 'Aggregierte Statistiken über ' + simulation.maxGamesConfig.value.toLocaleString('de-DE') + ' Spiele' 
+               : 'Modellierung von ' + simulation.maxGamesConfig.value.toLocaleString('de-DE') + ' echten Spielrunden' 
+            }}
+          </p>
         </div>
         <div class="text-right">
           <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">Fortschritt</div>
@@ -158,19 +165,54 @@ const handleResetSimulation = () => {
     <transition name="fade">
       <div v-show="simulation.isFinished.value" class="space-y-8">
         
-        <!-- Cumulative Analysis (New) -->
-        <CumulativeStats :stats="simulation.cumulativeStats.value" />
+        <!-- Aggregate Analysis (Load All) -->
+        <div v-if="simulation.currentRunId.value === -1" class="space-y-8">
+             <div class="p-6 bg-blue-50/50 rounded-2xl border border-blue-100">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-blue-100 p-2 rounded-lg text-blue-600">
+                        <i class="ph-bold ph-chart-pie-slice text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Globale Analyse</h3>
+                        <p class="text-sm text-gray-500">Zusammenfassung aller gespeicherten Simulationen</p>
+                    </div>
+                </div>
+                <!-- Stats Summary -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-4 rounded-xl border border-blue-100 shadow-sm">
+                        <div class="text-xs text-gray-400 uppercase font-bold">Gesamte Spiele</div>
+                        <div class="text-3xl font-mono font-bold text-gray-900">{{ simulation.maxGamesConfig.value.toLocaleString('de-DE') }}</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-blue-100 shadow-sm">
+                        <div class="text-xs text-gray-400 uppercase font-bold">Ø Züge / Spiel</div>
+                        <div class="text-3xl font-mono font-bold text-gray-900">{{ simulation.cumulativeStats.value?.avgTurns.toFixed(1) }}</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-blue-100 shadow-sm">
+                        <div class="text-xs text-gray-400 uppercase font-bold">Ø Joker / Spiel</div>
+                        <div class="text-3xl font-mono font-bold text-gray-900">{{ simulation.cumulativeStats.value?.avgJokers.toFixed(1) }}</div>
+                    </div>
+                </div>
+                
+                 <h4 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="ph-bold ph-sword text-skipbo-red"></i> Matchup-Analyse
+                 </h4>
+                 <AggregateAnalysis :results="simulation.aggregatedResults.value" />
+             </div>
+        </div>
 
-        <KPICards 
-          :averageTurns="simulation.averageTurns.value"
-          :winRateP1="simulation.winRateP1.value"
-          :averageJokers="simulation.averageJokers.value"
-        />
+        <!-- Single Run Analysis -->
+        <div v-else class="space-y-8">
+            <KPICards 
+            :averageTurns="simulation.averageTurns.value"
+            :winRateP1="simulation.winRateP1.value"
+            :averageJokers="simulation.averageJokers.value"
+            />
 
-        <!-- Charts Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <WinRateChart ref="winRateChartComponent" />
-          <DurationChart ref="durationChartComponent" />
+            <!-- Charts Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <WinRateChart ref="winRateChartComponent" />
+            <DurationChart ref="durationChartComponent" />
+            </div>
         </div>
 
         <div class="bg-skipbo-blue/5 border border-skipbo-blue/20 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -194,6 +236,7 @@ const handleResetSimulation = () => {
       :currentRunId="simulation.currentRunId.value"
       @clearHistory="simulation.clearHistory()" 
       @loadRun="simulation.loadRun"
+      @loadAll="simulation.loadAllRuns"
     />
   </div>
 </template>

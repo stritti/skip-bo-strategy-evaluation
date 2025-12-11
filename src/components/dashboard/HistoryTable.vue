@@ -9,6 +9,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   clearHistory: [];
   loadRun: [run: SimulationRun];
+  loadAll: [];
 }>();
 
 const formatDate = (timestamp: number) => {
@@ -29,10 +30,18 @@ const formatDate = (timestamp: number) => {
         <i class="ph-bold ph-clock-counter-clockwise text-xl text-blue-600"></i>
         Simulations-Historie
       </h3>
-      <button @click="emit('clearHistory')"
-        class="text-xs text-red-600 hover:text-red-800 font-bold hover:underline transition">
-        Historie löschen
-      </button>
+      
+      <div class="flex items-center gap-4">
+        <button @click="emit('loadAll')"
+          class="bg-skipbo-blue text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:bg-blue-700 transition flex items-center gap-2">
+          <i class="ph-bold ph-chart-pie-slice"></i>
+          Alle {{ history.length }} laden
+        </button>
+        <button @click="emit('clearHistory')"
+          class="text-xs text-red-600 hover:text-red-800 font-bold hover:underline transition">
+          Historie löschen
+        </button>
+      </div>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full text-sm text-left">
