@@ -1,5 +1,15 @@
 <script setup lang="ts">
-// No script needed for pure router links
+import { ref } from 'vue';
+
+const mobileMenuOpen = ref(false);
+
+const toggleMobileMenu = () => {
+  mobileMenuOpen.value = !mobileMenuOpen.value;
+};
+
+const closeMobileMenu = () => {
+  mobileMenuOpen.value = false;
+};
 </script>
 
 <template>
@@ -15,6 +25,8 @@
             <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Echte Simulation</div>
           </div>
         </div>
+
+        <!-- Desktop Navigation -->
         <div class="hidden md:flex items-center space-x-1 text-sm font-medium text-gray-500">
           <router-link to="/" active-class="bg-skipbo-red/10 text-skipbo-red font-bold"
             class="px-3 py-2 rounded-md transition-colors hover:bg-gray-50 hover:text-skipbo-red">
@@ -36,6 +48,11 @@
             Strategie
           </router-link>
 
+          <router-link to="/analysis" active-class="bg-skipbo-blue/10 text-skipbo-blue font-bold"
+            class="px-3 py-2 rounded-md transition-colors hover:bg-gray-50 hover:text-skipbo-blue flex items-center gap-1">
+            <i class="ph ph-lightbulb"></i> Analyse
+          </router-link>
+
           <router-link to="/about" active-class="bg-purple-100 text-purple-700 font-bold"
             class="px-3 py-2 rounded-md transition-colors hover:bg-purple-50 hover:text-purple-600 flex items-center gap-1 ml-2">
             <i class="ph ph-info"></i> Über
@@ -46,7 +63,74 @@
             <i class="ph-bold ph-github-logo text-2xl"></i>
           </a>
         </div>
+
+        <!-- Mobile Menu Button -->
+        <div class="md:hidden flex items-center">
+          <button @click="toggleMobileMenu" 
+            class="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+            :aria-label="mobileMenuOpen ? 'Menü schließen' : 'Menü öffnen'">
+            <i v-if="!mobileMenuOpen" class="ph-bold ph-list text-2xl"></i>
+            <i v-else class="ph-bold ph-x text-2xl"></i>
+          </button>
+        </div>
       </div>
     </div>
+
+    <!-- Mobile Menu Overlay -->
+    <transition
+      enter-active-class="transition-all duration-200 ease-out"
+      enter-from-class="opacity-0 -translate-y-2"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition-all duration-150 ease-in"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 -translate-y-2">
+      <div v-if="mobileMenuOpen" class="md:hidden border-t border-gray-200 bg-white shadow-lg">
+        <div class="px-4 py-3 space-y-1">
+          <router-link to="/" @click="closeMobileMenu"
+            active-class="bg-skipbo-red/10 text-skipbo-red font-bold"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-skipbo-red transition-colors">
+            <i class="ph-bold ph-house mr-2"></i>Dashboard
+          </router-link>
+          
+          <router-link to="/data" @click="closeMobileMenu"
+            active-class="bg-skipbo-blue/10 text-skipbo-blue font-bold"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-skipbo-blue transition-colors">
+            <i class="ph ph-table mr-2"></i>Datensätze
+          </router-link>
+          
+          <router-link to="/rules" @click="closeMobileMenu"
+            active-class="bg-skipbo-red/10 text-skipbo-red font-bold"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-skipbo-red transition-colors">
+            <i class="ph ph-scroll mr-2"></i>Regeln
+          </router-link>
+          
+          <router-link to="/strategy" @click="closeMobileMenu"
+            active-class="bg-skipbo-red/10 text-skipbo-red font-bold"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-skipbo-red transition-colors">
+            <i class="ph-bold ph-strategy mr-2"></i>Strategie
+          </router-link>
+
+          <router-link to="/analysis" @click="closeMobileMenu"
+            active-class="bg-skipbo-blue/10 text-skipbo-blue font-bold"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-skipbo-blue transition-colors">
+            <i class="ph ph-lightbulb mr-2"></i>Analyse
+          </router-link>
+
+          <router-link to="/about" @click="closeMobileMenu"
+            active-class="bg-purple-100 text-purple-700 font-bold"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors">
+            <i class="ph ph-info mr-2"></i>Über
+          </router-link>
+
+          <div class="pt-3 mt-3 border-t border-gray-200">
+            <a href="https://github.com/stritti/skip-bo-strategy-evaluation" target="_blank" rel="noopener noreferrer"
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+              <i class="ph-bold ph-github-logo mr-2"></i>GitHub Repository
+            </a>
+          </div>
+        </div>
+      </div>
+    </transition>
   </nav>
 </template>
+
