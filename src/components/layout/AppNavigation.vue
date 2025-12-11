@@ -17,8 +17,8 @@ const closeMobileMenu = () => {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
         <router-link to="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <div class="bg-skipbo-red text-white p-1.5 rounded-lg shadow-sm">
-            <i class="ph-bold ph-cards text-xl"></i>
+          <div class="bg-skipbo-red p-1.5 rounded-lg shadow-sm">
+            <img src="/favicon.png" alt="Skip-Bo Logo" class="w-6 h-6" />
           </div>
           <div>
             <h1 class="text-lg font-bold tracking-tight text-gray-900 leading-tight">Skip-Bo Analyst</h1>
