@@ -10,7 +10,6 @@ import {
     calculateConfidenceInterval,
     calculateQuartiles,
     chiSquareTest,
-    formatConfidenceInterval,
     calculateCohenD,
     calculateStandardDeviation
 } from '../utils/statistics';
