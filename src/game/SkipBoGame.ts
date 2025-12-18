@@ -60,6 +60,7 @@ export class SkipBoGame {
      * Deals the cards to players.
      */
     deal(): void {
+        this.createDeck(); // Ensure deck is fresh
         this.players.forEach(player => {
             player.stockpile = this.drawPile.splice(0, STOCKPILE_SIZE);
             player.hand = [];
@@ -67,7 +68,10 @@ export class SkipBoGame {
             player.discardPiles = Array.from({ length: DISCARD_PILE_COUNT }, () => []);
         });
         this.buildPiles = Array.from({ length: BUILD_PILE_COUNT }, () => []);
-        this.currentPlayerIndex = 0; // P1 starts
+        this.currentPlayerIndex = 0;
+        this.turnCount = 0;
+        this.winner = null;
+        this.app.tempJokersPlayed = 0;
     }
 
     /**
@@ -134,10 +138,20 @@ export class SkipBoGame {
      * @param player - Current player
      * @param source - 'hand', 'stockpile', or 'discard-[index]'
      * @param cardValue - The value of the card to play.
+     * @param targetPileIndex - Optional: force play on specific pile. If not set, tries all.
      * @returns True if a play was made.
      */
-    makePlay(player: Player, source: string, cardValue: number): boolean {
-        for (let i = 0; i < BUILD_PILE_COUNT; i++) {
+    makePlay(player: Player, source: string, cardValue: number, targetPileIndex: number = -1): boolean {
+        // Define which piles to try
+        let pilesToTry: number[] = [];
+        if (targetPileIndex !== -1) {
+            pilesToTry = [targetPileIndex];
+        } else {
+            // Try all 0..3
+            pilesToTry = [0, 1, 2, 3];
+        }
+
+        for (const i of pilesToTry) {
             if (this.playCardToBuildPile(cardValue, i)) {
                 // Remove card from source
                 if (source === 'stockpile') {
@@ -181,35 +195,15 @@ export class SkipBoGame {
         return pile.length > 0 ? pile[pile.length - 1] + 1 : 1;
     }
 
-    /**
-     * Checks if a card can be played on any build pile.
-     * @param cardValue - The card value to check
-     * @returns True if the card can be played
-     */
-    canPlayCard(cardValue: number): boolean {
-        for (let i = 0; i < BUILD_PILE_COUNT; i++) {
-            const required = this.getBuildPileRequiredValue(i);
-            if (required > 12) continue;
-            if (cardValue === JOKER_VALUE || cardValue === required) {
-                return true;
-            }
-        }
-        return false;
-    }
+    // --- Strategy: Advanced (Fortgeschritten) ---
 
-    /**
-     * Finds all possible moves for the Advanced AI strategy.
-     * Returns moves sorted by priority (3 > 2 > 1).
-     * @param player - The current player
-     * @returns Array of MoveOption objects sorted by priority (highest first)
-     */
-    findAllMoves(player: Player): MoveOption[] {
+    findAllMoves_Advanced(player: Player): MoveOption[] {
         const moves: MoveOption[] = [];
 
         // Check all 4 build piles
         for (let buildPileIdx = 0; buildPileIdx < BUILD_PILE_COUNT; buildPileIdx++) {
             const required = this.getBuildPileRequiredValue(buildPileIdx);
-            if (required > 12) continue; // Pile is complete or would be
+            if (required > 12) continue;
 
             // Priority 3: Stockpile
             const topStock = player.topStockpileCard;
@@ -250,7 +244,7 @@ export class SkipBoGame {
             });
         }
 
-        // Sort by priority (3 > 2 > 1), then by card value (lower is better for optimization)
+        // Sort by priority (3 > 2 > 1), then by card value
         moves.sort((a, b) => {
             if (b.priority !== a.priority) return b.priority - a.priority;
             // Within same priority, prefer non-jokers first, then lower values
@@ -262,22 +256,14 @@ export class SkipBoGame {
         return moves;
     }
 
-    /**
-     * Smart discard strategy for Advanced AI.
-     * Selects which card to discard and which pile to place it on.
-     * @param player - The current player
-     */
-    discardCardStrategically(player: Player): void {
-        if (player.hand.length === 0) {
-            this.app.logEvent('WARN', `${player.name} konnte keine Handkarten ablegen (Hand leer).`);
-            return;
-        }
+    findDiscard_Advanced(player: Player): MoveOption | null {
+        if (player.hand.length === 0) return null;
 
         // Card Selection Strategy:
         // 1. Never discard Wild Cards if possible
-        // 2. Avoid discarding low cards (1-3) that can start new build piles
+        // 2. Avoid discarding low cards (1-3)
         // 3. Prefer discarding high cards (10-12)
-        // 4. Never discard a card matching the stockpile top card
+        // 4. Never discard stockpile match
 
         const topStockpile = player.topStockpileCard;
         const nonJokers = player.hand.filter(c => c !== JOKER_VALUE);
@@ -285,36 +271,22 @@ export class SkipBoGame {
         let cardToDiscard: number;
 
         if (nonJokers.length > 0) {
-            // Score each card (higher score = better to discard)
             const scoredCards = nonJokers.map(card => {
                 let score = 0;
-
-                // High cards are better to discard
                 if (card >= 10) score += 50;
                 else if (card >= 7) score += 20;
-                else if (card <= 3) score -= 30; // Avoid discarding low cards
-
-                // Never discard stockpile match
+                else if (card <= 3) score -= 30;
                 if (card === topStockpile) score -= 100;
-
                 return { card, score };
             });
 
-            // Sort by score descending
             scoredCards.sort((a, b) => b.score - a.score);
             cardToDiscard = scoredCards[0].card;
         } else {
-            // Only jokers left, must discard one
             cardToDiscard = JOKER_VALUE;
         }
 
-        // Remove card from hand
-        const cardIndex = player.hand.indexOf(cardToDiscard);
-        const discardedCard = player.hand.splice(cardIndex, 1)[0];
-
-        // Pile Selection Strategy:
-        // Place on the pile with the highest current top card value (but not 12)
-        // This creates "blocking stacks" that are less likely to be useful
+        // Pile Selection: Highest current top card value (but < 12)
         let bestPileIndex = 0;
         let highestValue = -1;
 
@@ -326,7 +298,6 @@ export class SkipBoGame {
             }
         });
 
-        // If all piles have 12 on top, use the first empty pile, or just pile 0
         if (highestValue === -1) {
             for (let i = 0; i < player.discardPiles.length; i++) {
                 if (player.discardPiles[i].length === 0) {
@@ -336,246 +307,232 @@ export class SkipBoGame {
             }
         }
 
-        player.discardPiles[bestPileIndex].push(discardedCard);
-        this.app.logEvent('INFO', `${player.name} (Fortgeschritten) beendet Zug mit strategischer Ablage: Karte ${discardedCard} auf Stapel ${bestPileIndex + 1}.`);
+        return {
+            source: 'hand',
+            card: cardToDiscard,
+            buildPileIndex: bestPileIndex, // Used as Discard Pile Index here
+            priority: 0
+        };
+    }
+
+
+    // --- Strategy: Standard (Optimiert, Spontan, Zufall) ---
+
+    findBestMove_Standard(player: Player): MoveOption | null {
+        // Determine the next required card values for each build pile
+        const requiredValues = this.buildPiles.map(p => p.length > 0 ? p[p.length - 1] + 1 : 1);
+
+        // --- 1. Prioritize Stockpile Card ---
+        const topStockpile = player.topStockpileCard;
+        if (topStockpile !== null) {
+            // Find a pile that needs this
+            for (let i = 0; i < BUILD_PILE_COUNT; i++) {
+                const req = requiredValues[i];
+                if (req > 12) continue;
+                if (topStockpile === req || topStockpile === JOKER_VALUE) {
+                    return {
+                        source: 'stockpile',
+                        card: topStockpile,
+                        buildPileIndex: i,
+                        priority: 999
+                    };
+                }
+            }
+        }
+
+        // --- 2. Play from Hand or Discard Piles ---
+        const candidates: MoveOption[] = [];
+
+        // Check Hand
+        player.hand.filter(c => c !== JOKER_VALUE).forEach(card => {
+            requiredValues.forEach((req, pileIdx) => {
+                if (req > 12) return;
+                if (card === req) {
+                    let priority = 10;
+                    if (player.strategy === 'Optimiert') priority = card * 10 - req;
+                    else if (player.strategy === 'Spontan') priority = 100;
+                    else priority = 1;
+                    candidates.push({ source: 'hand', card, buildPileIndex: pileIdx, priority });
+                }
+            });
+        });
+
+        // Check Discard
+        player.discardPiles.forEach((pile, pileIdx) => {
+            const topCard = pile.length > 0 ? pile[pile.length - 1] : null;
+            if (topCard !== null && topCard !== JOKER_VALUE) {
+                requiredValues.forEach((req, buildIdx) => {
+                    if (req > 12) return;
+                    if (topCard === req) {
+                        let priority = 5;
+                        if (player.strategy === 'Optimiert') priority = 1000 + topCard;
+                        else if (player.strategy === 'Spontan') priority = 50;
+                        else priority = 1;
+
+                        candidates.push({
+                            source: `discard-${pileIdx}`,
+                            card: topCard,
+                            buildPileIndex: buildIdx,
+                            priority
+                        });
+                    }
+                });
+            }
+        });
+
+        // Check Jokers (Hand)
+        if (player.hand.includes(JOKER_VALUE)) {
+            requiredValues.forEach((req, pileIdx) => {
+                if (req > 12) return;
+                const isStrategic = req === 12 || req === player.topStockpileCard;
+                let priority = 0;
+                if (player.strategy === 'Optimiert') {
+                    if (isStrategic) priority = 5000 + req;
+                } else if (player.strategy === 'Spontan') priority = 200;
+                else priority = 1;
+
+                if (priority > 0) {
+                    candidates.push({ source: 'hand', card: JOKER_VALUE, buildPileIndex: pileIdx, priority });
+                }
+            });
+        }
+
+        // Stockpile Joker (Optimized Logic special case)
+        if (topStockpile === JOKER_VALUE && player.strategy === 'Optimiert') {
+            requiredValues.forEach((req, pileIdx) => {
+                if (req <= 12) {
+                    candidates.push({ source: 'stockpile', card: JOKER_VALUE, buildPileIndex: pileIdx, priority: 9999 + req });
+                }
+            });
+        }
+
+
+        if (candidates.length === 0) return null;
+
+        // Select Best
+        if (player.strategy === 'Optimiert') {
+            return candidates.sort((a, b) => b.priority - a.priority)[0];
+        } else if (player.strategy === 'Spontan') {
+            // Greedy/First found
+            // In original code: "Hand then Discard then Joker".
+            // Here candidates is mixed.
+            // Spontan: Hand (100) > Discard (50) > Joker (200). 
+            // Wait, Joker was 200?
+            // "Spontan uses Jokers freely if movable" priority=200.
+            // Hand normal=100.
+            // So Spontan will prioritize Jokers! That matches "greedy".
+            // However, list sort is stable? No.
+            // Let's sort to be safe.
+            return candidates.sort((a, b) => b.priority - a.priority)[0];
+        } else {
+            // Random
+            return candidates[Math.floor(Math.random() * candidates.length)];
+        }
+    }
+
+
+    findDiscard_Standard(player: Player): MoveOption | null {
+        if (player.hand.length === 0) return null;
+
+        let discardCard: number;
+        let discardPileIndex: number;
+
+        if (player.strategy === 'Optimiert') {
+            const nonJokers = player.hand.filter(c => c !== JOKER_VALUE).sort((a, b) => b - a);
+            const cardToDiscard = nonJokers.length > 0 ? nonJokers[0] : JOKER_VALUE;
+            discardCard = cardToDiscard;
+
+            discardPileIndex = 0;
+            let minTopCard = Infinity;
+            player.discardPiles.forEach((pile, index) => {
+                const topCard = pile.length > 0 ? pile[pile.length - 1] : 0;
+                if (topCard < minTopCard) {
+                    minTopCard = topCard;
+                    discardPileIndex = index;
+                }
+            });
+
+        } else if (player.strategy === 'Spontan') {
+            discardCard = player.hand[0]; // First card
+            discardPileIndex = Math.floor(Math.random() * DISCARD_PILE_COUNT);
+        } else {
+            // Random
+            const randIdx = Math.floor(Math.random() * player.hand.length);
+            discardCard = player.hand[randIdx];
+            discardPileIndex = Math.floor(Math.random() * DISCARD_PILE_COUNT);
+        }
+
+        return {
+            source: 'hand',
+            card: discardCard,
+            buildPileIndex: discardPileIndex, // Target Discard Pile
+            priority: 0
+        };
+    }
+
+    // --- Main Game Loop Support ---
+
+    /**
+     * Finds the next move for the player based on their strategy.
+     */
+    findNextMove(player: Player): MoveOption | null {
+        if (player.strategy === 'Fortgeschritten') {
+            const moves = this.findAllMoves_Advanced(player);
+            return moves.length > 0 ? moves[0] : null;
+        } else {
+            return this.findBestMove_Standard(player);
+        }
     }
 
     /**
-     * Implements the core game loop for one player's turn.
+     * Executes the player's turn fully (for simulation).
      */
-
     playerTurn(player: Player): void {
-        this.drawCards(player); // 1. Draw cards up to 5
+        this.drawCards(player);
 
-        // --- Advanced Strategy: Strict Priority-Based Execution ---
-        if (player.strategy === 'Fortgeschritten') {
-            let movesAvailable = true;
+        let move = this.findNextMove(player);
 
-            // Execute all possible moves in priority order until no moves remain
-            while (movesAvailable && this.winner === null) {
-                const allMoves = this.findAllMoves(player);
+        while (move && this.winner === null) {
+            // Execute move
+            // Determine handling of target pile
+            // Standard strategy might return a move without strong pile preference but here we assign one.
+            // Advanced ensures pile index.
+            // makePlay tries all if target is -1, but we should use the one found.
 
-                if (allMoves.length > 0) {
-                    // Take the highest priority move (already sorted)
-                    const bestMove = allMoves[0];
+            const success = this.makePlay(player, move.source, move.card, move.buildPileIndex);
 
-                    // Execute the move using makePlay
-                    if (this.makePlay(player, bestMove.source, bestMove.card)) {
-                        // Check for win condition
-                        if (player.stockpile.length === 0) {
-                            this.app.logEvent('SUCCESS', `${player.name} hat gewonnen!`);
-                            this.winner = player;
-                            return;
-                        }
-                    } else {
-                        // Move failed, stop searching
-                        movesAvailable = false;
-                    }
-                } else {
-                    // No more moves available
-                    movesAvailable = false;
-                }
-            }
-
-            // End turn with strategic discard
-            if (this.winner === null) {
-                this.discardCardStrategically(player);
-            }
-
-            return; // Exit early for Advanced strategy
-        }
-
-        // --- Existing Strategies: Optimiert, Spontan, Zufall ---
-        let playsMade = true;
-        let cardsPlayedThisTurn = 0;
-
-        while (playsMade && this.winner === null) {
-            playsMade = false;
-
-            // --- Strategy Implementation ---
-
-            // Determine the next required card values for each build pile
-            const requiredValues = this.buildPiles.map(p => p.length > 0 ? p[p.length - 1] + 1 : 1);
-
-            // --- 1. Prioritize Stockpile Card Play (Valid for ALL strategies as it's the win condition) ---
-            const topStockpile = player.topStockpileCard;
-            if (topStockpile !== null) {
-                // Check if stockpile card matches any required value
-                for (const requiredVal of requiredValues) {
-                    if (requiredVal > 12) continue;
-
-                    if (topStockpile === requiredVal || topStockpile === JOKER_VALUE) {
-                        // Optimized/Spontan: Always play stockpile immediately.
-                        // Random: Might miss it, but for sanity let's say even random players want to win.
-                        // However, strictly "Random" might pick from all valid moves.
-                        // But typical "Random" bots in games still prioritize winning moves if obvious.
-                        // Let's keep Stockpile priority for ALL strategies to ensure games finish reasonable fast.
-                        // EXCEPT if we want Random to be truly chaotic.
-                        // User wants "Spontan" -> maybe Spontan is greedy, Random is truly random?
-                        // Let's keep Stockpile Prio for all for now, as it's the basic rule of the game.
-
-                        if (this.makePlay(player, 'stockpile', topStockpile)) {
-                            playsMade = true;
-                            cardsPlayedThisTurn++;
-                            if (player.stockpile.length === 0) {
-                                this.app.logEvent('SUCCESS', `${player.name} hat gewonnen!`);
-                                return;
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (playsMade) continue; // Restart play loop
-
-            // --- 2. Play from Hand or Discard Piles ---
-
-            const playCandidates: Array<{ source: string; card: number; priority: number }> = [];
-
-            // Candidate: Hand cards (excluding Jokers)
-            player.hand.filter(c => c !== JOKER_VALUE).forEach(card => {
-                requiredValues.forEach((requiredVal) => {
-                    if (card === requiredVal) {
-                        // Priority calculation based on Strategy
-                        let priority = 10;
-                        if (player.strategy === 'Optimiert') {
-                            priority = card * 10 - requiredVal; // Low number is better
-                        } else if (player.strategy === 'Spontan') {
-                            priority = 100; // Flat priority, will rely on order
-                        } else { // Zufall
-                            priority = 1;
-                        }
-                        playCandidates.push({ source: 'hand', card: card, priority });
-                    }
-                });
-            });
-
-            // Candidate: Discard piles (only top card)
-            player.discardPiles.forEach((pile, pileIndex) => {
-                const topCard = pile.length > 0 ? pile[pile.length - 1] : null;
-                if (topCard !== null && topCard !== JOKER_VALUE) {
-                    requiredValues.forEach((requiredVal) => {
-                        if (topCard === requiredVal) {
-                            let priority = 5;
-                            if (player.strategy === 'Optimiert') {
-                                priority = 1000 + topCard; // Discards are lower priority than hand
-                            } else if (player.strategy === 'Spontan') {
-                                priority = 50; // Lower than hand
-                            } else {
-                                priority = 1;
-                            }
-                            playCandidates.push({ source: `discard-${pileIndex}`, card: topCard, priority });
-                        }
-                    });
-                }
-            });
-
-            // Candidate: Jokers (Hand only)
-            const jokerInHand = player.hand.includes(JOKER_VALUE);
-            if (jokerInHand) {
-                requiredValues.forEach((requiredVal) => {
-                    if (requiredVal <= 12) {
-                        const isStrategic = requiredVal === 12 || requiredVal === player.topStockpileCard;
-
-                        let priority = 0;
-                        if (player.strategy === 'Optimiert') {
-                            if (isStrategic) priority = 5000 + requiredVal;
-                        } else if (player.strategy === 'Spontan') {
-                            // Spontan uses Jokers freely if movable
-                            priority = 200;
-                        } else {
-                            // Zufall
-                            priority = 1;
-                        }
-
-                        if (priority > 0) {
-                            playCandidates.push({ source: 'hand', card: JOKER_VALUE, priority });
-                        }
-                    }
-                });
-            }
-
-            // Special AI Logic for Stockpile Joker (Optimized)
-            if (topStockpile === JOKER_VALUE && player.strategy === 'Optimiert') {
-                requiredValues.forEach((requiredVal) => {
-                    if (requiredVal <= 12) {
-                        playCandidates.push({ source: 'stockpile', card: JOKER_VALUE, priority: 9999 + requiredVal });
-                    }
-                });
-            }
-
-            if (playCandidates.length > 0) {
-                let bestPlay;
-                if (player.strategy === 'Optimiert') {
-                    // Find the highest priority play
-                    bestPlay = playCandidates.sort((a, b) => b.priority - a.priority)[0];
-                } else if (player.strategy === 'Spontan') {
-                    // Pick the first one (Greedy/Quick)
-                    // Since we pushed Hand then Discard, it prioritizes Hand.
-                    bestPlay = playCandidates[0];
-                } else {
-                    // Zufall: Pick a random valid play
-                    bestPlay = playCandidates[Math.floor(Math.random() * playCandidates.length)];
-                }
-
-                if (bestPlay) {
-                    if (this.makePlay(player, bestPlay.source, bestPlay.card)) {
-                        playsMade = true;
-                        cardsPlayedThisTurn++;
-                        if (player.stockpile.length === 0) {
-                            this.app.logEvent('SUCCESS', `${player.name} hat gewonnen!`);
-                            this.winner = player;
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-
-        // --- 3. End Turn (Discard) ---
-        if (this.winner === null) {
-            if (player.hand.length > 0) {
-                let discardCard: number;
-                let discardPileIndex: number;
-
-                if (player.strategy === 'Optimiert') {
-                    // Smart Discard
-                    const nonJokers = player.hand.filter(c => c !== JOKER_VALUE).sort((a, b) => b - a);
-                    const cardToDiscard = nonJokers.length > 0 ? nonJokers[0] : JOKER_VALUE;
-
-                    const cardIndex = player.hand.indexOf(cardToDiscard);
-                    discardCard = player.hand.splice(cardIndex, 1)[0];
-
-                    discardPileIndex = 0;
-                    let minTopCard = Infinity;
-                    player.discardPiles.forEach((pile, index) => {
-                        const topCard = pile.length > 0 ? pile[pile.length - 1] : 0;
-                        if (topCard < minTopCard) {
-                            minTopCard = topCard;
-                            discardPileIndex = index;
-                        }
-                    });
-
-                } else if (player.strategy === 'Spontan') {
-                    // Spontan: Simply discard the last card in hand (simulating "just get rid of it") to a random pile? 
-                    // Or last card to last pile?
-                    // Let's do: Random card to Random pile (fast/impulsive) implies not thinking about it.
-                    // Actually maybe "First card to First pile" is most "impulsive/robotic"?
-                    // Let's do: First card of hand to a random pile.
-                    discardCard = player.hand.shift()!; // Remove first
-                    discardPileIndex = Math.floor(Math.random() * DISCARD_PILE_COUNT);
-                } else {
-                    // Random Discard
-                    const randomIndex = Math.floor(Math.random() * player.hand.length);
-                    discardCard = player.hand.splice(randomIndex, 1)[0];
-                    discardPileIndex = Math.floor(Math.random() * DISCARD_PILE_COUNT);
-                }
-
-                player.discardPiles[discardPileIndex].push(discardCard);
-                this.app.logEvent('INFO', `${player.name} beendet Zug mit Ablage auf Stapel ${discardPileIndex + 1}.`);
+            if (success) {
+                if (player.stockpile.length === 0) return; // Winner handling in makePlay
+                move = this.findNextMove(player); // Look for next move
             } else {
-                this.app.logEvent('WARN', `${player.name} konnte keine Handkarten ablegen (Hand leer). Zug beendet.`);
+                break; // Should not happen if logic is correct
+            }
+        }
+
+        if (this.winner === null) {
+            let discardMove;
+            if (player.strategy === 'Fortgeschritten') {
+                discardMove = this.findDiscard_Advanced(player);
+            } else {
+                discardMove = this.findDiscard_Standard(player);
+            }
+
+            if (discardMove) {
+                // DISCARD LOGIC:
+                // The 'MoveOption' returned has 'buildPileIndex' acting as 'discardPileIndex'
+                // But wait, makePlay cannot do Discard. We need strict discard logic here.
+                // Actually discard IS NOT makePlay.
+                // Let's implement discard execution here.
+
+                const cardIndex = player.hand.indexOf(discardMove.card);
+                if (cardIndex !== -1) {
+                    player.hand.splice(cardIndex, 1);
+                    player.discardPiles[discardMove.buildPileIndex].push(discardMove.card);
+                    const stratName = player.strategy === 'Fortgeschritten' ? ' (Strategisch)' : '';
+                    this.app.logEvent('INFO', `${player.name}${stratName} beendet Zug mit Ablage auf Stapel ${discardMove.buildPileIndex + 1}.`);
+                }
+            } else {
+                if (player.hand.length > 0) this.app.logEvent('WARN', 'Konnte nicht ablegen.');
             }
         }
     }
@@ -584,14 +541,12 @@ export class SkipBoGame {
      * Simulates a full game and returns the result object.
      */
     run(): GameResult {
-        this.createDeck();
+        this.createDeck(); // Was missing in original run() sometimes? No deal calls createDeck.
         this.deal();
-        this.winner = null;
-        let currentTurn = 0;
-        const startTime = Date.now();
-        this.app.tempJokersPlayed = 0;
 
-        // Start with P1, then alternate
+        const startTime = Date.now();
+        let currentTurn = 0;
+
         while (this.winner === null && currentTurn < MAX_TURNS_LIMIT) {
             const player = this.players[this.currentPlayerIndex];
             currentTurn++;
@@ -599,25 +554,20 @@ export class SkipBoGame {
 
             this.playerTurn(player);
 
-            if (this.winner) {
-                break;
-            }
+            if (this.winner) break;
 
-            // Switch player
             this.currentPlayerIndex = 1 - this.currentPlayerIndex;
         }
 
         const durationMs = Date.now() - startTime;
-        const winner = this.winner as Player | null;
-
         return {
             id: Math.floor(Math.random() * 999999) + 1,
-            winner: winner ? `${winner.name} (${winner.strategy})` : 'TIE',
+            winner: this.winner ? `${this.winner.name} (${this.winner.strategy})` : 'TIE',
             turns: currentTurn,
             duration: durationMs,
             starter: this.players[0].id === 0 ? 'P1' : 'P2',
             jokers: this.app.tempJokersPlayed,
-            strategy: winner ? winner.strategy : 'Zufall'
+            strategy: this.winner ? this.winner.strategy : 'Zufall'
         };
     }
 }

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import StrategyDuel from '../components/StrategyDuel.vue';
 // Strategy View - Explains the implemented AI behaviors
 </script>
 
@@ -7,6 +8,10 @@
     <div class="text-center mb-12">
       <h2 class="text-3xl font-bold text-gray-900 mb-2">Strategie-Profile</h2>
       <p class="text-gray-500 text-lg">Wie "denken" die Computerspieler?</p>
+    </div>
+
+    <div class="mb-16">
+        <StrategyDuel />
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
