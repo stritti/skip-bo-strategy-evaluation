@@ -2,7 +2,7 @@
  * Skip-Bo Game Types and Interfaces
  */
 
-export type Strategy = 'Optimiert' | 'Zufall' | 'Spontan';
+export type Strategy = 'Optimiert' | 'Zufall' | 'Spontan' | 'Fortgeschritten';
 
 export interface GameResult {
     id: number;
@@ -26,6 +26,13 @@ export interface PlayCandidate {
     source: string;
     card: number;
     priority: number;
+}
+
+export interface MoveOption {
+    source: string;          // 'stockpile', 'hand', or 'discard-N'
+    card: number;            // Card value (0-12)
+    buildPileIndex: number;  // Which build pile to play on (0-3)
+    priority: number;        // 3=Stockpile, 2=Hand, 1=Discard
 }
 
 export interface Scenario {

@@ -12,7 +12,7 @@ import {
     HAND_SIZE,
     MAX_TURNS_LIMIT
 } from './constants';
-import type { SimulationApp, GameResult, Strategy } from './types';
+import type { SimulationApp, GameResult, Strategy, MoveOption } from './types';
 
 export class SkipBoGame {
     app: SimulationApp;
@@ -172,13 +172,222 @@ export class SkipBoGame {
     }
 
     /**
+     * Gets the required next value for a build pile.
+     * @param pileIndex - Index of the build pile (0-3)
+     * @returns The next required card value (1-12), or 13 if pile is complete
+     */
+    getBuildPileRequiredValue(pileIndex: number): number {
+        const pile = this.buildPiles[pileIndex];
+        return pile.length > 0 ? pile[pile.length - 1] + 1 : 1;
+    }
+
+    /**
+     * Checks if a card can be played on any build pile.
+     * @param cardValue - The card value to check
+     * @returns True if the card can be played
+     */
+    canPlayCard(cardValue: number): boolean {
+        for (let i = 0; i < BUILD_PILE_COUNT; i++) {
+            const required = this.getBuildPileRequiredValue(i);
+            if (required > 12) continue;
+            if (cardValue === JOKER_VALUE || cardValue === required) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Finds all possible moves for the Advanced AI strategy.
+     * Returns moves sorted by priority (3 > 2 > 1).
+     * @param player - The current player
+     * @returns Array of MoveOption objects sorted by priority (highest first)
+     */
+    findAllMoves(player: Player): MoveOption[] {
+        const moves: MoveOption[] = [];
+
+        // Check all 4 build piles
+        for (let buildPileIdx = 0; buildPileIdx < BUILD_PILE_COUNT; buildPileIdx++) {
+            const required = this.getBuildPileRequiredValue(buildPileIdx);
+            if (required > 12) continue; // Pile is complete or would be
+
+            // Priority 3: Stockpile
+            const topStock = player.topStockpileCard;
+            if (topStock !== null && (topStock === required || topStock === JOKER_VALUE)) {
+                moves.push({
+                    source: 'stockpile',
+                    card: topStock,
+                    buildPileIndex: buildPileIdx,
+                    priority: 3
+                });
+            }
+
+            // Priority 2: Hand cards
+            player.hand.forEach(handCard => {
+                if (handCard === required || handCard === JOKER_VALUE) {
+                    moves.push({
+                        source: 'hand',
+                        card: handCard,
+                        buildPileIndex: buildPileIdx,
+                        priority: 2
+                    });
+                }
+            });
+
+            // Priority 1: Discard piles (top card only)
+            player.discardPiles.forEach((pile, pileIdx) => {
+                if (pile.length > 0) {
+                    const topCard = pile[pile.length - 1];
+                    if (topCard === required || topCard === JOKER_VALUE) {
+                        moves.push({
+                            source: `discard-${pileIdx}`,
+                            card: topCard,
+                            buildPileIndex: buildPileIdx,
+                            priority: 1
+                        });
+                    }
+                }
+            });
+        }
+
+        // Sort by priority (3 > 2 > 1), then by card value (lower is better for optimization)
+        moves.sort((a, b) => {
+            if (b.priority !== a.priority) return b.priority - a.priority;
+            // Within same priority, prefer non-jokers first, then lower values
+            if (a.card === JOKER_VALUE && b.card !== JOKER_VALUE) return 1;
+            if (b.card === JOKER_VALUE && a.card !== JOKER_VALUE) return -1;
+            return a.card - b.card;
+        });
+
+        return moves;
+    }
+
+    /**
+     * Smart discard strategy for Advanced AI.
+     * Selects which card to discard and which pile to place it on.
+     * @param player - The current player
+     */
+    discardCardStrategically(player: Player): void {
+        if (player.hand.length === 0) {
+            this.app.logEvent('WARN', `${player.name} konnte keine Handkarten ablegen (Hand leer).`);
+            return;
+        }
+
+        // Card Selection Strategy:
+        // 1. Never discard Wild Cards if possible
+        // 2. Avoid discarding low cards (1-3) that can start new build piles
+        // 3. Prefer discarding high cards (10-12)
+        // 4. Never discard a card matching the stockpile top card
+
+        const topStockpile = player.topStockpileCard;
+        const nonJokers = player.hand.filter(c => c !== JOKER_VALUE);
+
+        let cardToDiscard: number;
+
+        if (nonJokers.length > 0) {
+            // Score each card (higher score = better to discard)
+            const scoredCards = nonJokers.map(card => {
+                let score = 0;
+
+                // High cards are better to discard
+                if (card >= 10) score += 50;
+                else if (card >= 7) score += 20;
+                else if (card <= 3) score -= 30; // Avoid discarding low cards
+
+                // Never discard stockpile match
+                if (card === topStockpile) score -= 100;
+
+                return { card, score };
+            });
+
+            // Sort by score descending
+            scoredCards.sort((a, b) => b.score - a.score);
+            cardToDiscard = scoredCards[0].card;
+        } else {
+            // Only jokers left, must discard one
+            cardToDiscard = JOKER_VALUE;
+        }
+
+        // Remove card from hand
+        const cardIndex = player.hand.indexOf(cardToDiscard);
+        const discardedCard = player.hand.splice(cardIndex, 1)[0];
+
+        // Pile Selection Strategy:
+        // Place on the pile with the highest current top card value (but not 12)
+        // This creates "blocking stacks" that are less likely to be useful
+        let bestPileIndex = 0;
+        let highestValue = -1;
+
+        player.discardPiles.forEach((pile, idx) => {
+            const topValue = pile.length > 0 ? pile[pile.length - 1] : 0;
+            if (topValue < 12 && topValue > highestValue) {
+                highestValue = topValue;
+                bestPileIndex = idx;
+            }
+        });
+
+        // If all piles have 12 on top, use the first empty pile, or just pile 0
+        if (highestValue === -1) {
+            for (let i = 0; i < player.discardPiles.length; i++) {
+                if (player.discardPiles[i].length === 0) {
+                    bestPileIndex = i;
+                    break;
+                }
+            }
+        }
+
+        player.discardPiles[bestPileIndex].push(discardedCard);
+        this.app.logEvent('INFO', `${player.name} (Fortgeschritten) beendet Zug mit strategischer Ablage: Karte ${discardedCard} auf Stapel ${bestPileIndex + 1}.`);
+    }
+
+    /**
      * Implements the core game loop for one player's turn.
      */
+
     playerTurn(player: Player): void {
+        this.drawCards(player); // 1. Draw cards up to 5
+
+        // --- Advanced Strategy: Strict Priority-Based Execution ---
+        if (player.strategy === 'Fortgeschritten') {
+            let movesAvailable = true;
+
+            // Execute all possible moves in priority order until no moves remain
+            while (movesAvailable && this.winner === null) {
+                const allMoves = this.findAllMoves(player);
+
+                if (allMoves.length > 0) {
+                    // Take the highest priority move (already sorted)
+                    const bestMove = allMoves[0];
+
+                    // Execute the move using makePlay
+                    if (this.makePlay(player, bestMove.source, bestMove.card)) {
+                        // Check for win condition
+                        if (player.stockpile.length === 0) {
+                            this.app.logEvent('SUCCESS', `${player.name} hat gewonnen!`);
+                            this.winner = player;
+                            return;
+                        }
+                    } else {
+                        // Move failed, stop searching
+                        movesAvailable = false;
+                    }
+                } else {
+                    // No more moves available
+                    movesAvailable = false;
+                }
+            }
+
+            // End turn with strategic discard
+            if (this.winner === null) {
+                this.discardCardStrategically(player);
+            }
+
+            return; // Exit early for Advanced strategy
+        }
+
+        // --- Existing Strategies: Optimiert, Spontan, Zufall ---
         let playsMade = true;
         let cardsPlayedThisTurn = 0;
-
-        this.drawCards(player); // 1. Draw cards up to 5
 
         while (playsMade && this.winner === null) {
             playsMade = false;

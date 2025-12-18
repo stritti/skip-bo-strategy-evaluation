@@ -131,6 +131,47 @@
         </div>
       </div>
 
+      <!-- Fortgeschritten (Purple) -->
+      <div class="group bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:border-purple-300 transition-all duration-300 relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity">
+           <i class="ph-fill ph-sword text-[120px] text-purple-600 transform -rotate-12"></i>
+        </div>
+        
+        <div class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+          <i class="ph-fill ph-sword text-3xl text-purple-600"></i>
+        </div>
+        
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">Fortgeschritten</h3>
+        <span class="inline-block bg-purple-100 text-purple-600 text-xs font-bold px-2 py-1 rounded mb-4">Der Stratege</span>
+        
+        <p class="text-gray-600 mb-6 leading-relaxed">
+          Strikte Priorisierung und strategische Planung. Diese KI erschöpft alle Möglichkeiten in einer festen Hierarchie und legt Karten taktisch klug ab.
+        </p>
+        
+        <div class="space-y-4">
+          <div>
+            <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <i class="ph-bold ph-check text-green-500"></i> Stärken
+            </h4>
+            <ul class="text-sm text-gray-600 space-y-1 ml-6 list-disc">
+              <li>Strenge Prio 3-2-1 Logik</li>
+              <li>Spielt jeden möglichen Zug vor dem Ablegen</li>
+              <li>Hält Joker und niedrige Karten taktisch zurück</li>
+              <li>Nutzt "Blocking Stacks" auf Ablagestapeln</li>
+            </ul>
+          </div>
+           <div>
+            <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <i class="ph-bold ph-x text-red-500"></i> Schwächen
+            </h4>
+            <ul class="text-sm text-gray-600 space-y-1 ml-6 list-disc">
+              <li>Rechnerisch intensiver</li>
+              <li>Kann durch sehr schnelle aggressive Gegner unter Druck gesetzt werden</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>

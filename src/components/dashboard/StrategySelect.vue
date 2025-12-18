@@ -12,7 +12,7 @@ const emit = defineEmits<{
 }>();
 
 const isOpen = ref(false);
-const options: Strategy[] = ['Optimiert', 'Zufall', 'Spontan'];
+const options: Strategy[] = ['Optimiert', 'Zufall', 'Spontan', 'Fortgeschritten'];
 const containerRef = ref<HTMLElement | null>(null);
 
 const getIcon = (s: Strategy) => {
@@ -20,6 +20,7 @@ const getIcon = (s: Strategy) => {
     case 'Optimiert': return 'ph-brain';
     case 'Zufall': return 'ph-dice-five';
     case 'Spontan': return 'ph-lightning';
+    case 'Fortgeschritten': return 'ph-sword';
     default: return 'ph-question';
   }
 };
@@ -29,6 +30,7 @@ const getColor = (s: Strategy) => {
     case 'Optimiert': return 'text-skipbo-blue';
     case 'Zufall': return 'text-skipbo-green';
     case 'Spontan': return 'text-skipbo-red';
+    case 'Fortgeschritten': return 'text-purple-600';
     default: return 'text-gray-400';
   }
 };
