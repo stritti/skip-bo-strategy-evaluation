@@ -20,8 +20,8 @@ const handleDownloadCSV = () => {
   <div class="max-w-7xl mx-auto px-4 py-8">
     <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <h2 class="text-2xl font-bold text-gray-900">Ergebnis-Tabelle</h2>
-        <p class="text-gray-500 text-sm">Auszug aus der simulierten Datenbank ({{
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Ergebnis-Tabelle</h2>
+        <p class="text-gray-500 dark:text-slate-400 text-sm">Auszug aus der simulierten Datenbank ({{
           simulation.totalRows.toLocaleString('de-DE') }} Einträge)</p>
       </div>
 
@@ -38,13 +38,13 @@ const handleDownloadCSV = () => {
       </div>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col min-h-[600px]">
+    <div class="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col min-h-[600px]">
       <!-- Table Header Filter -->
-      <div class="bg-gray-50 border-b border-gray-200 px-4 py-3 flex gap-4 overflow-x-auto">
-        <div class="flex items-center gap-2 bg-white border border-gray-300 rounded px-2 py-1 text-xs text-gray-600">
+      <div class="bg-gray-50 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-3 flex gap-4 overflow-x-auto">
+        <div class="flex items-center gap-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-xs text-gray-600 dark:text-slate-300">
           <i class="ph-bold ph-funnel"></i> Filter: Alle
         </div>
-        <div class="flex items-center gap-2 bg-white border border-gray-300 rounded px-2 py-1 text-xs text-gray-600">
+        <div class="flex items-center gap-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-xs text-gray-600 dark:text-slate-300">
           <i class="ph-bold ph-arrows-down-up"></i> Sortierung: {{ simulation.sortColumn.value }} ({{ simulation.sortDirection.value.toUpperCase() }})
         </div>
       </div>

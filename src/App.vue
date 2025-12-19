@@ -4,7 +4,7 @@ import AppFooter from './components/layout/AppFooter.vue';
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen bg-gradient-to-br from-skipbo-red/5 via-white to-skipbo-blue/5">
+  <div class="flex flex-col min-h-screen bg-gradient-to-br from-skipbo-red/5 via-white to-skipbo-blue/5 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-gray-900 dark:text-slate-200 transition-colors duration-300">
     <AppNavigation />
     
     <main class="flex-grow">

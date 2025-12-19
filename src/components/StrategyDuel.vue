@@ -142,21 +142,21 @@ const step = () => {
 </script>
 
 <template>
-  <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+  <div class="bg-gray-50 dark:bg-slate-800/50 rounded-xl p-6 border border-gray-200 dark:border-slate-700">
     <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-bold flex items-center gap-2">
+        <h3 class="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
             <i class="ph-fill ph-swords text-orange-500"></i> Strategie-Duell
         </h3>
         
-        <div class="flex items-center gap-4 bg-white p-2 rounded-lg border border-gray-200 shadow-sm">
-             <select v-model="strategyP1" @change="reset" class="px-2 py-1 text-sm border rounded">
+        <div class="flex items-center gap-4 bg-white dark:bg-slate-700 p-2 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm">
+             <select v-model="strategyP1" @change="reset" class="px-2 py-1 text-sm border rounded bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white">
                 <option value="Optimiert">Optimiert</option>
                 <option value="Zufall">Zufall</option>
                 <option value="Spontan">Spontan</option>
                 <option value="Fortgeschritten">Fortgeschritten</option>
             </select>
             <span class="text-gray-400 font-bold">VS</span>
-            <select v-model="strategyP2" @change="reset" class="px-2 py-1 text-sm border rounded">
+            <select v-model="strategyP2" @change="reset" class="px-2 py-1 text-sm border rounded bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white">
                 <option value="Optimiert">Optimiert</option>
                 <option value="Zufall">Zufall</option>
                 <option value="Spontan">Spontan</option>
@@ -169,20 +169,20 @@ const step = () => {
     <div v-if="game" class="relative min-h-[500px] flex flex-col justify-between">
         
         <!-- Player 2 (Top) -->
-        <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 transition-all duration-300" 
+        <div class="bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-800/30 transition-all duration-300" 
              :class="{'ring-2 ring-blue-500 shadow-lg scale-[1.01]': game.currentPlayerIndex === 1}">
             <div class="flex justify-between mb-2">
-                <span class="font-bold text-gray-700">Spieler 2 ({{ strategyP2 }})</span>
-                <span class="text-xs bg-white px-2 py-1 rounded border" v-if="game.currentPlayerIndex === 1">Am Zug</span>
+                <span class="font-bold text-gray-700 dark:text-gray-200">Spieler 2 ({{ strategyP2 }})</span>
+                <span class="text-xs bg-white dark:bg-slate-700 px-2 py-1 rounded border dark:border-slate-600 dark:text-white" v-if="game.currentPlayerIndex === 1">Am Zug</span>
             </div>
             
             <div class="flex gap-8">
                 <!-- Stockpile -->
                 <div class="text-center">
                     <div class="text-xs text-gray-400 mb-1">Spielerstapel</div>
-                    <div class="w-16 h-24 bg-white border-2 border-red-500 rounded-lg flex items-center justify-center shadow-md font-bold text-2xl text-red-600 relative">
+                    <div class="w-16 h-24 bg-white dark:bg-slate-700 border-2 border-red-500 rounded-lg flex items-center justify-center shadow-md font-bold text-2xl text-red-600 relative">
                         {{ game.players[1].topStockpileCard === 0 ? '★' : game.players[1].topStockpileCard }}
-                        <div class="absolute -top-2 -right-2 w-6 h-6 bg-red-600 text-white text-xs rounded-full flex items-center justify-center border-2 border-white">
+                        <div class="absolute -top-2 -right-2 w-6 h-6 bg-red-600 text-white text-xs rounded-full flex items-center justify-center border-2 border-white dark:border-slate-800">
                             {{ game.players[1].stockpile.length }}
                         </div>
                     </div>
@@ -193,7 +193,7 @@ const step = () => {
                     <div class="text-xs text-gray-400 mb-1">Handkarten</div>
                     <div class="flex gap-2">
                         <div v-for="(card, i) in game.players[1].hand" :key="i"
-                             class="w-12 h-16 bg-white border border-gray-300 rounded flex items-center justify-center font-bold text-lg shadow-sm">
+                             class="w-12 h-16 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded flex items-center justify-center font-bold text-lg shadow-sm text-gray-900 dark:text-white">
                              {{ card === 0 ? '★' : card }}
                         </div>
                     </div>
@@ -204,7 +204,7 @@ const step = () => {
                      <div class="text-xs text-gray-400 mb-1">Ablagestapel</div>
                      <div class="grid grid-cols-2 gap-2">
                         <div v-for="(pile, i) in game.players[1].discardPiles" :key="i"
-                             class="w-10 h-14 bg-gray-200/50 border border-gray-200 rounded flex items-center justify-center text-sm">
+                             class="w-10 h-14 bg-gray-200/50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">
                              {{ pile.length > 0 ? (pile[pile.length-1] === 0 ? '★' : pile[pile.length-1]) : '' }}
                         </div>
                      </div>
@@ -215,10 +215,10 @@ const step = () => {
         <!-- Center: Build Piles & Deck -->
         <div class="flex justify-center items-center gap-8 py-8">
             <div v-for="(pile, i) in game.buildPiles" :key="i"
-                 class="w-16 h-24 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center ml-2 relative group">
+                 class="w-16 h-24 bg-gray-100 dark:bg-slate-800 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg flex items-center justify-center ml-2 relative group">
                  
-                 <span v-if="pile.length === 0" class="text-gray-300 text-xs">1</span>
-                 <span v-else class="text-2xl font-bold text-gray-800">
+                 <span v-if="pile.length === 0" class="text-gray-300 dark:text-slate-600 text-xs">1</span>
+                 <span v-else class="text-2xl font-bold text-gray-800 dark:text-white">
                     {{ pile[pile.length-1] === 0 ? '★' : pile[pile.length-1] }}
                  </span>
                  
@@ -226,29 +226,29 @@ const step = () => {
             </div>
             
              <!-- Deck -->
-            <div class="ml-12 w-16 h-24 bg-skipbo-blue rounded-lg shadow-md border-2 border-white flex items-center justify-center">
+            <div class="ml-12 w-16 h-24 bg-skipbo-blue rounded-lg shadow-md border-2 border-white dark:border-slate-700 flex items-center justify-center">
                 <span class="text-white font-bold opacity-50">Deck</span>
-                <div class="absolute -top-3 -right-3 w-8 h-8 bg-white text-skipbo-blue text-xs rounded-full flex items-center justify-center shadow font-bold">
+                <div class="absolute -top-3 -right-3 w-8 h-8 bg-white dark:bg-slate-700 text-skipbo-blue text-xs rounded-full flex items-center justify-center shadow font-bold">
                     {{ game.drawPile.length }}
                 </div>
             </div>
         </div>
 
         <!-- Player 1 (Bottom) -->
-        <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 transition-all duration-300"
+        <div class="bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-800/30 transition-all duration-300"
               :class="{'ring-2 ring-blue-500 shadow-lg scale-[1.01]': game.currentPlayerIndex === 0}">
             <div class="flex justify-between mb-2">
-                <span class="font-bold text-gray-700">Spieler 1 ({{ strategyP1 }})</span>
-                 <span class="text-xs bg-white px-2 py-1 rounded border" v-if="game.currentPlayerIndex === 0">Am Zug</span>
+                <span class="font-bold text-gray-700 dark:text-gray-200">Spieler 1 ({{ strategyP1 }})</span>
+                 <span class="text-xs bg-white dark:bg-slate-700 px-2 py-1 rounded border dark:border-slate-600 dark:text-white" v-if="game.currentPlayerIndex === 0">Am Zug</span>
             </div>
             
             <div class="flex gap-8">
                 <!-- Stockpile -->
                 <div class="text-center">
                     <div class="text-xs text-gray-400 mb-1">Spielerstapel</div>
-                    <div class="w-16 h-24 bg-white border-2 border-red-500 rounded-lg flex items-center justify-center shadow-md font-bold text-2xl text-red-600 relative">
+                    <div class="w-16 h-24 bg-white dark:bg-slate-700 border-2 border-red-500 rounded-lg flex items-center justify-center shadow-md font-bold text-2xl text-red-600 relative">
                          {{ game.players[0].topStockpileCard === 0 ? '★' : game.players[0].topStockpileCard }}
-                         <div class="absolute -top-2 -right-2 w-6 h-6 bg-red-600 text-white text-xs rounded-full flex items-center justify-center border-2 border-white">
+                         <div class="absolute -top-2 -right-2 w-6 h-6 bg-red-600 text-white text-xs rounded-full flex items-center justify-center border-2 border-white dark:border-slate-800">
                             {{ game.players[0].stockpile.length }}
                         </div>
                     </div>
@@ -259,7 +259,7 @@ const step = () => {
                     <div class="text-xs text-gray-400 mb-1">Handkarten</div>
                     <div class="flex gap-2">
                          <div v-for="(card, i) in game.players[0].hand" :key="i"
-                             class="w-12 h-16 bg-white border border-gray-300 rounded flex items-center justify-center font-bold text-lg shadow-sm">
+                             class="w-12 h-16 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded flex items-center justify-center font-bold text-lg shadow-sm text-gray-900 dark:text-white">
                              {{ card === 0 ? '★' : card }}
                         </div>
                     </div>
@@ -270,7 +270,7 @@ const step = () => {
                      <div class="text-xs text-gray-400 mb-1">Ablagestapel</div>
                      <div class="grid grid-cols-2 gap-2">
                         <div v-for="(pile, i) in game.players[0].discardPiles" :key="i"
-                             class="w-10 h-14 bg-gray-200/50 border border-gray-200 rounded flex items-center justify-center text-sm">
+                             class="w-10 h-14 bg-gray-200/50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">
                              {{ pile.length > 0 ? (pile[pile.length-1] === 0 ? '★' : pile[pile.length-1]) : '' }}
                         </div>
                      </div>
@@ -284,32 +284,32 @@ const step = () => {
     <div class="mt-6 flex gap-4 items-start">
         <div class="flex-1 space-y-2">
             
-            <div class="bg-white p-4 rounded-lg border border-gray-200 flex items-center justify-between">
-                <div class="font-medium text-lg">
+            <div class="bg-white dark:bg-slate-700 p-4 rounded-lg border border-gray-200 dark:border-slate-600 flex items-center justify-between">
+                <div class="font-medium text-lg text-gray-900 dark:text-white">
                     <span v-if="game?.winner" class="text-green-600 font-bold">SPIEL VORBEI! {{ currentAction }}</span>
                     <span v-else>{{ currentAction }}</span>
                 </div>
                 
                 <div class="flex gap-2">
                      <button @click="step" :disabled="!!game?.winner || isPlaying"
-                            class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-sm transition-colors disabled:opacity-50">
+                            class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-slate-600 dark:hover:bg-slate-500 dark:text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50">
                         <i class="ph-bold ph-skip-forward"></i> Schritt
                     </button>
                     
                     <button @click="toggleAutoPlay" :disabled="!!game?.winner"
                             class="px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2"
-                            :class="isPlaying ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-blue-600 text-white hover:bg-blue-700'">
+                            :class="isPlaying ? 'bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400' : 'bg-blue-600 text-white hover:bg-blue-700'">
                         <i :class="isPlaying ? 'ph-bold ph-pause' : 'ph-bold ph-play'"></i>
                         {{ isPlaying ? 'Pause' : 'Auto-Play' }}
                     </button>
 
-                     <button @click="reset" class="px-3 py-2 text-gray-400 hover:text-gray-600">
+                     <button @click="reset" class="px-3 py-2 text-gray-400 hover:text-gray-600 dark:hover:text-white">
                         <i class="ph-bold ph-arrow-counter-clockwise text-xl"></i>
                     </button>
                 </div>
             </div>
             
-             <select v-model="speed" class="w-full p-2 text-sm border border-gray-200 rounded-lg bg-white">
+             <select v-model="speed" class="w-full p-2 text-sm border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white">
                 <option :value="1000">Geschwindigkeit: Normal (1s)</option>
                 <option :value="300">Geschwindigkeit: Schnell (0.3s)</option>
                 <option :value="50">Geschwindigkeit: Turbo (0.05s)</option>
@@ -318,9 +318,9 @@ const step = () => {
         </div>
         
         <!-- Mini Log -->
-        <div class="w-1/3 h-40 overflow-y-auto bg-black/5 rounded-lg p-2 text-xs font-mono space-y-1 custom-scrollbar">
+        <div class="w-1/3 h-40 overflow-y-auto bg-black/5 dark:bg-black/30 rounded-lg p-2 text-xs font-mono space-y-1 custom-scrollbar">
             <div v-for="log in logs" :key="log.id" :class="log.color">
-                <span class="opacity-50">{{log.time}}</span> {{ log.text }}
+                <span class="opacity-50 dark:opacity-40">{{log.time}}</span> {{ log.text }}
             </div>
         </div>
     </div>
