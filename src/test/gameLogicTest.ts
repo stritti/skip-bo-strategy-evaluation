@@ -1,7 +1,6 @@
 
 import { SkipBoGame } from '../game/SkipBoGame';
 import type { SimulationApp } from '../game/types';
-import { JOKER_VALUE } from '../game/constants';
 
 // Mock App
 const mockApp: SimulationApp = {
@@ -84,5 +83,5 @@ function testAdvancedStrategy() {
 
 runTests().catch(e => {
     console.error(e);
-    process.exit(1);
+    throw e;
 });
