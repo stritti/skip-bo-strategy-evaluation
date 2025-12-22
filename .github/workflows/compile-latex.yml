@@ -1,0 +1,40 @@
+name: Compile LaTeX Documents
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**/*.tex'
+      - 'docs/**/*.cls'
+      - 'docs/**/*.bib'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compile Revised Skip-Bo Paper
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: revised_skipbo_paper.tex
+          working_directory: docs/thesis
+          compiler: pdflatex
+
+      - name: Compile MIT Thesis Layout
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: skipbo_mit_layout.tex
+          compiler: lualatex
+          working_directory: docs/thesis
+
+      - name: Upload PDFs
+        uses: actions/upload-artifact@v4
+        with:
+          name: PDFs
+          path: |
+            docs/thesis/revised_skipbo_paper.pdf
+            docs/thesis/skipbo_mit_layout.pdf
