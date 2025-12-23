@@ -6,8 +6,8 @@ const projectRoot = process.cwd();
 
 const documents = [
     {
-        name: 'Revised Skip-Bo Paper',
-        root: 'revised_skipbo_paper.tex',
+        name: 'Deterministic Skip-Bo HPVP Agent Analysis',
+        root: 'Deterministic_SkipBo_HPVP_Agent_Analysis.tex',
         compiler: 'pdflatex',
         cwd: 'docs/thesis'
     },

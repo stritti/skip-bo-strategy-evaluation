@@ -17,10 +17,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Compile Revised Skip-Bo Paper
+      - name: Compile Deterministic SkipBo HPVP Agent Analysis
         uses: xu-cheng/latex-action@v3
         with:
-          root_file: revised_skipbo_paper.tex
+          root_file: Deterministic_SkipBo_HPVP_Agent_Analysis.tex
           working_directory: docs/thesis
           compiler: pdflatex
 
@@ -36,5 +36,5 @@ jobs:
         with:
           name: PDFs
           path: |
-            docs/thesis/revised_skipbo_paper.pdf
+            docs/thesis/Deterministic_SkipBo_HPVP_Agent_Analysis.pdf
             docs/thesis/skipbo_mit_layout.pdf

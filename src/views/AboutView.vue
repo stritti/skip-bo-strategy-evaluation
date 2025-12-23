@@ -69,6 +69,36 @@
               </div>
             </div>
           </div>
+
+          <!-- Academic Research -->
+          <div class="flex items-start gap-4">
+            <div class="bg-indigo-50 p-3 rounded-xl">
+              <i class="ph-fill ph-graduation-cap text-2xl text-indigo-600"></i>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold text-gray-900 mb-2">Wissenschaftliche Begleitung</h3>
+              <p class="text-gray-600 leading-relaxed mb-4">
+                Die mathematischen Grundlagen und die formalisierte HPVP-Strategie wurden in begleitenden 
+                Forschungsarbeiten dokumentiert. Diese Dokumente wurden ebenfalls primär durch 
+                <strong>Gemini</strong> erstellt und dienen als formale Basis für die Simulation.
+              </p>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <a href="/documents/Deterministic_SkipBo_HPVP_Agent_Analysis.pdf" target="_blank" 
+                   class="flex items-center p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all group">
+                  <div class="bg-indigo-50 p-2 rounded-lg mr-4 group-hover:bg-indigo-100 transition-colors">
+                    <i class="ph-bold ph-file-pdf text-xl text-indigo-600"></i>
+                  </div>
+                  <div>
+                    <div class="text-sm font-semibold text-gray-900">Research Paper</div>
+                    <div class="text-xs text-gray-500">Deterministic SkipBo HPVP Agent Analysis</div>
+                  </div>
+                  <i class="ph-bold ph-download-simple ml-auto text-gray-300 group-hover:text-indigo-600"></i>
+                </a>
+
+              </div>
+            </div>
+          </div>
         </section>
 
         <!-- Disclaimer -->
