@@ -15,24 +15,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Compile Deterministic SkipBo HPVP Agent Analysis
-        uses: xu-cheng/latex-action@v3
+        uses: xu-cheng/latex-action@v4
         with:
           root_file: Deterministic_SkipBo_HPVP_Agent_Analysis.tex
           working_directory: docs/thesis
           compiler: pdflatex
 
       - name: Compile MIT Thesis Layout
-        uses: xu-cheng/latex-action@v3
+        uses: xu-cheng/latex-action@v4
         with:
           root_file: skipbo_mit_layout.tex
           compiler: lualatex
           working_directory: docs/thesis
 
       - name: Upload PDFs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: PDFs
           path: |
