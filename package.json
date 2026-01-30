@@ -22,6 +22,6 @@
     "@vitejs/plugin-vue": "^6.0.3",
     "chart.js": "^4.5.1",
     "idb": "^8.0.3",
-    "vue-router": "^4.6.4"
+    "vue-router": "^5.0.0"
   }
 }
