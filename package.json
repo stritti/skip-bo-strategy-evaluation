@@ -11,10 +11,10 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.27",
-    "postcss": "^8.5.8",
+    "postcss": "^8.5.9",
     "tailwindcss": "^4.1.18",
     "typescript": "~6.0.2",
-    "vite": "^8.0.2"
+    "vite": "^8.0.8"
   },
   "dependencies": {
     "@phosphor-icons/vue": "^2.2.1",
