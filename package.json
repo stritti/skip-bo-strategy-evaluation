@@ -10,18 +10,18 @@
     "docs:compile": "node scripts/compile-latex.js"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.27",
-    "postcss": "^8.5.8",
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8.5.10",
     "tailwindcss": "^4.1.18",
-    "typescript": "~6.0.2",
-    "vite": "^8.0.2"
+    "typescript": "~6.0.3",
+    "vite": "^8.0.9"
   },
   "dependencies": {
     "@phosphor-icons/vue": "^2.2.1",
-    "@tailwindcss/vite": "^4.2.2",
-    "@vitejs/plugin-vue": "^6.0.5",
+    "@tailwindcss/vite": "^4.2.4",
+    "@vitejs/plugin-vue": "^6.0.6",
     "chart.js": "^4.5.1",
     "idb": "^8.0.3",
-    "vue-router": "^5.0.4"
+    "vue-router": "^5.0.6"
   }
 }
