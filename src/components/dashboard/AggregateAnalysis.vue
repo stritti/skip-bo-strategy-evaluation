@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { calculateConfidenceInterval, mcnemarExactTest, holmCorrect } from '../../utils/statistics';
 
 const props = defineProps<{
   results: {
@@ -11,6 +12,19 @@ const props = defineProps<{
     winRateP1: number;
   }[];
 }>();
+
+// Enrich each matchup with a Wilson CI and a Holm-corrected exact McNemar p-value
+const enriched = computed(() => {
+  const items = props.results.filter(r => r.games > 0);
+  const pValues = items.map(r => mcnemarExactTest(r.winsP1, r.winsP2).pValue);
+  const adjusted = holmCorrect(pValues);
+  return items.map((r, i) => ({
+    ...r,
+    ci: calculateConfidenceInterval(r.winsP1 / r.games, r.games),
+    adjPValue: adjusted[i],
+    significant: adjusted[i] < 0.05 && r.games >= 30
+  }));
+});
 
 const getColor = (rate: number) => {
   if (rate > 0.55) return 'text-green-600';
@@ -26,7 +40,7 @@ const getBgColor = (rate: number) => {
 
 <template>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <div v-for="(item, index) in results" :key="index"
+    <div v-for="(item, index) in enriched" :key="index"
       class="rounded-xl border p-5 shadow-sm transition hover:shadow-md"
       :class="getBgColor(item.winRateP1)">
       
@@ -50,6 +64,14 @@ const getBgColor = (rate: number) => {
             <span class="text-2xl font-mono font-bold" :class="getColor(item.winRateP1)">
                 {{ (item.winRateP1 * 100).toFixed(1) }}%
             </span>
+        </div>
+
+        <div class="flex justify-between items-center text-xs text-gray-500">
+            <span>95% CI (Wilson): ±{{ (item.ci.margin * 100).toFixed(1) }}%</span>
+            <span v-if="item.significant" class="font-bold text-green-700 bg-green-100 border border-green-200 px-2 py-0.5 rounded">
+                signifikant (Holm, p={{ item.adjPValue.toExponential(1) }})
+            </span>
+            <span v-else-if="item.games >= 30" class="text-gray-400">nicht signifikant (Holm)</span>
         </div>
         
         <div class="grid grid-cols-2 gap-4 text-sm">

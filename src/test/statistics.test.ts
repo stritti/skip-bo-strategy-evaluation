@@ -15,7 +15,8 @@ import {
     studentTCdf,
     tCriticalValue,
     calculatePower,
-    calculateRequiredSampleSize
+    calculateRequiredSampleSize,
+    holmCorrect
 } from '../utils/statistics';
 
 describe('normalQuantile / normalCdf', () => {
@@ -186,6 +187,20 @@ describe('calculateQuartiles', () => {
         const q = calculateQuartiles([1, 2, 3, 4, 5, 6, 7, 8, 9, 100]);
         expect(q.whiskerHigh).toBe(9);
         expect(q.outliers).toEqual([100]);
+    });
+});
+
+describe('holmCorrect', () => {
+    it('applies Holm-Bonferroni adjustment in original order', () => {
+        // sorted: 0.01 (x3), 0.03 (x2), 0.04 (x1) with running max -> [0.03, 0.06, 0.06]
+        expect(holmCorrect([0.01, 0.04, 0.03])).toEqual([0.03, 0.06, 0.06]);
+    });
+
+    it('caps at 1, enforces monotonicity and handles a single p-value', () => {
+        expect(holmCorrect([0.5])).toEqual([0.5]);
+        // smallest p (0.8) is scaled by m=2 -> 1.6, capped at 1 and propagated
+        expect(holmCorrect([0.9, 0.8])).toEqual([1, 1]);
+        expect(holmCorrect([0.01, 0.02])).toEqual([0.02, 0.02]);
     });
 });
 

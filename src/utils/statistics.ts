@@ -544,6 +544,25 @@ export function mannWhitneyUTest(
     return { u: u1, z, pValue, isSignificant: pValue < 0.05 };
 }
 
+/**
+ * Holm-Bonferroni correction for multiple comparisons.
+ * Returns adjusted p-values (monotonically enforced) in the original order.
+ */
+export function holmCorrect(pValues: number[]): number[] {
+    const m = pValues.length;
+    const order = pValues
+        .map((p, i) => ({ p, i }))
+        .sort((a, b) => a.p - b.p);
+
+    const adjusted = new Array<number>(m);
+    let runningMax = 0;
+    order.forEach(({ p, i }, rank) => {
+        runningMax = Math.max(runningMax, (m - rank) * p);
+        adjusted[i] = Math.min(1, runningMax);
+    });
+    return adjusted;
+}
+
 // ---------------------------------------------------------------------------
 // Effect sizes
 // ---------------------------------------------------------------------------
