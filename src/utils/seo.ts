@@ -92,7 +92,9 @@ export function applyPageSeo(seo: PageSeo, rawPath: string): void {
 }
 
 export function resolveRouteSeo(path: string): { seo: PageSeo; locale: Locale } {
-    const entry = routeSeo[dePathOf(path)] ?? routeSeo['/'];
+    const p = dePathOf(path);
+    const key = routeSeo[p] ? p : p.startsWith('/runs/') ? '/runs/:seed' : '/';
+    const entry = routeSeo[key];
     const locale: Locale = isEnPath(path) ? 'en' : 'de';
     return { seo: entry[locale], locale };
 }
@@ -180,6 +182,18 @@ export const routeSeo: Record<string, { de: PageSeo; en: PageSeo }> = {
             title: 'Validation & methodology of the Skip-Bo analysis | Skip-Bo Strategy Analyzer',
             description:
                 'How the Skip-Bo simulations are scientifically validated: statistical significance, paired tests, effect sizes and power analysis.'
+        }
+    },
+    '/runs/:seed': {
+        de: {
+            title: 'Geteilter Simulationslauf | Skip-Bo Strategy Analyzer',
+            description:
+                'Geteilter, seed-reproduzierbarer Skip-Bo Simulationslauf mit Aggregaten und allen Einzelergebnissen als JSON (CI re-simuliert jeden Lauf).'
+        },
+        en: {
+            title: 'Shared simulation run | Skip-Bo Strategy Analyzer',
+            description:
+                'Shared, seed-reproducible Skip-Bo simulation run with aggregates and all per-game results as JSON (CI re-simulates every run).'
         }
     }
 };

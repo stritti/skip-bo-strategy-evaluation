@@ -127,4 +127,22 @@
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
+  <url>
+    <loc>https://skip-bo-strategy-analysis.netlify.app/runs/20260613</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://skip-bo-strategy-analysis.netlify.app/runs/20260613"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://skip-bo-strategy-analysis.netlify.app/en/runs/20260613"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://skip-bo-strategy-analysis.netlify.app/runs/20260613"/>
+    <lastmod>2026-11-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://skip-bo-strategy-analysis.netlify.app/en/runs/20260613</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://skip-bo-strategy-analysis.netlify.app/runs/20260613"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://skip-bo-strategy-analysis.netlify.app/en/runs/20260613"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://skip-bo-strategy-analysis.netlify.app/runs/20260613"/>
+    <lastmod>2026-11-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
 </urlset>

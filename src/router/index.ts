@@ -6,6 +6,7 @@ import StrategyView from '../views/StrategyView.vue';
 import AnalysisView from '../views/AnalysisView.vue';
 import ValidationView from '../views/ValidationView.vue';
 import AboutView from '../views/AboutView.vue';
+import RunView from '../views/RunView.vue';
 
 declare module 'vue-router' {
     interface RouteMeta {
@@ -21,7 +22,8 @@ const baseRoutes = [
     { path: '/rules', name: 'rules', component: RulesView },
     { path: '/strategy', name: 'strategy', component: StrategyView },
     { path: '/analysis', name: 'analysis', component: AnalysisView },
-    { path: '/validation', name: 'validation', component: ValidationView }
+    { path: '/validation', name: 'validation', component: ValidationView },
+    { path: '/runs/:seed', name: 'run', component: RunView }
 ] as const;
 
 export const routes: RouteRecordRaw[] = baseRoutes.flatMap((r) => [
