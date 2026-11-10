@@ -4,13 +4,16 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { runsIndex } from '../generated/runsIndex';
 import { entryToSummaryRun } from '../services/sharedRuns';
+import { runIdOfFile } from '../utils/seo';
 import { isEnPath } from '../i18n';
 
 const route = useRoute();
 const { t } = useI18n({ useScope: 'global' });
 
-const seedParam = computed(() => Number(route.params.seed));
-const entry = computed(() => runsIndex.find(e => e.seed === seedParam.value) ?? null);
+const runIdParam = computed(() => String(route.params.runId));
+const entry = computed(() =>
+    runsIndex.find(e => runIdOfFile(e.file) === runIdParam.value || String(e.seed) === runIdParam.value) ?? null
+);
 const run = computed(() => (entry.value ? entryToSummaryRun(entry.value) : null));
 const winRateP1 = computed(() =>
     run.value && run.value.gamesCount > 0 ? run.value.winsP1 / run.value.gamesCount : 0
@@ -18,7 +21,10 @@ const winRateP1 = computed(() =>
 const fileUrl = computed(() =>
     entry.value ? `${import.meta.env.BASE_URL}data/runs/${entry.value.file}` : ''
 );
-const dashboardPath = computed(() => (isEnPath(route.path) ? '/en' : '/'));
+const dashboardLink = computed(() => ({
+    path: isEnPath(route.path) ? '/en' : '/',
+    query: { run: runIdParam.value }
+}));
 const formattedDate = computed(() =>
     run.value ? new Date(run.value.timestamp).toLocaleString('de-DE') : ''
 );
@@ -67,7 +73,7 @@ const formattedDate = computed(() =>
           </div>
           <div class="flex justify-between border-b border-gray-100 dark:border-slate-800 pb-2">
             <dt class="text-gray-500">{{ t('run.permalink') }}</dt>
-            <dd class="font-mono text-xs text-gray-900 dark:text-white">/runs/{{ run.seed }}</dd>
+            <dd class="font-mono text-xs text-gray-900 dark:text-white">/runs/{{ runIdParam }}</dd>
           </div>
         </dl>
 
@@ -80,7 +86,7 @@ const formattedDate = computed(() =>
              class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 transition shadow-sm">
             <i class="ph-bold ph-download-simple"></i> {{ t('run.download') }}
           </a>
-          <router-link :to="dashboardPath"
+          <router-link :to="dashboardLink"
              class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg font-medium text-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition">
             <i class="ph-bold ph-gauge"></i> {{ t('run.openDashboard') }}
           </router-link>
@@ -91,7 +97,7 @@ const formattedDate = computed(() =>
     <div v-else class="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-800 p-12 text-center">
       <i class="ph-bold ph-magnifying-glass-minus text-5xl text-gray-300 dark:text-slate-600 mb-4"></i>
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ t('run.notFound') }}</h1>
-      <p class="text-gray-500 dark:text-slate-400 font-mono text-sm">/runs/{{ route.params.seed }}</p>
+      <p class="text-gray-500 dark:text-slate-400 font-mono text-sm">/runs/{{ route.params.runId }}</p>
     </div>
   </div>
 </template>

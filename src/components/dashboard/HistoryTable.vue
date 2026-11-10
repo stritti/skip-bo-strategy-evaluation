@@ -87,7 +87,7 @@ const formatDate = (timestamp: number) => {
             <td class="px-6 py-3 text-right font-mono dark:text-slate-300">{{ (run.ties ?? 0).toLocaleString('de-DE') }}</td>
             <td class="px-6 py-3 text-right font-mono text-xs dark:text-slate-400">
               {{ run.seed ?? '—' }}
-              <router-link v-if="run.shared && run.seed" :to="`/runs/${run.seed}`" title="Permalink"
+              <router-link v-if="run.shared && run.file" :to="`/runs/${run.file.replace(/\.json$/, '')}`" title="Permalink"
                 class="ml-2 inline-flex items-center text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300 align-middle">
                 <i class="ph-bold ph-link"></i>
               </router-link>

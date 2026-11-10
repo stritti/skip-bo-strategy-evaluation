@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, nextTick, watch } from 'vue';
+import { ref, computed, nextTick, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import LogDisplay from '../components/dashboard/LogDisplay.vue';
 import ProgressBar from '../components/dashboard/ProgressBar.vue';
@@ -68,6 +68,21 @@ const handleResetSimulation = () => {
   charts.destroyAllCharts();
   simulation.resetSimulation();
 };
+
+// Deep link: /?run=<runId> loads the referenced (shared) run once the history is available
+onMounted(() => {
+  const runId = router.currentRoute.value.query.run;
+  if (!runId) return;
+  const stop = watch(() => simulation.history.value, (h) => {
+    if (!h.length) return;
+    const run = h.find(r =>
+      (r.file && r.file.replace(/\.json$/, '') === String(runId)) ||
+      (r.seed !== undefined && String(r.seed) === String(runId))
+    );
+    if (run) simulation.loadRun(run);
+    stop();
+  }, { immediate: true });
+});
 </script>
 
 <template>

@@ -1,6 +1,60 @@
+import { runsIndex } from '../generated/runsIndex';
+
 export const SITE_URL = 'https://skip-bo-strategy-analysis.netlify.app';
 export const SITE_NAME = 'Skip-Bo Strategy Analyzer';
 export const SITE_LOCALE = 'de';
+
+// Run permalinks are keyed by file basename (unique), e.g. /runs/<file-without-.json>.
+// Seed is accepted as a fallback for readability/backward compatibility.
+export function runIdOfFile(file: string): string {
+    return file.replace(/\.json$/, '');
+}
+
+export function findRunEntry(dePath: string) {
+    const parts = dePath.split('/').filter(Boolean);
+    if (parts[0] !== 'runs' || parts.length !== 2) return null;
+    const id = parts[1];
+    return runsIndex.find(e => runIdOfFile(e.file) === id || String(e.seed) === id) ?? null;
+}
+
+export function runSeoFor(dePath: string, locale: Locale): PageSeo | null {
+    const entry = findRunEntry(dePath);
+    if (!entry) return null;
+    const winRate = entry.gamesCount ? ((entry.winsP1 ?? 0) / entry.gamesCount * 100).toFixed(1) : '0';
+    return locale === 'en'
+        ? {
+            title: `${entry.label ?? `Run ${entry.seed}`} | ${SITE_NAME}`,
+            description: `${entry.strategyP1} vs. ${entry.strategyP2} — N=${entry.gamesCount}, win rate P1 ${winRate}%, seed ${entry.seed}. Reproducible: re-simulated in CI.`
+        }
+        : {
+            title: `${entry.label ?? `Lauf ${entry.seed}`} | ${SITE_NAME}`,
+            description: `${entry.strategyP1} vs. ${entry.strategyP2} — N=${entry.gamesCount}, Gewinnrate P1 ${winRate}%, Seed ${entry.seed}. Reproduzierbar: in CI re-simuliert.`
+        };
+}
+
+export function runJsonLdObject(dePath: string, url: string) {
+    const entry = findRunEntry(dePath);
+    if (!entry) return null;
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'Dataset',
+        name: entry.label ?? `Skip-Bo simulation run (seed ${entry.seed})`,
+        description: `${entry.strategyP1} vs. ${entry.strategyP2}, N=${entry.gamesCount}, wins P1/P2: ${entry.winsP1}/${entry.winsP2}, seed ${entry.seed}`,
+        url,
+        license: 'https://opensource.org/licenses/MIT',
+        distribution: {
+            '@type': 'DataDownload',
+            encodingFormat: 'application/json',
+            contentUrl: `${SITE_URL}/data/runs/${entry.file}`
+        }
+    };
+}
+
+export function runJsonLdHtml(dePath: string, url: string): string {
+    const obj = runJsonLdObject(dePath, url);
+    if (!obj) return '';
+    return `<script type="application/ld+json" data-run-jsonld>${JSON.stringify(obj)}</script>`;
+}
 
 export interface PageSeo {
     title: string;
@@ -89,13 +143,31 @@ export function applyPageSeo(seo: PageSeo, rawPath: string): void {
     upsertLink('alternate', pageUrl(dePath), 'hreflang', 'de');
     upsertLink('alternate', pageUrl(enPathOf(dePath)), 'hreflang', 'en');
     upsertLink('alternate', pageUrl(dePath), 'hreflang', 'x-default');
+
+    // Per-run Dataset JSON-LD: upsert on run pages, remove elsewhere (client-side navigation)
+    const RUN_JSONLD_SELECTOR = 'script[type="application/ld+json"][data-run-jsonld]';
+    const existingJsonLd = document.head.querySelector(RUN_JSONLD_SELECTOR);
+    const jsonLdObj = runJsonLdObject(dePath, url);
+    if (jsonLdObj) {
+        const script = existingJsonLd ?? document.createElement('script');
+        script.setAttribute('type', 'application/ld+json');
+        script.setAttribute('data-run-jsonld', '');
+        script.textContent = JSON.stringify(jsonLdObj);
+        if (!existingJsonLd) document.head.appendChild(script);
+    } else if (existingJsonLd) {
+        existingJsonLd.remove();
+    }
 }
 
 export function resolveRouteSeo(path: string): { seo: PageSeo; locale: Locale } {
     const p = dePathOf(path);
-    const key = routeSeo[p] ? p : p.startsWith('/runs/') ? '/runs/:seed' : '/';
-    const entry = routeSeo[key];
     const locale: Locale = isEnPath(path) ? 'en' : 'de';
+    if (p.startsWith('/runs/')) {
+        const runSeo = runSeoFor(p, locale);
+        if (runSeo) return { seo: runSeo, locale };
+        return { seo: routeSeo['/runs/:runId'][locale], locale };
+    }
+    const entry = routeSeo[p] ?? routeSeo['/'];
     return { seo: entry[locale], locale };
 }
 
@@ -184,7 +256,7 @@ export const routeSeo: Record<string, { de: PageSeo; en: PageSeo }> = {
                 'How the Skip-Bo simulations are scientifically validated: statistical significance, paired tests, effect sizes and power analysis.'
         }
     },
-    '/runs/:seed': {
+    '/runs/:runId': {
         de: {
             title: 'Geteilter Simulationslauf | Skip-Bo Strategy Analyzer',
             description:

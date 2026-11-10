@@ -23,7 +23,7 @@ const baseRoutes = [
     { path: '/strategy', name: 'strategy', component: StrategyView },
     { path: '/analysis', name: 'analysis', component: AnalysisView },
     { path: '/validation', name: 'validation', component: ValidationView },
-    { path: '/runs/:seed', name: 'run', component: RunView }
+    { path: '/runs/:runId', name: 'run', component: RunView }
 ] as const;
 
 export const routes: RouteRecordRaw[] = baseRoutes.flatMap((r) => [

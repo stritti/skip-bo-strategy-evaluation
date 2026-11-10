@@ -59,15 +59,15 @@ const baseRoutes = [
     ['/rules', 'monthly', '0.8'],
     ['/data', 'weekly', '0.7'],
     ['/about', 'monthly', '0.5'],
-    ['/runs/:seed', 'monthly', '0.6']
+    ['/runs/:runId', 'monthly', '0.6']
 ];
 
 const lastmod = new Date().toISOString().slice(0, 10);
 
 const urls = [];
 for (const [path, changefreq, priority] of baseRoutes) {
-    const concrete = path.includes(':seed')
-        ? entries.flatMap(e => [`/runs/${e.seed}`, `/en/runs/${e.seed}`])
+    const concrete = path.includes(':runId')
+        ? entries.flatMap(e => [`/runs/${e.file.replace(/\.json$/, '')}`, `/en/runs/${e.file.replace(/\.json$/, '')}`])
         : [path, path === '/' ? '/en' : `/en${path}`];
     for (const loc of concrete) {
         const de = loc.startsWith('/en') ? loc.slice(3) || '/' : loc;
