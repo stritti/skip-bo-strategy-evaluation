@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n({ useScope: 'global' });
+import { computed } from 'vue';
 import type { GameResult } from '../../game/types';
 
 defineProps<{
@@ -14,7 +15,7 @@ const emit = defineEmits<{
   toggleSort: [column: keyof GameResult];
 }>();
 
-const headers: { key: keyof GameResult; label: string }[] = [
+const headers = computed<{ key: keyof GameResult; label: string }[]>(() => [
   { key: 'id', label: t('data.colGameId') },
   { key: 'winner', label: t('data.colWinner') },
   { key: 'turns', label: t('data.colTurns') },
@@ -22,7 +23,7 @@ const headers: { key: keyof GameResult; label: string }[] = [
   { key: 'starter', label: t('data.colStarter') },
   { key: 'jokers', label: t('data.colJokers') },
   { key: 'strategy', label: t('data.colStrategy') },
-];
+]);
 </script>
 
 <template>
