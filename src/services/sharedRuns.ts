@@ -8,6 +8,8 @@ import type { SimulationRun } from './dbService';
 export interface SharedRunIndexEntry {
     file: string;
     label?: string;
+    strategyP1?: string;
+    strategyP2?: string;
     gamesCount?: number;
     seed?: number;
     timestamp?: number;

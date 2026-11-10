@@ -12,6 +12,7 @@
     "docs:compile": "node scripts/compile-latex.js"
   },
   "devDependencies": {
+    "ajv": "^8.20.0",
     "autoprefixer": "^10.6.2",
     "beasties": "^0.3.5",
     "postcss": "^8.5.32",
