@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { SkipBoGame } from '../game/SkipBoGame';
+import { generateSeed } from '../game/utils';
 import type { Strategy, MoveOption, LogEntry } from '../game/types';
 
 const props = defineProps<{
@@ -38,7 +39,7 @@ const initGame = () => {
         tempJokersPlayed: 0
     };
     
-    game.value = new SkipBoGame(appMock, strategyP1.value, strategyP2.value);
+    game.value = new SkipBoGame(appMock, strategyP1.value, strategyP2.value, generateSeed());
     game.value.createDeck();
     game.value.deal();
     

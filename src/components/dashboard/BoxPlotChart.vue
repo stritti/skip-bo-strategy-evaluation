@@ -1,8 +1,10 @@
 <script setup lang="ts">
 /**
  * Box Plot Component
- * Displays distribution quartiles using custom SVG rendering
+ * Displays distribution quartiles, 1.5*IQR whiskers and outliers using custom SVG rendering
  */
+
+import { computed } from 'vue';
 
 interface Props {
     data: {
@@ -12,6 +14,9 @@ interface Props {
         q3: number;
         max: number;
         iqr: number;
+        whiskerLow?: number;
+        whiskerHigh?: number;
+        outliers?: number[];
     };
     label: string;
     color?: string;
@@ -37,6 +42,11 @@ const getXPosition = (value: number): number => {
     if (range === 0) return plotWidth / 2;
     return ((value - min) / range) * plotWidth;
 };
+
+// Whiskers (1.5*IQR fences), falling back to min/max
+const whiskerLow = computed(() => props.data.whiskerLow ?? props.data.min);
+const whiskerHigh = computed(() => props.data.whiskerHigh ?? props.data.max);
+const outliers = computed(() => props.data.outliers ?? []);
 </script>
 
 <template>
@@ -49,34 +59,46 @@ const getXPosition = (value: number): number => {
         <!-- SVG Box Plot -->
         <svg :width="width" :height="height" class="mx-auto">
             <g :transform="`translate(${margin.left}, ${margin.top})`">
-                <!-- Whisker line (Min to Max) -->
+                <!-- Whisker line (whisker low to whisker high) -->
                 <line
-                    :x1="getXPosition(data.min)"
+                    :x1="getXPosition(whiskerLow)"
                     :y1="plotHeight / 2"
-                    :x2="getXPosition(data.max)"
+                    :x2="getXPosition(whiskerHigh)"
                     :y2="plotHeight / 2"
                     stroke="#9ca3af"
                     stroke-width="2"
                 />
 
-                <!-- Min whisker -->
+                <!-- Low whisker cap -->
                 <line
-                    :x1="getXPosition(data.min)"
+                    :x1="getXPosition(whiskerLow)"
                     :y1="plotHeight / 2 - 15"
-                    :x2="getXPosition(data.min)"
+                    :x2="getXPosition(whiskerLow)"
                     :y2="plotHeight / 2 + 15"
                     stroke="#9ca3af"
                     stroke-width="2"
                 />
 
-                <!-- Max whisker -->
+                <!-- High whisker cap -->
                 <line
-                    :x1="getXPosition(data.max)"
+                    :x1="getXPosition(whiskerHigh)"
                     :y1="plotHeight / 2 - 15"
-                    :x2="getXPosition(data.max)"
+                    :x2="getXPosition(whiskerHigh)"
                     :y2="plotHeight / 2 + 15"
                     stroke="#9ca3af"
                     stroke-width="2"
+                />
+
+                <!-- Outliers beyond the 1.5*IQR fences -->
+                <circle
+                    v-for="(outlier, idx) in outliers"
+                    :key="idx"
+                    :cx="getXPosition(outlier)"
+                    :cy="plotHeight / 2"
+                    r="3.5"
+                    :fill="color"
+                    fill-opacity="0.8"
+                    :stroke="color"
                 />
 
                 <!-- Box (Q1 to Q3) -->

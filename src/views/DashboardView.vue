@@ -323,20 +323,22 @@ const handleResetSimulation = () => {
 
         <!-- Single Run Analysis -->
         <div v-else class="space-y-8">
-            <KPICards 
+            <KPICards
             :averageTurns="simulation.averageTurns.value"
             :winRateP1="simulation.winRateP1.value"
             :averageJokers="simulation.averageJokers.value"
+            :tieRate="simulation.tieRate.value"
+            :seed="simulation.currentSeed.value"
             :winRateCI="simulation.winRateP1CI.value"
             :turnsCI="simulation.averageTurnsCI.value"
             />
             
             <!-- Statistical Significance Test -->
             <StatisticalSignificance
-              :chiSquare="simulation.chiSquareResult.value.statistic"
-              :pValue="simulation.chiSquareResult.value.pValue"
-              :isSignificant="simulation.chiSquareResult.value.isSignificant"
-              :applicable="simulation.chiSquareResult.value.applicable"
+              :chiSquare="simulation.mcnemarResult.value.statistic"
+              :pValue="simulation.mcnemarResult.value.pValue"
+              :isSignificant="simulation.mcnemarResult.value.isSignificant"
+              :applicable="simulation.mcnemarResult.value.applicable"
               :strategyA="simulation.strategyP1.value"
               :strategyB="simulation.strategyP2.value"
             />
@@ -373,10 +375,10 @@ const handleResetSimulation = () => {
                 <!-- Effect Size -->
                 <EffectSize
                   v-if="simulation.effectSizeResult.value.applicable"
-                  :effectSize="simulation.effectSizeResult.value.d"
+                  :effectSize="simulation.effectSizeResult.value.value"
                   :interpretation="simulation.effectSizeResult.value.interpretation"
                   :magnitude="simulation.effectSizeResult.value.magnitude"
-                  label="Effektstärke (Züge)"
+                  label="Effektstärke (Gewinnrate vs. Zufall)"
                 />
                 
                 <!-- Data Export -->
@@ -384,6 +386,7 @@ const handleResetSimulation = () => {
                   :data="simulation.rawData.value"
                   :strategyP1="simulation.strategyP1.value"
                   :strategyP2="simulation.strategyP2.value"
+                  :seed="simulation.currentSeed.value"
                 />
               </div>
 

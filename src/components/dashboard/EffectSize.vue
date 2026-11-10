@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * Effect Size Display Component
- * Shows Cohen's d with visual magnitude indicator
+ * Shows Cohen's h (proportions) with visual magnitude indicator
  */
 
 interface Props {
@@ -44,8 +44,8 @@ const getMagnitudeIcon = (mag: string): string => {
             </div>
         </div>
         <div class="flex items-baseline gap-2">
-            <div class="text-3xl font-mono font-bold text-gray-900">d = {{ effectSize.toFixed(2) }}</div>
-            <div class="text-sm text-gray-500">Cohen's d</div>
+            <div class="text-3xl font-mono font-bold text-gray-900">h = {{ effectSize.toFixed(2) }}</div>
+            <div class="text-sm text-gray-500">Cohen's h</div>
         </div>
         <div class="mt-2 text-xs text-gray-600">
             {{ effectSize >= 0.8 ? 'Praktisch sehr relevant' : effectSize >= 0.5 ? 'Praktisch relevant' : 'Begrenzte praktische Relevanz' }}

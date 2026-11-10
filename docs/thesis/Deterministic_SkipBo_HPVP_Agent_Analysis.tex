@@ -15,7 +15,7 @@
 \maketitle
 
 \begin{abstract}
-Skip‑Bo is a commercial card game of imperfect information in which players race to clear their personal stock piles. Research on artificial agents for this domain is scarce, yet the game’s simple rules and large state space make it an attractive benchmark for sequential decision‑making under uncertainty. This paper formalises a deterministic baseline agent, \textbf{Hierarchical Positional Value Play} (HPVP), that prioritises actions from different sources (stock, hand, discard) and proposes an evaluation framework that emphasises reproducibility and statistical rigour. The underlying rule set, information available to the agent and randomisation procedures are made explicit to enable fair comparison and replication. A companion web application and open‑source repository provide a reference implementation and datasets for further study.
+Skip‑Bo is a commercial card game of imperfect information in which players race to clear their personal stock piles. Research on artificial agents for this domain is scarce, yet the game’s simple rules and large state space make it an attractive benchmark for sequential decision‑making under uncertainty. This paper formalises a deterministic baseline agent, \textbf{Hierarchical Positional Value Play} (HPVP), that prioritises actions from different sources (stock, hand, discard) and proposes an evaluation framework that emphasises reproducibility and statistical rigour. The underlying rule set, information available to the agent and randomisation procedures are made explicit to enable fair comparison and replication. All randomness is drawn from a seeded PRNG (mulberry32): each simulation run records a 32‑bit run seed and each game a per‑game seed, so every reported result can be replayed exactly. Because the two players' outcomes in a duel are paired, win‑rate differences are assessed with an exact McNemar (binomial) test, win rates are reported with Wilson score intervals and effect sizes with Cohen's h. A companion web application and open‑source repository provide a reference implementation and datasets for further study.
 \end{abstract}
 
 \section{Introduction}
@@ -29,7 +29,7 @@ Skip‑Bo is played with a deck of \textbf{162 cards}: 144 numbered cards (twelv
 Play proceeds clockwise from the dealer. At the beginning of the first turn a player draws five cards from the draw pile as their hand and on subsequent turns draws back up to five cards\,[\ref{ref:skipbo}]. A player may then play cards onto the building piles in ascending order; each building pile must start with a card of rank 1 or a Skip‑Bo (wild) card\,[\ref{ref:skipbo}]. When a building pile reaches rank 12, it is removed from the table and its cards are set aside; when the draw pile is exhausted, all completed building piles are reshuffled to form a new draw pile\,[\ref{ref:skipbo}]. There can never be more than four active building piles at once\,[\ref{ref:skipbo}]. During a turn players may play cards from three sources: the face‑up stock card, cards in hand and the top cards of any discard piles. They may play as many cards as legal; whenever all hand cards have been used they draw back up to five and may continue\,[\ref{ref:skipbo}]. A player’s turn ends when they cannot or choose not to make a play; they must then discard exactly one card from hand to one of their personal discard piles\,[\ref{ref:skipbo}]. The \emph{winner} of the round is the first player to play every card in their stock pile\,[\ref{ref:skipbo}].
 
 \subsection{Notation and assumptions}
-We model the game as a two‑player Markov decision process with hidden state. A game state $s$ includes the ordered draw pile, each player’s stock pile, four discard piles per player (top cards visible), up to four building piles (top cards visible) and the current hand of the acting player. The \emph{action space} $A(s)$ comprises all legal moves: playing the top stock card, playing any hand card, playing the top card of any discard pile or discarding a hand card to one of the four discard piles. To guarantee reproducibility we fix a pseudo‑random number generator seed for shuffling at the beginning of each match and alternate starting player roles across games.
+We model the game as a two‑player Markov decision process with hidden state. A game state $s$ includes the ordered draw pile, each player’s stock pile, four discard piles per player (top cards visible), up to four building piles (top cards visible) and the current hand of the acting player. The \emph{action space} $A(s)$ comprises all legal moves: playing the top stock card, playing any hand card, playing the top card of any discard pile or discarding a hand card to one of the four discard piles. To guarantee reproducibility, all randomness is drawn from a seeded pseudo‑random number generator (mulberry32). Each simulation run is assigned a 32‑bit run seed; from it a per‑game seed is derived for every game, so each recorded game can be replayed exactly from its own seed. The starting player is chosen uniformly at random per game and recorded; games that reach the turn limit of 1000 turns are recorded as ties.
 
 \subsection{Formal model and complexity}
 Skip‑Bo can be formalised as a Markov decision process (MDP) with hidden information. For each state $s$ in the state space $S$, the available actions $A(s)$ are the legal moves described above. A transition kernel $T(s,a)$ yields a distribution over next states, capturing randomness from shuffling and drawing. A reward function $R(s,a)$ assigns $+1$ to terminal states in which the agent has emptied its stock pile and $0$ elsewhere; intermediate rewards can be assumed zero because the objective is to maximise the probability of eventual victory. Solving this MDP optimally is intractable: the state space grows combinatorially with the number of cards. A coarse lower bound on $|S|$ is the number of ways to distribute 162 distinct cards into two stock piles, two hands, eight discard piles and up to four building piles, ignoring within‑pile order, i.e.,\,\(\binom{162}{30,30,5,5,4,4,84}\). This combinatorial explosion motivates the use of heuristic policies and simulation‑based evaluation.
@@ -87,42 +87,84 @@ Additional baselines may include one‑step look‑ahead agents or learned polic
 \subsection{Experimental design}
 Because Skip‑Bo is stochastic and turn order confers an advantage, experimental design must control for variance and bias. For each matchup between two agents we recommend:
 \begin{itemize}
-\item \textbf{Paired games:} Play an even number $N$ of games with fixed seeds; in half of them Agent A starts and in the other half Agent B starts. Use the same shuffles and starting positions across pairings so differences in win rate reflect agent policy rather than card order.
+\item \textbf{Paired games:} Play $N$ games under one fixed run seed; the starting player is drawn uniformly at random per game and recorded, balancing first‑player advantage in expectation (the reference run in Section~\ref{sec:results} started 50.3\% of games with player 1). Reusing the same run seed across pairings makes differences in win rate reflect agent policy rather than card order.
 \item \textbf{Sample size:} Choose $N$ via power analysis for the expected effect size. For win‑rate comparisons (binary outcome), the standard error of the difference in proportions decreases with $1/\sqrt{N}$. Small effect sizes (e.g., difference of 0.05) require more games than large differences.
-\item \textbf{Logging:} Record for each game the shuffle seed, sequence of actions, number of turns, number of completed building piles and the winner. Publicly release raw data and code for reproducibility.
+\item \textbf{Logging:} Record for each game the per‑game seed, starting player, winner id, tie flag, number of turns and jokers played; CSV/JSON exports carry a metadata header with the matchup and the run seed. Publicly release raw data and code for reproducibility.
 \end{itemize}
 
 \subsection{Metrics and statistical analysis}
 \begin{itemize}
-\item \textbf{Win rate ($\rho$):} The fraction of games won by the agent when alternately starting. Use confidence intervals based on the binomial distribution (e.g., Wilson or Clopper–Pearson) to quantify uncertainty.
-\item \textbf{Turn length ($\bar{L}$):} The average number of turns taken by the winner. Because turn counts can be skewed or heavy‑tailed, non‑parametric tests (e.g., Mann–Whitney $U$ test) are appropriate when normality cannot be assumed. Non‑parametric tests make fewer assumptions about the data distribution\,[\ref{ref:mannwhitney},\,\ref{ref:nonparametricKorean}].
+\item \textbf{Win rate ($\rho$):} The fraction of games won by the agent. Report Wilson score intervals (preferred over the Wald interval, especially near 0/1 or for small $n$). Because duel outcomes are paired‑+ every win of one player is a loss of the other‑test win‑rate differences with the exact McNemar test (a two‑sided binomial test on the discordant pairs against $p=0.5$), not with a chi‑square test of independence, which assumes independent samples.
+\item \textbf{Turn length ($\bar{L}$):} The average number of turns per game. Report the mean with a $t$‑based confidence interval (critical value from the Student $t$ distribution, sample variance with $n-1$). Because turn counts can be skewed or heavy‑tailed, group comparisons use non‑parametric tests (e.g., Mann–Whitney $U$ test) when normality cannot be assumed. Non‑parametric tests make fewer assumptions about the data distribution\,[\ref{ref:mannwhitney},\,\ref{ref:nonparametricKorean}].
 \item \textbf{Rounds to win ($R_{\text{win}}$):} The number of complete rounds played before the stock pile is depleted. Analyse using median and inter‑quartile range and compare agents with non‑parametric methods.
 \end{itemize}
-When comparing multiple agents across several metrics, adjust $p$‑values for multiple testing (e.g., Holm correction) and report effect sizes.
+When comparing multiple agents across several metrics, adjust $p$‑values for multiple testing (e.g., Holm correction) and report effect sizes (Cohen's $h$ for win‑rate proportions).
 
 \subsection{Sample size determination and effect sizes}
 When comparing two agents’ win rates ($p_1,p_2$), researchers should compute the number of paired games $N$ needed to detect a difference $\delta = p_1 - p_2$ with desired significance $\alpha$ and power $1-\beta$. Under the asymptotic normal approximation for a difference in proportions, the approximate sample size is given by
 \begin{equation}
 N \approx \frac{(z_{\alpha/2} + z_{\beta})^2\, [p_1(1-p_1) + p_2(1-p_2)]}{\delta^2},
 \end{equation}
-where $z_q$ denotes the $q$‑quantile of the standard normal distribution. For instance, distinguishing a 5\% difference in win rate (e.g., $0.55$ vs.~$0.50$) at $\alpha=0.05$ with 80\% power requires roughly $6\,500$ games. Investigators should adjust $N$ based on expected effect size and practical constraints\,[\ref{ref:comparingproportions}]. For a given observed win rate $\hat{p}$ over $n$ games, exact confidence intervals can be computed by inverting the binomial distribution. The Clopper–Pearson interval, which inverts the cumulative binomial distribution and uses Beta distribution quantiles, provides a conservative exact interval for~$p$\,[\ref{ref:clopperpearson}].
+where $z_q$ denotes the $q$‑quantile of the standard normal distribution. For instance, distinguishing a 5\% difference in win rate (e.g., $0.55$ vs.~$0.50$) at $\alpha=0.05$ with 80\% power requires roughly $6\,500$ games. Investigators should adjust $N$ based on expected effect size and practical constraints. For paired designs the companion implementation uses the per‑group size $n = 2(z_{\alpha/2}+z_{\beta})^2/d^2$ (Cohen's $d$), computed by the built‑in power‑analysis tool for user‑chosen $\alpha$, power and effect size\,[\ref{ref:comparingproportions}]. For a given observed win rate $\hat{p}$ over $n$ games, exact confidence intervals can be computed by inverting the binomial distribution. The Clopper–Pearson interval, which inverts the cumulative binomial distribution and uses Beta distribution quantiles, provides a conservative exact interval for~$p$\,[\ref{ref:clopperpearson}].
 
 To compare distributions of turn lengths or rounds‑to‑win between agents, non‑parametric tests such as the Mann–Whitney $U$ test are appropriate because they require no assumption of normality. The $U$ test compares the ranks of observations from two independent samples and assesses whether one agent tends to produce longer or shorter games. It is important to note that the $U$ statistic reflects stochastic dominance rather than a direct difference of medians. When the sample sizes are sufficiently large and the distributions are approximately symmetric, parametric tests like the two‑sample $t$‑test can be more powerful. Regardless of the test used, researchers should report effect sizes alongside $p$‑values; for example, the difference in median turn counts or the common language effect size (probability that a randomly selected game from one agent exceeds one from another). All reported statistics should include confidence intervals to convey uncertainty.\,[\ref{ref:mannwhitney},\,\ref{ref:parametrictests}]
 
+
+\section{Empirical reference results}
+\label{sec:results}
+As a first check of the framework we ran a seeded reference matchup: the HPVP-style policy (``Optimiert'') against the random baseline (``Zufall''), $N=10{,}000$ games, run seed 20260613. Table~\ref{tab:results} summarises the outcome. The random baseline won 70.5\% of the games; the exact McNemar test rejects $p=0.5$ ($\chi^2(1)=1531.84$, $p<0.001$) and Cohen's $h=0.41$ indicates a medium effect size. The run is fully reproducible: rerunning with run seed 20260613 yields identical counts, and every individual game can be replayed from its recorded per-game seed.
+
+\begin{table}[ht]
+\centering
+{\small
+\begin{tabular}{@{}l r@{}}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Games $N$ & $10{,}000$ \\
+Run seed & 20260613 \\
+P1 wins (Optimiert) & 2951 (29.51\%) \\
+Wilson 95\% CI for P1 win rate & [28.62\%, 30.41\%] \\
+McNemar $\chi^2(1)$ / $p$ & 1531.84 / $<0.001$ \\
+Cohen's $h$ (vs.\ 0.5) & 0.407 (medium) \\
+Ties (turn limit) & 228 (2.28\%) \\
+Mean turns per game (95\% $t$-CI) & 140.0 [137.4, 142.7] \\
+Games started by P1 & 50.3\% \\
+\bottomrule
+\end{tabular}
+}
+\caption{Seeded reference run: HPVP-style policy vs.\ random baseline ($N=10{,}000$, run seed 20260613).}
+\label{tab:results}
+\end{table}
+
 \section{Implementation and companion artefacts}
-The HPVP agent and evaluation framework are implemented in TypeScript and are available under an open‑source licence at the repository \texttt{stritti/skip‑bo‑strategy‑evaluation}. The project includes a web interface that allows users to simulate games, view replay data and export results. To ensure reproducibility, we specify the game rules and randomisation procedures in Section 2 and release the code with version tags and commit hashes. Future agents can be integrated by adhering to the same state and action interfaces.
+The HPVP agent and evaluation framework are implemented in TypeScript and are available under an open‑source licence at the repository \texttt{stritti/skip‑bo‑strategy‑evaluation}. The project includes a web interface that allows users to simulate games, view replay data and export results. To ensure reproducibility, we specify the game rules and randomisation procedures in Section 2 and release the code with version tags and commit hashes. All randomness stems from mulberry32 seeded per run; per-game seeds are stored with each result (IndexedDB) and included in CSV/JSON exports together with a metadata header (matchup, run seed). The statistics module implements Wilson intervals, exact chi-square $p$-values (regularised incomplete gamma, Yates correction), the exact McNemar test, Student-$t$ critical values (incomplete beta), Cohen's $h$, Mann‑Whitney $U$ with tie correction, Holm correction and a power analysis that honours user-set $\alpha$/power. A Vitest suite (36 tests) covers game logic, determinism/replayability and the statistics, and runs in CI on Node 22/24. Future agents can be integrated by adhering to the same state and action interfaces.
 
 \section{Limitations and threats to validity}
 Several factors limit the generality of the current study:
 \begin{itemize}
 \item \textbf{Rule variants:} The analysis assumes standard Skip‑Bo rules; variations in stock size, number of players or draw‑pile replenishment may change optimal strategies. Researchers should document any deviations from the rules described in Section 2 to ensure comparability.
 \item \textbf{Deterministic policy:} HPVP is deterministic and does not consider hidden information or opponent modelling. Sophisticated strategies could exploit its predictability; however, as a baseline this transparency is valuable.
-\item \textbf{Absence of empirical results:} This paper focuses on formalising the environment and the HPVP policy rather than presenting exhaustive experimental results. The companion web project collects data for thousands of games; analysing these results and comparing to learning‑based agents is future work.
+\item \textbf{Scope of empirical results:} Section~\ref{sec:results} reports one seeded reference matchup ($N=10{,}000$); a systematic comparison of all strategy pairings and of learning‑based agents is future work. The reference run also shows the HPVP‑style heuristic underperforming the random baseline and a 2.3\% tie rate at the 1000‑turn limit, which warrants analysis of the heuristic and the turn‑limit rule.
 \item \textbf{Statistical assumptions:} While we advocate non‑parametric tests for skewed metrics, some parametric tests remain robust under mild deviations from normality\,[\ref{ref:parametrictests}]. Researchers should inspect data distributions before choosing tests.
 \end{itemize}
 
 \section{Conclusion}
-This paper introduces a reproducible framework for evaluating Skip‑Bo agents and formalises the Hierarchical Positional Value Play heuristic. By making the rules, information assumptions and randomisation explicit and by providing open‑source code and data, we aim to lower the barrier to entry for researchers interested in imperfect‑information card games. Future work will integrate search‑based and learning‑based agents and perform comprehensive empirical comparisons.
+This paper introduces a reproducible framework for evaluating Skip‑Bo agents and formalises the Hierarchical Positional Value Play heuristic. By making the rules, information assumptions and randomisation explicit and by providing open‑source code and data, we aim to lower the barrier to entry for researchers interested in imperfect‑information card games. A first seeded reference run (Section~\ref{sec:results}) already shows the framework detecting a significant performance difference ($p<0.001$); future work will integrate search‑based and learning‑based agents and perform comprehensive empirical comparisons.
+
+
+\section*{Document and artefact history}
+\label{sec:history}
+\begin{tabular}{@{}l l p{0.62\textwidth}@{}}
+\toprule
+\textbf{Version} & \textbf{Date} & \textbf{Changes} \\
+\midrule
+v0.1 & 2025‑12‑19 & Initial draft: game rules, HPVP policy, evaluation methodology. \\
+v0.2 & 2026‑11‑10 & Seeded reproducibility (mulberry32, run + per-game seeds, randomized starter, tie tracking); corrected paired statistics (exact McNemar, Wilson intervals, $t$-based CI, Cohen's $h$, Holm correction); seeded reference results (Section~\ref{sec:results}); Vitest suite + CI; real-data CSV export. \\
+\bottomrule
+\end{tabular}
+
+The full commit-level history is kept in the git repository (\texttt{git log}).
 
 \section*{References}
 %

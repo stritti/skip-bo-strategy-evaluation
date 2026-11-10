@@ -5,13 +5,14 @@
 
 import { ref, computed, reactive, onMounted } from 'vue';
 import { SkipBoGame } from '../game/SkipBoGame';
+import { generateSeed } from '../game/utils';
 import type { SimulationApp, GameResult, Strategy, LogEntry } from '../game/types';
 import {
     calculateConfidenceInterval,
     calculateQuartiles,
-    chiSquareTest,
-    calculateCohenD,
-    calculateStandardDeviation
+    mcnemarExactTest,
+    cohensH,
+    tCriticalValue
 } from '../utils/statistics';
 
 import { dbService, type SimulationRun } from '../services/dbService';
@@ -21,7 +22,6 @@ import { dbService, type SimulationRun } from '../services/dbService';
 const minGames = 100;
 const maxGamesLimit = 10000;
 const stepGames = 100;
-const totalRows = 1000000; // Fixed for data explorer
 
 // Simulation State
 const maxGamesConfig = ref(1000);
@@ -44,11 +44,13 @@ const strategyP2 = ref<Strategy>('Zufall');
 // History State
 const history = ref<SimulationRun[]>([]);
 const currentRunId = ref<number | null>(null);
+const currentSeed = ref<number | null>(null);
 
 // Statistical Results (Current Run)
 const realResults = reactive({
     winsP1: 0,
     winsP2: 0,
+    ties: 0,
     totalTurns: 0,
     totalJokers: 0,
 });
@@ -73,12 +75,19 @@ export function useSimulation() {
             : 0
     );
 
+    const tieRate = computed(() =>
+        gameCounter.value > 0
+            ? realResults.ties / gameCounter.value
+            : 0
+    );
+
     // --- Cumulative Statistics ---
     const cumulativeStats = computed(() => {
         if (history.value.length === 0) return null;
 
         const totalGames = history.value.reduce((sum, run) => sum + run.gamesCount, 0);
         const totalWinsP1 = history.value.reduce((sum, run) => sum + run.winsP1, 0);
+        const totalTies = history.value.reduce((sum, run) => sum + (run.ties ?? 0), 0);
         const totalTurns = history.value.reduce((sum, run) => sum + run.totalTurns, 0);
         const totalJokers = history.value.reduce((sum, run) => sum + run.totalJokers, 0);
 
@@ -86,6 +95,7 @@ export function useSimulation() {
             totalRuns: history.value.length,
             totalGames,
             winRateP1: totalGames > 0 ? totalWinsP1 / totalGames : 0,
+            tieRate: totalGames > 0 ? totalTies / totalGames : 0,
             avgTurns: totalGames > 0 ? totalTurns / totalGames : 0,
             avgJokers: totalGames > 0 ? totalJokers / totalGames : 0
         };
@@ -103,16 +113,14 @@ export function useSimulation() {
         if (rawData.value.length < 30) {
             return { margin: 0, lower: averageTurns.value, upper: averageTurns.value };
         }
-        // For means (not proportions), use t-distribution approximation
-        // Simplified: use proportion CI formula as approximation
+        // For means, use the t-distribution critical value with sample variance (n-1)
         const turns = rawData.value.map(r => r.turns);
         const mean = averageTurns.value;
         const n = turns.length;
 
-        // Standard error of the mean
-        const variance = turns.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / n;
+        const variance = turns.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (n - 1);
         const stdError = Math.sqrt(variance / n);
-        const margin = 1.96 * stdError; // 95% CI
+        const margin = tCriticalValue(0.95, n - 1) * stdError;
 
         return {
             margin,
@@ -138,61 +146,45 @@ export function useSimulation() {
         return calculateQuartiles(durations);
     });
 
-    // --- Chi-Square Significance Test ---
-    const chiSquareResult = computed(() => {
-        // Only meaningful when comparing different strategies
-        if (strategyP1.value === strategyP2.value || gameCounter.value < 30) {
+    // --- McNemar exact test (correct test for paired duel outcomes) ---
+    const mcnemarResult = computed(() => {
+        const decisive = realResults.winsP1 + realResults.winsP2;
+        if (strategyP1.value === strategyP2.value || decisive < 30) {
             return {
                 statistic: 0,
                 pValue: 1,
                 isSignificant: false,
-                degreesOfFreedom: 1,
+                discordantPairs: decisive,
                 applicable: false
             };
         }
 
-        const wins1 = realResults.winsP1;
-        const losses1 = realResults.winsP2; // P1 losses = P2 wins
-        const wins2 = realResults.winsP2;
-        const losses2 = realResults.winsP1;
-
-        const result = chiSquareTest(wins1, losses1, wins2, losses2);
+        const result = mcnemarExactTest(realResults.winsP1, realResults.winsP2);
         return { ...result, applicable: true };
     });
 
-    // --- Effect Size (Cohen's d) ---
+    // --- Effect Size (Cohen's h on the decisive win rate vs. chance 0.5) ---
     const effectSizeResult = computed(() => {
-        // Only meaningful when comparing different strategies
-        if (strategyP1.value === strategyP2.value || rawData.value.length < 30) {
+        const decisive = realResults.winsP1 + realResults.winsP2;
+        if (strategyP1.value === strategyP2.value || decisive < 30) {
             return {
-                d: 0,
+                value: 0,
                 interpretation: 'Nicht berechenbar',
                 magnitude: 'negligible' as const,
                 applicable: false
             };
         }
 
-        // Calculate turns by strategy
-        const turnsP1 = rawData.value.filter(r => r.winner.includes(strategyP1.value)).map(r => r.turns);
-        const turnsP2 = rawData.value.filter(r => r.winner.includes(strategyP2.value)).map(r => r.turns);
-
-        if (turnsP1.length < 10 || turnsP2.length < 10) {
-            return {
-                d: 0,
-                interpretation: 'Zu wenig Daten',
-                magnitude: 'negligible' as const,
-                applicable: false
-            };
-        }
-
-        const mean1 = turnsP1.reduce((sum, v) => sum + v, 0) / turnsP1.length;
-        const mean2 = turnsP2.reduce((sum, v) => sum + v, 0) / turnsP2.length;
-        const std1 = calculateStandardDeviation(turnsP1);
-        const std2 = calculateStandardDeviation(turnsP2);
-
-        const result = calculateCohenD(mean1, mean2, std1, std2, turnsP1.length, turnsP2.length);
-        return { ...result, applicable: true };
+        const winRateDecisive = realResults.winsP1 / decisive;
+        const result = cohensH(winRateDecisive, 0.5);
+        return {
+            value: result.h,
+            interpretation: result.interpretation,
+            magnitude: result.magnitude,
+            applicable: true
+        };
     });
+
 
     // --- Computed UI Helpers ---
     const formattedCounter = computed(() => gameCounter.value.toLocaleString('de-DE'));
@@ -276,12 +268,14 @@ export function useSimulation() {
     const loadRun = (run: SimulationRun) => {
         // Restore configuration and state
         currentRunId.value = run.id || null;
+        currentSeed.value = run.seed ?? null;
         maxGamesConfig.value = run.gamesCount;
         gameCounter.value = run.gamesCount;
 
         // Restore statistics
         realResults.winsP1 = run.winsP1;
         realResults.winsP2 = run.winsP2;
+        realResults.ties = run.ties ?? 0;
         realResults.totalTurns = run.totalTurns;
         realResults.totalJokers = run.totalJokers;
 
@@ -325,6 +319,7 @@ export function useSimulation() {
         // Reset state
         realResults.winsP1 = 0;
         realResults.winsP2 = 0;
+        realResults.ties = 0;
         realResults.totalTurns = 0;
         realResults.totalJokers = 0;
         rawData.value = [];
@@ -344,6 +339,7 @@ export function useSimulation() {
             // Global Totals
             realResults.winsP1 += run.winsP1;
             realResults.winsP2 += run.winsP2;
+            realResults.ties += run.ties ?? 0;
             realResults.totalTurns += run.totalTurns;
             realResults.totalJokers += run.totalJokers;
             totalGames += run.gamesCount;
@@ -366,7 +362,9 @@ export function useSimulation() {
 
             if (run.results) {
                 // Performance warning: This might be heavy
-                rawData.value.push(...run.results);
+                // Offset ids so aggregated rows keep unique keys across runs
+                const offset = rawData.value.length;
+                rawData.value.push(...run.results.map(r => ({ ...r, id: offset + r.id })));
             }
         });
 
@@ -380,6 +378,7 @@ export function useSimulation() {
         })).sort((a, b) => b.games - a.games); // Most played first
 
         currentRunId.value = -1; // -1 indicates "All Runs"
+        currentSeed.value = null; // aggregated across runs
         gameCounter.value = totalGames;
         maxGamesConfig.value = totalGames; // Show total as goal
         isSimulating.value = false;
@@ -400,6 +399,7 @@ export function useSimulation() {
         // Reset real results
         realResults.winsP1 = 0;
         realResults.winsP2 = 0;
+        realResults.ties = 0;
         realResults.totalTurns = 0;
         realResults.totalJokers = 0;
         rawData.value = [];
@@ -414,11 +414,13 @@ export function useSimulation() {
             tempJokersPlayed: 0
         };
 
-        const game = new SkipBoGame(verboseApp, strategyP1.value, strategyP2.value);
+        const seed = generateSeed();
+        currentSeed.value = seed;
+        const game = new SkipBoGame(verboseApp, strategyP1.value, strategyP2.value, seed);
         const batchSize = 100;
         let totalGamesRun = 0;
 
-        logEvent('START', `Starte Echtsimulation von ${maxGamesConfig.value.toLocaleString('de-DE')} Runden...`);
+        logEvent('START', `Starte Echtsimulation von ${maxGamesConfig.value.toLocaleString('de-DE')} Runden (Seed: ${seed})...`);
 
         const processBatch = (): void => {
             const start = Date.now();
@@ -436,10 +438,12 @@ export function useSimulation() {
                 const result = game.run();
 
                 // Collect real statistics
-                if (result.winner.includes('Spieler 1')) {
+                if (result.winnerId === 0) {
                     realResults.winsP1++;
-                } else if (result.winner.includes('Spieler 2')) {
+                } else if (result.winnerId === 1) {
                     realResults.winsP2++;
+                } else {
+                    realResults.ties++;
                 }
                 realResults.totalTurns += result.turns;
                 realResults.totalJokers += result.jokers;
@@ -472,6 +476,8 @@ export function useSimulation() {
                     strategyP2: strategyP2.value,
                     totalTurns: realResults.totalTurns,
                     totalJokers: realResults.totalJokers,
+                    ties: realResults.ties,
+                    seed,
                     results: JSON.parse(JSON.stringify(rawData.value)) // Clone to ensure clean storage
                 };
 
@@ -506,6 +512,7 @@ export function useSimulation() {
     const resetSimulation = (): void => {
         gameCounter.value = 0;
         currentRunId.value = null;
+        currentSeed.value = null;
         progress.value = 0;
         isSimulating.value = false;
         isFinished.value = false;
@@ -513,6 +520,7 @@ export function useSimulation() {
         currentPage.value = 1;
         realResults.winsP1 = 0;
         realResults.winsP2 = 0;
+        realResults.ties = 0;
         realResults.totalTurns = 0;
         realResults.totalJokers = 0;
 
@@ -521,7 +529,7 @@ export function useSimulation() {
 
     // --- Pagination ---
     const nextPage = (): void => {
-        if ((currentPage.value * pageSize) < totalRows) {
+        if ((currentPage.value * pageSize) < rawData.value.length) {
             currentPage.value++;
         }
     };
@@ -544,7 +552,6 @@ export function useSimulation() {
         minGames,
         maxGamesLimit,
         stepGames,
-        totalRows,
 
         // State
         maxGamesConfig,
@@ -559,6 +566,7 @@ export function useSimulation() {
         pageSize,
         history,
         currentRunId,
+        currentSeed,
         sortColumn,
         sortDirection,
         strategyP1,
@@ -567,6 +575,7 @@ export function useSimulation() {
 
         // Computed
         winRateP1,
+        tieRate,
         averageTurns,
         averageJokers,
         cumulativeStats,
@@ -580,7 +589,7 @@ export function useSimulation() {
         averageTurnsCI,
         turnsDistribution,
         durationDistribution,
-        chiSquareResult,
+        mcnemarResult,
         effectSizeResult,
 
         // Methods

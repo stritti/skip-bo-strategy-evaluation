@@ -3,7 +3,7 @@
  */
 
 import { Player } from './Player';
-import { shuffle } from './utils';
+import { shuffle, mulberry32, generateSeed, type Rng } from './utils';
 import {
     JOKER_VALUE,
     STOCKPILE_SIZE,
@@ -23,9 +23,17 @@ export class SkipBoGame {
     currentPlayerIndex: number;
     turnCount: number;
     winner: Player | null;
+    seed: number;
+    rng: Rng;
+    starterIndex: number;
+    gamesPlayed: number;
 
-    constructor(app: SimulationApp, strategyP1: Strategy = 'Optimiert', strategyP2: Strategy = 'Zufall') {
+    constructor(app: SimulationApp, strategyP1: Strategy = 'Optimiert', strategyP2: Strategy = 'Zufall', seed?: number) {
         this.app = app;
+        this.seed = seed ?? generateSeed();
+        this.rng = mulberry32(this.seed);
+        this.starterIndex = 0;
+        this.gamesPlayed = 0;
         this.players = [new Player(0, strategyP1), new Player(1, strategyP2)];
         this.drawPile = [];
         this.discardPile = [];
@@ -53,7 +61,7 @@ export class SkipBoGame {
             cards.push(JOKER_VALUE);
         }
 
-        this.drawPile = shuffle(cards);
+        this.drawPile = shuffle(cards, this.rng);
     }
 
     /**
@@ -61,6 +69,7 @@ export class SkipBoGame {
      */
     deal(): void {
         this.createDeck(); // Ensure deck is fresh
+        this.discardPile = []; // Reset leftovers from any previous game
         this.players.forEach(player => {
             player.stockpile = this.drawPile.splice(0, STOCKPILE_SIZE);
             player.hand = [];
@@ -79,7 +88,7 @@ export class SkipBoGame {
      */
     refillDrawPile(): void {
         if (this.drawPile.length === 0) {
-            this.drawPile = shuffle(this.discardPile);
+            this.drawPile = shuffle(this.discardPile, this.rng);
             this.discardPile = [];
             this.app.logEvent('INFO', 'Ziehstapel wurde aus Ablagestapel neu gebildet.');
         }
@@ -426,7 +435,7 @@ export class SkipBoGame {
             return candidates.sort((a, b) => b.priority - a.priority)[0];
         } else {
             // Random
-            return candidates[Math.floor(Math.random() * candidates.length)];
+            return candidates[Math.floor(this.rng() * candidates.length)];
         }
     }
 
@@ -454,12 +463,12 @@ export class SkipBoGame {
 
         } else if (player.strategy === 'Spontan') {
             discardCard = player.hand[0]; // First card
-            discardPileIndex = Math.floor(Math.random() * DISCARD_PILE_COUNT);
+            discardPileIndex = Math.floor(this.rng() * DISCARD_PILE_COUNT);
         } else {
             // Random
-            const randIdx = Math.floor(Math.random() * player.hand.length);
+            const randIdx = Math.floor(this.rng() * player.hand.length);
             discardCard = player.hand[randIdx];
-            discardPileIndex = Math.floor(Math.random() * DISCARD_PILE_COUNT);
+            discardPileIndex = Math.floor(this.rng() * DISCARD_PILE_COUNT);
         }
 
         return {
@@ -541,10 +550,13 @@ export class SkipBoGame {
      * Simulates a full game and returns the result object.
      */
     run(): GameResult {
-        this.createDeck(); // Was missing in original run() sometimes? No deal calls createDeck.
+        // This game uses the rng seeded with this.seed; the result records that
+        // seed so the game can be replayed via new SkipBoGame(app, s1, s2, result.seed)
         this.deal();
 
         const startTime = Date.now();
+        this.currentPlayerIndex = this.rng() < 0.5 ? 0 : 1;
+        this.starterIndex = this.currentPlayerIndex;
         let currentTurn = 0;
 
         while (this.winner === null && currentTurn < MAX_TURNS_LIMIT) {
@@ -560,14 +572,22 @@ export class SkipBoGame {
         }
 
         const durationMs = Date.now() - startTime;
-        return {
-            id: Math.floor(Math.random() * 999999) + 1,
+        const result: GameResult = {
+            id: ++this.gamesPlayed,
             winner: this.winner ? `${this.winner.name} (${this.winner.strategy})` : 'TIE',
+            winnerId: this.winner ? this.winner.id : null,
             turns: currentTurn,
             duration: durationMs,
-            starter: this.players[0].id === 0 ? 'P1' : 'P2',
+            starter: this.players[this.starterIndex].id === 0 ? 'P1' : 'P2',
             jokers: this.app.tempJokersPlayed,
-            strategy: this.winner ? this.winner.strategy : 'Zufall'
+            strategy: this.winner ? this.winner.strategy : 'Zufall',
+            seed: this.seed
         };
+
+        // Advance to a fresh per-game seed for the next run() call on this instance
+        this.seed = Math.floor(this.rng() * 4294967296);
+        this.rng = mulberry32(this.seed);
+
+        return result;
     }
 }
