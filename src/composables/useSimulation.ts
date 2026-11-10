@@ -16,6 +16,7 @@ import {
 } from '../utils/statistics';
 
 import { dbService, type SimulationRun } from '../services/dbService';
+import { normalizeSharedRun, type SharedRunIndexEntry } from '../services/sharedRuns';
 
 // --- Global State (Singleton Pattern) ---
 // Configuration
@@ -259,8 +260,35 @@ export function useSimulation() {
     };
 
     // --- DB Actions ---
+    // Shared runs are committed to public/data/runs/ in the repo and fetched from there
+    const loadSharedRuns = async (): Promise<SimulationRun[]> => {
+        try {
+            const base = import.meta.env.BASE_URL;
+            const indexRes = await fetch(`${base}data/runs/index.json`);
+            if (!indexRes.ok) return [];
+            const entries = await indexRes.json() as SharedRunIndexEntry[];
+            const runs: SimulationRun[] = [];
+            for (const entry of entries) {
+                try {
+                    const res = await fetch(`${base}data/runs/${entry.file}`);
+                    if (!res.ok) continue;
+                    const run = normalizeSharedRun(await res.json(), entry);
+                    if (!run) continue;
+                    // negative ids below -1000: -1 is reserved for the "all runs" aggregate view
+                    runs.push({ ...run, id: -(1000 + runs.length) });
+                } catch {
+                    // skip broken shared run file
+                }
+            }
+            return runs;
+        } catch {
+            return [];
+        }
+    };
+
     const loadHistory = async () => {
-        history.value = await dbService.getAllRuns();
+        const [local, shared] = await Promise.all([dbService.getAllRuns(), loadSharedRuns()]);
+        history.value = [...local, ...shared];
         history.value.sort((a, b) => b.timestamp - a.timestamp); // Newest first
     };
 

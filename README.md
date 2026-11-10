@@ -65,5 +65,12 @@ Stellen Sie sicher, dass [Node.js](https://nodejs.org/) installiert ist.
 3. **Start**: Klicken Sie auf den Play-Button.
 4. **Auswertung**: Nach Abschluss sehen Sie sofort die Ergebnisse. Klicken Sie auf "Zur Datentabelle", um Details zu sehen, oder laden Sie vergangene Läufe aus der Tabelle unten.
 
+## 🤝 Geteilte Simulationsläufe
+
+Alle Runs bleiben lokal in der IndexedDB des Browsers. Damit Runs **allen** zur Verfügung stehen, können sie ins Repository committed werden: JSON-Export eines Laufs nach `public/data/runs/` legen und in `public/data/runs/index.json` eintragen (siehe `public/data/runs/README.md`). Die App lädt diese geteilten Runs automatisch und zeigt sie in der Historie als „geteilt" an. Eine serverseitige Speicherung (für echtes automatisches Teilen aller Runs) würde einen Backend-Endpunkt benötigen – bei statischem Hosting ist der Repository-Weg die datensparsame Variante.
+
+> **KI-Transparenz (EU AI Act, Art. 50):** Diese App wurde mit KI-Unterstützung (Gemini 3 Pro via Antigravity) erstellt. Simulationsergebnisse sind deterministisch über Seeds replizierbar.
+
 ---
-*Dieses Projekt wurde zu Bildungs- und Analysezwecken erstellt.*
+*Dieses Projekt wurde zu Bildungs- und Analysezwecken erstellt.*  
+*© 2026 Stephan Strittmatter · MIT-Lizenz*

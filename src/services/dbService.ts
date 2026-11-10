@@ -3,6 +3,7 @@ import type { GameResult } from '../game/types';
 
 export interface SimulationRun {
     id?: number;
+    shared?: boolean;
     timestamp: number;
     gamesCount: number;
     winsP1: number;

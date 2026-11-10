@@ -102,11 +102,24 @@
         </section>
 
         <!-- Disclaimer -->
-        <div class="border-t border-gray-100 pt-8 mt-8">
+        <div class="border-t border-gray-100 pt-8 mt-8 space-y-4">
           <div class="flex items-center gap-3 text-gray-400 justify-center">
             <i class="ph-bold ph-warning-circle text-xl"></i>
             <span class="font-medium">Keine Garantie für die Korrektheit der Analysen :)</span>
           </div>
+
+          <!-- KI-Transparenz (EU AI Act Art. 50) -->
+          <div class="bg-purple-50 border border-purple-100 rounded-lg p-4 flex items-start gap-3">
+            <i class="ph-bold ph-robot text-2xl text-purple-600 mt-0.5"></i>
+            <div class="text-sm text-purple-900">
+              <strong>KI-Transparenz (EU AI Act, Art. 50):</strong> Diese Anwendung und die begleitenden
+              Forschungsdokumente wurden mit KI-Unterstützung (Gemini 3 Pro via Antigravity) erstellt.
+              Alle Simulationsergebnisse werden deterministisch aus dem dokumentierten Seed erzeugt und
+              sind replizierbar (Run-Seed und Per-Game-Seed werden mit jedem Ergebnis gespeichert).
+            </div>
+          </div>
+
+          <div class="text-center text-xs text-gray-400">&copy; 2026 Stephan Strittmatter &middot; MIT-Lizenz</div>
         </div>
       </div>
     </div>
