@@ -17,6 +17,9 @@ export function useSimulation() {
         maxGamesLimit,
         stepGames,
 
+        // Plain (non-reactive) values omitted by storeToRefs
+        pageSize: sim.pageSize,
+
         // State + getters as refs (simulationStore)
         ...storeToRefs(sim),
 

@@ -113,14 +113,24 @@ export const useHistoryStore = defineStore('history', () => {
         const sim = useSimulationStore();
         if (history.value.length === 0) return;
 
+        const requestId = ++loadRequestCounter.value;
+
         // Shared runs only carry summaries in the index; fetch their details so the
         // aggregate view includes their games in rawData (Data Explorer, exports, charts)
+        const failed: string[] = [];
         await Promise.all(history.value.map(async (run) => {
             if (run.shared && run.file && run.results.length === 0) {
                 const full = await fetchSharedRunDetails(run.file);
                 if (full) run.results = full.results;
+                else failed.push(run.file);
             }
         }));
+
+        if (requestId !== loadRequestCounter.value) return; // a newer selection superseded this request
+        if (failed.length > 0) {
+            sim.logEvent('WARN', `Details für ${failed.length} geteilte(n) Lauf/Läufe (${failed.join(', ')}) konnten nicht geladen werden – Aggregation abgebrochen.`);
+            return;
+        }
 
         // Prevent watcher from triggering reset during update
         sim.isFinished = false;
