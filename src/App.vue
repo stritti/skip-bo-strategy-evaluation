@@ -1,6 +1,15 @@
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import AppNavigation from './components/layout/AppNavigation.vue';
 import AppFooter from './components/layout/AppFooter.vue';
+import { useHistoryStore } from './stores/historyStore';
+
+onMounted(() => {
+    const historyStore = useHistoryStore();
+    if (historyStore.history.length === 0) {
+        historyStore.loadHistory();
+    }
+});
 </script>
 
 <template>

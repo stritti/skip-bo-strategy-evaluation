@@ -17,11 +17,13 @@ import App from './App.vue'
 import { routes } from './router'
 import { createAppI18n, isEnPath, LOCALE_STORAGE_KEY } from './i18n'
 import { applyPageSeo, resolveRouteSeo } from './utils/seo'
+import { createAppPinia } from './stores/pinia'
 
 export const createApp = ViteSSG(
     App,
     { routes, base: import.meta.env.BASE_URL },
     ({ app, router, head }) => {
+        app.use(createAppPinia())
         const i18n = createAppI18n()
         app.use(i18n)
 
