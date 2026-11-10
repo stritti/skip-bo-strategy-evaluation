@@ -73,7 +73,7 @@ Stellen Sie sicher, dass [Node.js](https://nodejs.org/) installiert ist.
 
 Alle Runs bleiben lokal in der IndexedDB des Browsers. Damit Runs **allen** zur Verfügung stehen, können sie ins Repository committed werden: JSON-Export eines Laufs nach `public/data/runs/` legen und in `public/data/runs/index.json` eintragen (siehe `public/data/runs/README.md`). Die App lädt diese geteilten Runs automatisch und zeigt sie in der Historie als „geteilt" an. Eine serverseitige Speicherung (für echtes automatisches Teilen aller Runs) würde einen Backend-Endpunkt benötigen – bei statischem Hosting ist der Repository-Weg die datensparsame Variante.
 
-**Qualitätssicherung in CI:** Geteilte Runs müssen dem versionierten Schema `schemas/simulation-run.schema.json` (`version: 1`) entsprechen und werden in `npm test` automatisch mit ihrem Seed **re-simuliert** – Aggregatwerte und Einzelergebnisse müssen exakt reproduzierbar sein (Reproduzierbarkeits-Gate, siehe `src/test/sharedRunsValidation.test.ts`).
+**Qualitätssicherung in CI:** Geteilte Runs müssen dem versionierten Schema `schemas/simulation-run.schema.json` (`version: 1`) entsprechen und werden in `npm test` automatisch mit ihrem Seed **re-simuliert** – Aggregatwerte und Einzelergebnisse müssen exakt reproduzierbar sein (Reproduzierbarkeits-Gate, siehe `src/test/sharedRunsValidation.test.ts`). Die App lädt nur die Aggregat-Summaries aus `index.json` (schnell); die Einzelergebnisse eines geteilten Runs werden erst beim Öffnen lazy nachgeladen (`npm run runs:index` regeneriert den Index).
 
 > **KI-Transparenz (EU AI Act, Art. 50):** Diese App wurde mit KI-Unterstützung (Gemini 3 Pro via Antigravity) erstellt. Simulationsergebnisse sind deterministisch über Seeds replizierbar.
 

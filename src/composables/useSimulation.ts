@@ -16,7 +16,7 @@ import {
 } from '../utils/statistics';
 
 import { dbService, type SimulationRun } from '../services/dbService';
-import { normalizeSharedRun, type SharedRunIndexEntry } from '../services/sharedRuns';
+import { entryToSummaryRun, normalizeSharedRun, type SharedRunIndexEntry } from '../services/sharedRuns';
 
 // --- Global State (Singleton Pattern) ---
 // Configuration
@@ -260,29 +260,30 @@ export function useSimulation() {
     };
 
     // --- DB Actions ---
-    // Shared runs are committed to public/data/runs/ in the repo and fetched from there
+    // Shared runs are committed to public/data/runs/ in the repo. The index carries
+    // precomputed aggregates, so the history list loads without downloading full runs;
+    // per-game results of a shared run are fetched lazily when the run is opened.
     const loadSharedRuns = async (): Promise<SimulationRun[]> => {
         try {
             const base = import.meta.env.BASE_URL;
             const indexRes = await fetch(`${base}data/runs/index.json`);
             if (!indexRes.ok) return [];
             const entries = await indexRes.json() as SharedRunIndexEntry[];
-            const runs: SimulationRun[] = [];
-            for (const entry of entries) {
-                try {
-                    const res = await fetch(`${base}data/runs/${entry.file}`);
-                    if (!res.ok) continue;
-                    const run = normalizeSharedRun(await res.json(), entry);
-                    if (!run) continue;
-                    // negative ids below -1000: -1 is reserved for the "all runs" aggregate view
-                    runs.push({ ...run, id: -(1000 + runs.length) });
-                } catch {
-                    // skip broken shared run file
-                }
-            }
-            return runs;
+            // negative ids below -1000: -1 is reserved for the "all runs" aggregate view
+            return entries.map((entry, i) => ({ ...entryToSummaryRun(entry), id: -(1000 + i) }));
         } catch {
             return [];
+        }
+    };
+
+    const fetchSharedRunDetails = async (file: string): Promise<SimulationRun | null> => {
+        try {
+            const base = import.meta.env.BASE_URL;
+            const res = await fetch(`${base}data/runs/${file}`);
+            if (!res.ok) return null;
+            return normalizeSharedRun(await res.json());
+        } catch {
+            return null;
         }
     };
 
@@ -293,7 +294,13 @@ export function useSimulation() {
     };
 
     // --- History Actions ---
-    const loadRun = (run: SimulationRun) => {
+    const loadRun = async (run: SimulationRun) => {
+        // Shared runs arrive as summaries from the index; fetch full results lazily
+        if (run.shared && run.file && run.results.length === 0) {
+            const full = await fetchSharedRunDetails(run.file);
+            if (full) run = { ...full, id: run.id, file: run.file };
+        }
+
         // Restore configuration and state
         currentRunId.value = run.id || null;
         currentSeed.value = run.seed ?? null;
