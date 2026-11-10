@@ -25,10 +25,12 @@ Dafür fehlt noch ein Workflow `.github/workflows/deploy.yml` (z. B. `actions/de
 ## Build lokal testen
 
 ```bash
-npm run build   # Produktions-Build (tsc + vite build)
+npm run build   # Produktions-Build (tsc + vite-ssg build: Client-Bundle + prerendered statische Seite pro Route)
 npm test        # Unit-Tests (Vitest)
 npm run preview # Vorschau unter http://localhost:4173
 ```
+
+Hinweis: Der Build erzeugt neben `dist/index.html` auch `dist/<route>/index.html` pro Route (SSG via `vite-ssg`, dirStyle `nested`). Netlify liefert diese Dateien direkt aus; die SPA-Redirects greifen nur für nicht vorhandene Pfade.
 
 ## Troubleshooting
 

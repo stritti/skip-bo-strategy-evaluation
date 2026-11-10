@@ -22,6 +22,10 @@ Eine moderne Web-Anwendung zur Simulation und Auswertung verschiedener Strategie
 - **Data Explorer**: Untersuchen Sie die Rohdaten jedes einzelnen Spiels in einer sortierbaren Tabelle (Sieger, Züge, Jokereinsatz).
 - **Kumulative Statistik**: Sehen Sie aggregierte Kennzahlen über alle geladenen Simulationen hinweg.
 
+### Auffindbarkeit (SEO/SSG)
+- **Statisches Prerendering**: Der Build (`vite-ssg build`) erzeugt pro Route eine statische HTML-Seite (`dist/<route>/index.html`) inklusive Critical CSS – Suchmaschinen indexieren den vollen Inhalt ohne JS.
+- **Per-route SEO-Metadaten**: Titel, Beschreibung, Canonical, hreflang, Open Graph und Twitter Cards pro Route – im prerendered HTML (via `ssgOptions.onBeforePageRender`) und clientseitig bei Navigation (`applyPageSeo` in `src/utils/seo.ts`).
+
 ## 🛠 Tech Stack
 
 - **Framework**: [Vue 3](https://vuejs.org/) (Composition API, Script Setup)
