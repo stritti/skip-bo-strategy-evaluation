@@ -64,6 +64,9 @@ const formatDate = (timestamp: number) => {
             <td class="px-6 py-3 whitespace-nowrap text-gray-900 dark:text-slate-200 flex items-center gap-2">
               <i v-if="run.id === currentRunId" class="ph-fill ph-check-circle text-blue-600 dark:text-blue-400"></i>
               {{ formatDate(run.timestamp) }}
+              <span v-if="run.shared" class="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded text-xs font-semibold border border-indigo-100 dark:border-indigo-900/50" title="Aus dem Repository geladen (public/data/runs)">
+                <i class="ph-bold ph-globe"></i> geteilt
+              </span>
             </td>
             <td class="px-6 py-3 text-right font-mono dark:text-slate-300">{{ run.gamesCount.toLocaleString('de-DE') }}</td>
             <td class="px-6 py-3 text-right font-bold"

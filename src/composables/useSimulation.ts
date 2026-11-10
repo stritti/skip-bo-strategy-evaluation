@@ -259,8 +259,33 @@ export function useSimulation() {
     };
 
     // --- DB Actions ---
+    // Shared runs are committed to public/data/runs/ in the repo and fetched from there
+    const loadSharedRuns = async (): Promise<SimulationRun[]> => {
+        try {
+            const base = import.meta.env.BASE_URL;
+            const indexRes = await fetch(`${base}data/runs/index.json`);
+            if (!indexRes.ok) return [];
+            const entries = await indexRes.json() as { file: string }[];
+            const runs: SimulationRun[] = [];
+            for (const entry of entries) {
+                try {
+                    const res = await fetch(`${base}data/runs/${entry.file}`);
+                    if (!res.ok) continue;
+                    const run = await res.json() as SimulationRun;
+                    runs.push({ ...run, id: -(runs.length + 1), shared: true });
+                } catch {
+                    // skip broken shared run file
+                }
+            }
+            return runs;
+        } catch {
+            return [];
+        }
+    };
+
     const loadHistory = async () => {
-        history.value = await dbService.getAllRuns();
+        const [local, shared] = await Promise.all([dbService.getAllRuns(), loadSharedRuns()]);
+        history.value = [...local, ...shared];
         history.value.sort((a, b) => b.timestamp - a.timestamp); // Newest first
     };
 
