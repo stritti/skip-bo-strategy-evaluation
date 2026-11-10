@@ -67,7 +67,7 @@ const getBgColor = (rate: number) => {
         </div>
 
         <div class="flex justify-between items-center text-xs text-gray-500">
-            <span>95% CI (Wilson): ±{{ (item.ci.margin * 100).toFixed(1) }}%</span>
+            <span>95% CI (Wilson): {{ (item.ci.lower * 100).toFixed(1) }}% – {{ (item.ci.upper * 100).toFixed(1) }}%</span>
             <span v-if="item.significant" class="font-bold text-green-700 bg-green-100 border border-green-200 px-2 py-0.5 rounded">
                 signifikant (Holm, p={{ item.adjPValue.toExponential(1) }})
             </span>

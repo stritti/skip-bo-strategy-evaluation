@@ -10,9 +10,7 @@ import type { SimulationApp, GameResult, Strategy, LogEntry } from '../game/type
 import {
     calculateConfidenceInterval,
     calculateQuartiles,
-    chiSquareTest,
     mcnemarExactTest,
-    mannWhitneyUTest,
     cohensH,
     tCriticalValue
 } from '../utils/statistics';
@@ -148,28 +146,6 @@ export function useSimulation() {
         return calculateQuartiles(durations);
     });
 
-    // --- Chi-Square Significance Test ---
-    const chiSquareResult = computed(() => {
-        // Only meaningful when comparing different strategies
-        if (strategyP1.value === strategyP2.value || gameCounter.value < 30) {
-            return {
-                statistic: 0,
-                pValue: 1,
-                isSignificant: false,
-                degreesOfFreedom: 1,
-                applicable: false
-            };
-        }
-
-        const wins1 = realResults.winsP1;
-        const losses1 = realResults.winsP2; // P1 losses = P2 wins
-        const wins2 = realResults.winsP2;
-        const losses2 = realResults.winsP1;
-
-        const result = chiSquareTest(wins1, losses1, wins2, losses2);
-        return { ...result, applicable: true };
-    });
-
     // --- McNemar exact test (correct test for paired duel outcomes) ---
     const mcnemarResult = computed(() => {
         const decisive = realResults.winsP1 + realResults.winsP2;
@@ -209,19 +185,6 @@ export function useSimulation() {
         };
     });
 
-    // --- Mann-Whitney U test on game length (turns) grouped by winner ---
-    const turnsTestResult = computed(() => {
-        const notApplicable = { u: 0, z: 0, pValue: 1, isSignificant: false, applicable: false };
-        if (strategyP1.value === strategyP2.value) return notApplicable;
-
-        const turnsWonP1 = rawData.value.filter(r => r.winnerId === 0).map(r => r.turns);
-        const turnsWonP2 = rawData.value.filter(r => r.winnerId === 1).map(r => r.turns);
-
-        if (turnsWonP1.length < 10 || turnsWonP2.length < 10) return notApplicable;
-
-        const result = mannWhitneyUTest(turnsWonP1, turnsWonP2);
-        return { ...result, applicable: true };
-    });
 
     // --- Computed UI Helpers ---
     const formattedCounter = computed(() => gameCounter.value.toLocaleString('de-DE'));
@@ -626,10 +589,8 @@ export function useSimulation() {
         averageTurnsCI,
         turnsDistribution,
         durationDistribution,
-        chiSquareResult,
         mcnemarResult,
         effectSizeResult,
-        turnsTestResult,
 
         // Methods
         logEvent,
