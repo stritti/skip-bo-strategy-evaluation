@@ -50,6 +50,7 @@ const currentRunId = ref<number | null>(null);
 const realResults = reactive({
     winsP1: 0,
     winsP2: 0,
+    ties: 0,
     totalTurns: 0,
     totalJokers: 0,
 });
@@ -74,12 +75,19 @@ export function useSimulation() {
             : 0
     );
 
+    const tieRate = computed(() =>
+        gameCounter.value > 0
+            ? realResults.ties / gameCounter.value
+            : 0
+    );
+
     // --- Cumulative Statistics ---
     const cumulativeStats = computed(() => {
         if (history.value.length === 0) return null;
 
         const totalGames = history.value.reduce((sum, run) => sum + run.gamesCount, 0);
         const totalWinsP1 = history.value.reduce((sum, run) => sum + run.winsP1, 0);
+        const totalTies = history.value.reduce((sum, run) => sum + (run.ties ?? 0), 0);
         const totalTurns = history.value.reduce((sum, run) => sum + run.totalTurns, 0);
         const totalJokers = history.value.reduce((sum, run) => sum + run.totalJokers, 0);
 
@@ -87,6 +95,7 @@ export function useSimulation() {
             totalRuns: history.value.length,
             totalGames,
             winRateP1: totalGames > 0 ? totalWinsP1 / totalGames : 0,
+            tieRate: totalGames > 0 ? totalTies / totalGames : 0,
             avgTurns: totalGames > 0 ? totalTurns / totalGames : 0,
             avgJokers: totalGames > 0 ? totalJokers / totalGames : 0
         };
@@ -283,6 +292,7 @@ export function useSimulation() {
         // Restore statistics
         realResults.winsP1 = run.winsP1;
         realResults.winsP2 = run.winsP2;
+        realResults.ties = run.ties ?? 0;
         realResults.totalTurns = run.totalTurns;
         realResults.totalJokers = run.totalJokers;
 
@@ -326,6 +336,7 @@ export function useSimulation() {
         // Reset state
         realResults.winsP1 = 0;
         realResults.winsP2 = 0;
+        realResults.ties = 0;
         realResults.totalTurns = 0;
         realResults.totalJokers = 0;
         rawData.value = [];
@@ -345,6 +356,7 @@ export function useSimulation() {
             // Global Totals
             realResults.winsP1 += run.winsP1;
             realResults.winsP2 += run.winsP2;
+            realResults.ties += run.ties ?? 0;
             realResults.totalTurns += run.totalTurns;
             realResults.totalJokers += run.totalJokers;
             totalGames += run.gamesCount;
@@ -401,6 +413,7 @@ export function useSimulation() {
         // Reset real results
         realResults.winsP1 = 0;
         realResults.winsP2 = 0;
+        realResults.ties = 0;
         realResults.totalTurns = 0;
         realResults.totalJokers = 0;
         rawData.value = [];
@@ -438,10 +451,12 @@ export function useSimulation() {
                 const result = game.run();
 
                 // Collect real statistics
-                if (result.winner.includes('Spieler 1')) {
+                if (result.winnerId === 0) {
                     realResults.winsP1++;
-                } else if (result.winner.includes('Spieler 2')) {
+                } else if (result.winnerId === 1) {
                     realResults.winsP2++;
+                } else {
+                    realResults.ties++;
                 }
                 realResults.totalTurns += result.turns;
                 realResults.totalJokers += result.jokers;
@@ -474,6 +489,7 @@ export function useSimulation() {
                     strategyP2: strategyP2.value,
                     totalTurns: realResults.totalTurns,
                     totalJokers: realResults.totalJokers,
+                    ties: realResults.ties,
                     seed,
                     results: JSON.parse(JSON.stringify(rawData.value)) // Clone to ensure clean storage
                 };
@@ -516,6 +532,7 @@ export function useSimulation() {
         currentPage.value = 1;
         realResults.winsP1 = 0;
         realResults.winsP2 = 0;
+        realResults.ties = 0;
         realResults.totalTurns = 0;
         realResults.totalJokers = 0;
 
@@ -570,6 +587,7 @@ export function useSimulation() {
 
         // Computed
         winRateP1,
+        tieRate,
         averageTurns,
         averageJokers,
         cumulativeStats,

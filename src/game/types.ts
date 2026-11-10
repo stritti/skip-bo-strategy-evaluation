@@ -7,6 +7,7 @@ export type Strategy = 'Optimiert' | 'Zufall' | 'Spontan' | 'Fortgeschritten';
 export interface GameResult {
     id: number;
     winner: string;
+    winnerId: number | null;
     turns: number;
     duration: number;
     starter: string;

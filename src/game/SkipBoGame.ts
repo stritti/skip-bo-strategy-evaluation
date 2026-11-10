@@ -25,11 +25,15 @@ export class SkipBoGame {
     winner: Player | null;
     seed: number;
     rng: Rng;
+    starterIndex: number;
+    gamesPlayed: number;
 
     constructor(app: SimulationApp, strategyP1: Strategy = 'Optimiert', strategyP2: Strategy = 'Zufall', seed?: number) {
         this.app = app;
         this.seed = seed ?? generateSeed();
         this.rng = mulberry32(this.seed);
+        this.starterIndex = 0;
+        this.gamesPlayed = 0;
         this.players = [new Player(0, strategyP1), new Player(1, strategyP2)];
         this.drawPile = [];
         this.discardPile = [];
@@ -545,10 +549,11 @@ export class SkipBoGame {
      * Simulates a full game and returns the result object.
      */
     run(): GameResult {
-        this.createDeck(); // Was missing in original run() sometimes? No deal calls createDeck.
         this.deal();
 
         const startTime = Date.now();
+        this.currentPlayerIndex = this.rng() < 0.5 ? 0 : 1;
+        this.starterIndex = this.currentPlayerIndex;
         let currentTurn = 0;
 
         while (this.winner === null && currentTurn < MAX_TURNS_LIMIT) {
@@ -565,11 +570,12 @@ export class SkipBoGame {
 
         const durationMs = Date.now() - startTime;
         return {
-            id: Math.floor(this.rng() * 999999) + 1,
+            id: ++this.gamesPlayed,
             winner: this.winner ? `${this.winner.name} (${this.winner.strategy})` : 'TIE',
+            winnerId: this.winner ? this.winner.id : null,
             turns: currentTurn,
             duration: durationMs,
-            starter: this.players[0].id === 0 ? 'P1' : 'P2',
+            starter: this.players[this.starterIndex].id === 0 ? 'P1' : 'P2',
             jokers: this.app.tempJokersPlayed,
             strategy: this.winner ? this.winner.strategy : 'Zufall',
             seed: this.seed

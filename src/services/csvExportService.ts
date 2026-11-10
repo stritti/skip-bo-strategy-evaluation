@@ -17,6 +17,7 @@ export function generateMockRow(
     return {
         id: id,
         winner: isP1 ? 'Spieler 1 (KI)' : 'Spieler 2 (Random)',
+        winnerId: isP1 ? 0 : 1,
         turns: Math.max(5, Math.floor(averageTurns + (Math.random() - 0.5) * 10)),
         duration: Math.floor(Math.random() * 200) + 50,
         starter: Math.random() > 0.5 ? 'P1' : 'P2',
