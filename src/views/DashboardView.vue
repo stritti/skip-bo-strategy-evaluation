@@ -73,15 +73,19 @@ const handleResetSimulation = () => {
 onMounted(() => {
   const runId = router.currentRoute.value.query.run;
   if (!runId) return;
-  const stop = watch(() => simulation.history.value, (h) => {
-    if (!h.length) return;
+  const tryLoad = (h: typeof simulation.history.value): boolean => {
+    if (!h.length) return false;
     const run = h.find(r =>
       (r.file && r.file.replace(/\.json$/, '') === String(runId)) ||
       (r.seed !== undefined && String(r.seed) === String(runId))
     );
     if (run) simulation.loadRun(run);
-    stop();
-  }, { immediate: true });
+    return true;
+  };
+  if (tryLoad(simulation.history.value)) return;
+  const stop = watch(() => simulation.history.value, (h) => {
+    if (tryLoad(h)) stop();
+  });
 });
 </script>
 
