@@ -77,6 +77,20 @@ Alle Runs bleiben lokal in der IndexedDB des Browsers. Damit Runs **allen** zur 
 
 > **KI-Transparenz (EU AI Act, Art. 50):** Diese App wurde mit KI-Unterstützung (Gemini 3 Pro via Antigravity) erstellt. Simulationsergebnisse sind deterministisch über Seeds replizierbar.
 
+## Zitieren
+
+Maschinenlesbare Zitationsdaten in [CITATION.cff](CITATION.cff) (GitHub rendert daraus einen „Cite this repository"-Block). BibTeX:
+
+```bibtex
+@software{strittmatter2026skipbo,
+  author = {Strittmatter, Stephan},
+  title  = {Skip-Bo Strategy Evaluation},
+  year   = {2026},
+  url    = {https://skip-bo-strategy-analysis.netlify.app/},
+  license = {MIT}
+}
+```
+
 ---
 *Dieses Projekt wurde zu Bildungs- und Analysezwecken erstellt.*  
 *© 2026 Stephan Strittmatter · MIT-Lizenz*
