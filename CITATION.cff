@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use this software or the accompanying analysis, please cite it as below."
+title: "Skip-Bo Strategy Evaluation"
+version: "1.0.0"
+date-released: "2026-11-10"
+type: software
+authors:
+  - family-names: Strittmatter
+    given-names: Stephan
+repository-code: "https://github.com/stritti/skip-bo-strategy-evaluation"
+url: "https://skip-bo-strategy-analysis.netlify.app/"
+license: MIT
+keywords:
+  - Skip-Bo
+  - card game
+  - game simulation
+  - strategy evaluation
+  - Monte Carlo simulation
+  - reproducible research
+abstract: >-
+  Browser-based deterministic simulation and statistical evaluation of strategies
+  for the 2-player card game Skip-Bo: seeded reproducibility (per-run and per-game
+  seeds), shared simulation runs validated and re-simulated in CI, CSV/JSON export,
+  and a scientific analysis paper on a deterministic HPVP agent.
+references:
+  - type: article
+    title: "Deterministic Skip-Bo Agent with Hierarchical Positional Value Play"
+    authors:
+      - family-names: Strittmatter
+        given-names: Stephan
+    year: 2026
+    url: "https://skip-bo-strategy-analysis.netlify.app/documents/Deterministic_SkipBo_HPVP_Agent_Analysis.pdf"
+    license: MIT
