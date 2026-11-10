@@ -403,8 +403,8 @@ onMounted(() => {
                 <!-- Data Export -->
                 <DataExport
                   :data="simulation.rawData.value"
-                  :strategyP1="simulation.strategyP1.value"
-                  :strategyP2="simulation.strategyP2.value"
+                  :strategyP1="simulation.lastRunStrategies.value?.p1 ?? simulation.strategyP1.value"
+                  :strategyP2="simulation.lastRunStrategies.value?.p2 ?? simulation.strategyP2.value"
                   :seed="simulation.currentSeed.value"
                 />
               </div>

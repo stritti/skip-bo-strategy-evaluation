@@ -9,8 +9,8 @@ const simulation = useSimulation();
 const handleDownloadCSV = () => {
   downloadCSV(
     simulation.rawData.value,
-    simulation.strategyP1.value,
-    simulation.strategyP2.value,
+    simulation.lastRunStrategies.value?.p1 ?? simulation.strategyP1.value,
+    simulation.lastRunStrategies.value?.p2 ?? simulation.strategyP2.value,
     simulation.currentSeed.value
   );
 };

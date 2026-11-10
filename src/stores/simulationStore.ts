@@ -42,6 +42,8 @@ export const useSimulationStore = defineStore('simulation', () => {
     const sortDirection = ref<'asc' | 'desc'>('desc');
     const strategyP1 = ref<Strategy>('Optimiert');
     const strategyP2 = ref<Strategy>('Zufall');
+    // Strategies of the currently loaded/finished run (the selectors get randomized for the next run)
+    const lastRunStrategies = ref<{ p1: Strategy; p2: Strategy } | null>(null);
 
     // Statistical Results (Current Run)
     const realResults = reactive({
@@ -284,6 +286,7 @@ export const useSimulationStore = defineStore('simulation', () => {
 
         const seed = generateSeed();
         historyStore.currentSeed = seed;
+        lastRunStrategies.value = { p1: strategyP1.value, p2: strategyP2.value };
         const game = new SkipBoGame(verboseApp, strategyP1.value, strategyP2.value, seed);
         const batchSize = 100;
         let totalGamesRun = 0;
@@ -440,6 +443,7 @@ export const useSimulationStore = defineStore('simulation', () => {
         sortDirection,
         strategyP1,
         strategyP2,
+        lastRunStrategies,
         realResults,
 
         // Getters
