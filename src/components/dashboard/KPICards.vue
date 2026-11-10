@@ -3,6 +3,8 @@ defineProps<{
   averageTurns: number;
   winRateP1: number;
   averageJokers: number;
+  tieRate?: number;
+  seed?: number | null;
   winRateCI?: { margin: number; lower: number; upper: number };
   turnsCI?: { margin: number; lower: number; upper: number };
 }>();
@@ -29,6 +31,9 @@ defineProps<{
       <div v-if="winRateCI && winRateCI.margin > 0" class="text-xs text-gray-500 dark:text-slate-400 mt-1">
         ± {{ (winRateCI.margin * 100).toFixed(1) }}% (95% CI)
       </div>
+      <div v-if="tieRate && tieRate > 0" class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
+        Unentschieden: {{ (tieRate * 100).toFixed(2) }}%
+      </div>
     </div>
     <div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
       <div class="flex items-center gap-2 mb-2">
@@ -43,6 +48,9 @@ defineProps<{
         <span class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase">Ø Joker/Spiel</span>
       </div>
       <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ averageJokers.toFixed(1) }}</div>
+      <div v-if="seed !== null && seed !== undefined" class="text-xs text-gray-400 dark:text-slate-500 mt-1 font-mono">
+        Seed: {{ seed }}
+      </div>
     </div>
   </div>
 </template>

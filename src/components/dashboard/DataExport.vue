@@ -10,6 +10,7 @@ interface Props {
     data: GameResult[];
     strategyP1: string;
     strategyP2: string;
+    seed?: number | null;
     isDisabled?: boolean;
 }
 
@@ -21,17 +22,19 @@ const exportToCSV = () => {
     if (props.data.length === 0) return;
 
     // CSV Header
-    const headers = ['ID', 'Winner', 'Turns', 'Duration (ms)', 'Starter', 'Jokers', 'Strategy'];
+    const headers = ['ID', 'Winner', 'WinnerID', 'Turns', 'Duration (ms)', 'Starter', 'Jokers', 'Strategy', 'Seed'];
     const csvContent = [
         headers.join(','),
         ...props.data.map(row => [
             row.id,
             row.winner,
+            row.winnerId ?? '',
             row.turns,
             row.duration,
             row.starter,
             row.jokers,
-            row.strategy
+            row.strategy,
+            row.seed
         ].join(','))
     ].join('\n');
 
@@ -56,7 +59,8 @@ const exportToJSON = () => {
         exportDate: new Date().toISOString(),
         totalGames: props.data.length,
         strategyP1: props.strategyP1,
-        strategyP2: props.strategyP2
+        strategyP2: props.strategyP2,
+        seed: props.seed ?? null
     };
 
     const exportData = {

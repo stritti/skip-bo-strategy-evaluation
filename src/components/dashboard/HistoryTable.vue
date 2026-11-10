@@ -53,6 +53,8 @@ const formatDate = (timestamp: number) => {
             <th class="px-6 py-3">Strategie P1</th>
             <th class="px-6 py-3">Strategie P2</th>
             <th class="px-6 py-3 text-right">Ø Züge</th>
+            <th class="px-6 py-3 text-right">Ties</th>
+            <th class="px-6 py-3 text-right">Seed</th>
             <th class="px-6 py-3 text-right">Aktion</th>
           </tr>
         </thead>
@@ -79,6 +81,8 @@ const formatDate = (timestamp: number) => {
                </span>
             </td>
             <td class="px-6 py-3 text-right dark:text-slate-300">{{ (run.totalTurns / run.gamesCount).toFixed(1) }}</td>
+            <td class="px-6 py-3 text-right font-mono dark:text-slate-300">{{ (run.ties ?? 0).toLocaleString('de-DE') }}</td>
+            <td class="px-6 py-3 text-right font-mono text-xs dark:text-slate-400">{{ run.seed ?? '—' }}</td>
             <td class="px-6 py-3 text-right">
               <button v-if="run.id !== currentRunId" @click="emit('loadRun', run)"
                 class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1 rounded-lg text-xs font-bold transition shadow-sm flex items-center gap-1 ml-auto">

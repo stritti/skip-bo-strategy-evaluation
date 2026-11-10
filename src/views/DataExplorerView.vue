@@ -22,7 +22,7 @@ const handleDownloadCSV = () => {
       <div>
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Ergebnis-Tabelle</h2>
         <p class="text-gray-500 dark:text-slate-400 text-sm">Auszug aus der simulierten Datenbank ({{
-          simulation.totalRows.toLocaleString('de-DE') }} Einträge)</p>
+          simulation.rawData.value.length.toLocaleString('de-DE') }} Einträge)</p>
       </div>
 
       <div class="flex items-center gap-2">

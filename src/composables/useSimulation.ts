@@ -24,7 +24,6 @@ import { dbService, type SimulationRun } from '../services/dbService';
 const minGames = 100;
 const maxGamesLimit = 10000;
 const stepGames = 100;
-const totalRows = 1000000; // Fixed for data explorer
 
 // Simulation State
 const maxGamesConfig = ref(1000);
@@ -47,6 +46,7 @@ const strategyP2 = ref<Strategy>('Zufall');
 // History State
 const history = ref<SimulationRun[]>([]);
 const currentRunId = ref<number | null>(null);
+const currentSeed = ref<number | null>(null);
 
 // Statistical Results (Current Run)
 const realResults = reactive({
@@ -305,6 +305,7 @@ export function useSimulation() {
     const loadRun = (run: SimulationRun) => {
         // Restore configuration and state
         currentRunId.value = run.id || null;
+        currentSeed.value = run.seed ?? null;
         maxGamesConfig.value = run.gamesCount;
         gameCounter.value = run.gamesCount;
 
@@ -412,6 +413,7 @@ export function useSimulation() {
         })).sort((a, b) => b.games - a.games); // Most played first
 
         currentRunId.value = -1; // -1 indicates "All Runs"
+        currentSeed.value = null; // aggregated across runs
         gameCounter.value = totalGames;
         maxGamesConfig.value = totalGames; // Show total as goal
         isSimulating.value = false;
@@ -448,6 +450,7 @@ export function useSimulation() {
         };
 
         const seed = generateSeed();
+        currentSeed.value = seed;
         const game = new SkipBoGame(verboseApp, strategyP1.value, strategyP2.value, seed);
         const batchSize = 100;
         let totalGamesRun = 0;
@@ -544,6 +547,7 @@ export function useSimulation() {
     const resetSimulation = (): void => {
         gameCounter.value = 0;
         currentRunId.value = null;
+        currentSeed.value = null;
         progress.value = 0;
         isSimulating.value = false;
         isFinished.value = false;
@@ -560,7 +564,7 @@ export function useSimulation() {
 
     // --- Pagination ---
     const nextPage = (): void => {
-        if ((currentPage.value * pageSize) < totalRows) {
+        if ((currentPage.value * pageSize) < rawData.value.length) {
             currentPage.value++;
         }
     };
@@ -583,7 +587,6 @@ export function useSimulation() {
         minGames,
         maxGamesLimit,
         stepGames,
-        totalRows,
 
         // State
         maxGamesConfig,
@@ -598,6 +601,7 @@ export function useSimulation() {
         pageSize,
         history,
         currentRunId,
+        currentSeed,
         sortColumn,
         sortDirection,
         strategyP1,

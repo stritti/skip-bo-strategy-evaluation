@@ -323,10 +323,12 @@ const handleResetSimulation = () => {
 
         <!-- Single Run Analysis -->
         <div v-else class="space-y-8">
-            <KPICards 
+            <KPICards
             :averageTurns="simulation.averageTurns.value"
             :winRateP1="simulation.winRateP1.value"
             :averageJokers="simulation.averageJokers.value"
+            :tieRate="simulation.tieRate.value"
+            :seed="simulation.currentSeed.value"
             :winRateCI="simulation.winRateP1CI.value"
             :turnsCI="simulation.averageTurnsCI.value"
             />
@@ -384,6 +386,7 @@ const handleResetSimulation = () => {
                   :data="simulation.rawData.value"
                   :strategyP1="simulation.strategyP1.value"
                   :strategyP2="simulation.strategyP2.value"
+                  :seed="simulation.currentSeed.value"
                 />
               </div>
 
