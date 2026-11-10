@@ -21,12 +21,15 @@ import { applyPageSeo, resolveRouteSeo } from './utils/seo'
 export const createApp = ViteSSG(
     App,
     { routes, base: import.meta.env.BASE_URL },
-    ({ app, router }) => {
+    ({ app, router, head }) => {
         const i18n = createAppI18n()
         app.use(i18n)
 
         router.beforeEach((to, _from, next) => {
-            i18n.global.locale.value = isEnPath(to.path) ? 'en' : 'de'
+            const locale = isEnPath(to.path) ? 'en' : 'de'
+            i18n.global.locale.value = locale
+            // override unhead's default htmlAttrs lang ("en") with the route locale
+            head?.push({ htmlAttrs: { lang: locale } })
             if (
                 !import.meta.env.SSR &&
                 to.path === '/' &&

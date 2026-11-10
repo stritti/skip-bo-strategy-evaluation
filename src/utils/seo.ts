@@ -43,26 +43,35 @@ export function pageUrl(path: string): string {
 
 export type Locale = 'de' | 'en';
 
+export function normalizePath(path: string): string {
+    if (path.length > 1 && path.endsWith('/')) return path.slice(0, -1);
+    return path;
+}
+
 export function isEnPath(path: string): boolean {
-    return path === '/en' || path.startsWith('/en/');
+    const p = normalizePath(path);
+    return p === '/en' || p.startsWith('/en/');
 }
 
 export function dePathOf(path: string): string {
-    if (path === '/en') return '/';
-    return isEnPath(path) ? path.slice(3) : path;
+    const p = normalizePath(path);
+    if (p === '/en') return '/';
+    return isEnPath(p) ? p.slice(3) : p;
 }
 
 export function enPathOf(dePath: string): string {
     return dePath === '/' ? '/en' : `/en${dePath}`;
 }
 
-export function applyPageSeo(seo: PageSeo, path: string): void {
+export function applyPageSeo(seo: PageSeo, rawPath: string): void {
     if (typeof document === 'undefined') return;
+    const path = normalizePath(rawPath);
     const url = pageUrl(path);
     const dePath = dePathOf(path);
     const locale: Locale = isEnPath(path) ? 'en' : 'de';
 
     document.title = seo.title;
+    document.documentElement.lang = locale;
 
     upsertMeta('name', 'description', seo.description);
     upsertLink('canonical', url);

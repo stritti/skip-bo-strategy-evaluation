@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
-import { DEFAULT_SEO, resolveRouteSeo, pageUrl, dePathOf, enPathOf } from './src/utils/seo'
+import { DEFAULT_SEO, resolveRouteSeo, pageUrl, dePathOf, enPathOf, normalizePath } from './src/utils/seo'
 
 const escapeAttr = (value: string): string =>
     value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -35,9 +35,14 @@ export default defineConfig({
         onBeforePageRender(route, indexHTML) {
             const { seo, locale } = resolveRouteSeo(route)
             const meta = seo ?? DEFAULT_SEO
-            const url = pageUrl(route)
-            const dePath = dePathOf(route)
+            const normalized = normalizePath(route)
+            const url = pageUrl(normalized)
+            const dePath = dePathOf(normalized)
             let html = indexHTML.replace(
+                /<html lang="[^"]*">/,
+                `<html lang="${locale}">`
+            )
+            html = html.replace(
                 /<title>[^<]*<\/title>/,
                 `<title>${escapeAttr(meta.title)}</title>`
             )
