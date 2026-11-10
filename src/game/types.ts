@@ -12,6 +12,7 @@ export interface GameResult {
     starter: string;
     jokers: number;
     strategy: string;
+    seed: number;
 }
 
 export interface LogEntry {

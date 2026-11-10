@@ -3,7 +3,7 @@
  */
 
 import { Player } from './Player';
-import { shuffle } from './utils';
+import { shuffle, mulberry32, generateSeed, type Rng } from './utils';
 import {
     JOKER_VALUE,
     STOCKPILE_SIZE,
@@ -23,9 +23,13 @@ export class SkipBoGame {
     currentPlayerIndex: number;
     turnCount: number;
     winner: Player | null;
+    seed: number;
+    rng: Rng;
 
-    constructor(app: SimulationApp, strategyP1: Strategy = 'Optimiert', strategyP2: Strategy = 'Zufall') {
+    constructor(app: SimulationApp, strategyP1: Strategy = 'Optimiert', strategyP2: Strategy = 'Zufall', seed?: number) {
         this.app = app;
+        this.seed = seed ?? generateSeed();
+        this.rng = mulberry32(this.seed);
         this.players = [new Player(0, strategyP1), new Player(1, strategyP2)];
         this.drawPile = [];
         this.discardPile = [];
@@ -53,7 +57,7 @@ export class SkipBoGame {
             cards.push(JOKER_VALUE);
         }
 
-        this.drawPile = shuffle(cards);
+        this.drawPile = shuffle(cards, this.rng);
     }
 
     /**
@@ -79,7 +83,7 @@ export class SkipBoGame {
      */
     refillDrawPile(): void {
         if (this.drawPile.length === 0) {
-            this.drawPile = shuffle(this.discardPile);
+            this.drawPile = shuffle(this.discardPile, this.rng);
             this.discardPile = [];
             this.app.logEvent('INFO', 'Ziehstapel wurde aus Ablagestapel neu gebildet.');
         }
@@ -426,7 +430,7 @@ export class SkipBoGame {
             return candidates.sort((a, b) => b.priority - a.priority)[0];
         } else {
             // Random
-            return candidates[Math.floor(Math.random() * candidates.length)];
+            return candidates[Math.floor(this.rng() * candidates.length)];
         }
     }
 
@@ -454,12 +458,12 @@ export class SkipBoGame {
 
         } else if (player.strategy === 'Spontan') {
             discardCard = player.hand[0]; // First card
-            discardPileIndex = Math.floor(Math.random() * DISCARD_PILE_COUNT);
+            discardPileIndex = Math.floor(this.rng() * DISCARD_PILE_COUNT);
         } else {
             // Random
-            const randIdx = Math.floor(Math.random() * player.hand.length);
+            const randIdx = Math.floor(this.rng() * player.hand.length);
             discardCard = player.hand[randIdx];
-            discardPileIndex = Math.floor(Math.random() * DISCARD_PILE_COUNT);
+            discardPileIndex = Math.floor(this.rng() * DISCARD_PILE_COUNT);
         }
 
         return {
@@ -561,13 +565,14 @@ export class SkipBoGame {
 
         const durationMs = Date.now() - startTime;
         return {
-            id: Math.floor(Math.random() * 999999) + 1,
+            id: Math.floor(this.rng() * 999999) + 1,
             winner: this.winner ? `${this.winner.name} (${this.winner.strategy})` : 'TIE',
             turns: currentTurn,
             duration: durationMs,
             starter: this.players[0].id === 0 ? 'P1' : 'P2',
             jokers: this.app.tempJokersPlayed,
-            strategy: this.winner ? this.winner.strategy : 'Zufall'
+            strategy: this.winner ? this.winner.strategy : 'Zufall',
+            seed: this.seed
         };
     }
 }

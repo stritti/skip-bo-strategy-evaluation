@@ -5,6 +5,7 @@
 
 import { ref, computed, reactive, onMounted } from 'vue';
 import { SkipBoGame } from '../game/SkipBoGame';
+import { generateSeed } from '../game/utils';
 import type { SimulationApp, GameResult, Strategy, LogEntry } from '../game/types';
 import {
     calculateConfidenceInterval,
@@ -414,11 +415,12 @@ export function useSimulation() {
             tempJokersPlayed: 0
         };
 
-        const game = new SkipBoGame(verboseApp, strategyP1.value, strategyP2.value);
+        const seed = generateSeed();
+        const game = new SkipBoGame(verboseApp, strategyP1.value, strategyP2.value, seed);
         const batchSize = 100;
         let totalGamesRun = 0;
 
-        logEvent('START', `Starte Echtsimulation von ${maxGamesConfig.value.toLocaleString('de-DE')} Runden...`);
+        logEvent('START', `Starte Echtsimulation von ${maxGamesConfig.value.toLocaleString('de-DE')} Runden (Seed: ${seed})...`);
 
         const processBatch = (): void => {
             const start = Date.now();
@@ -472,6 +474,7 @@ export function useSimulation() {
                     strategyP2: strategyP2.value,
                     totalTurns: realResults.totalTurns,
                     totalJokers: realResults.totalJokers,
+                    seed,
                     results: JSON.parse(JSON.stringify(rawData.value)) // Clone to ensure clean storage
                 };
 

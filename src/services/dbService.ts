@@ -11,6 +11,7 @@ export interface SimulationRun {
     strategyP2: string;
     totalTurns: number;
     totalJokers: number;
+    seed?: number;
     results: GameResult[];
 }
 

@@ -21,7 +21,8 @@ export function generateMockRow(
         duration: Math.floor(Math.random() * 200) + 50,
         starter: Math.random() > 0.5 ? 'P1' : 'P2',
         jokers: Math.max(0, Math.round(averageJokers + (Math.random() - 0.5) * 2)),
-        strategy: isP1 ? 'Optimiert' : 'Zufall'
+        strategy: isP1 ? 'Optimiert' : 'Zufall',
+        seed: 0
     };
 }
 
