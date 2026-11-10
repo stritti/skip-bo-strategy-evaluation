@@ -57,6 +57,19 @@ describe('shared runs (public/data/runs) – schema, size, reproducibility', () 
                 if (entry.seed !== undefined) expect(run!.seed).toBe(entry.seed);
             });
 
+            it('index entry aggregates match the run file (npm run runs:index)', () => {
+                const run = normalizeSharedRun(data, entry);
+                expect(run).not.toBeNull();
+                expect(entry.strategyP1).toBe(run!.strategyP1);
+                expect(entry.strategyP2).toBe(run!.strategyP2);
+                expect(entry.winsP1).toBe(run!.winsP1);
+                expect(entry.winsP2).toBe(run!.winsP2);
+                expect(entry.ties).toBe(run!.ties ?? 0);
+                expect(entry.totalTurns).toBe(run!.totalTurns);
+                expect(entry.totalJokers).toBe(run!.totalJokers);
+                expect(entry.timestamp).toBe(run!.timestamp);
+            });
+
             it('is reproducible: re-simulation with the recorded seed matches the stored run', { timeout: 60000 }, () => {
                 const run = normalizeSharedRun(data, entry);
                 expect(run).not.toBeNull();

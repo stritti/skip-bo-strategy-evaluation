@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "docs:compile": "node scripts/compile-latex.js"
+    "docs:compile": "node scripts/compile-latex.js",
+    "runs:index": "node scripts/update-runs-index.mjs"
   },
   "devDependencies": {
     "ajv": "^8.20.0",

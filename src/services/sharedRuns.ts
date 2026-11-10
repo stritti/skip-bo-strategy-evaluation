@@ -11,8 +11,36 @@ export interface SharedRunIndexEntry {
     strategyP1?: string;
     strategyP2?: string;
     gamesCount?: number;
+    winsP1?: number;
+    winsP2?: number;
+    ties?: number;
+    totalTurns?: number;
+    totalJokers?: number;
     seed?: number;
     timestamp?: number;
+}
+
+/**
+ * Builds a summary-only SimulationRun from an index entry (no results payload).
+ * Used for the history list; full results are fetched lazily via the file name.
+ */
+export function entryToSummaryRun(entry: SharedRunIndexEntry): SimulationRun {
+    return {
+        file: entry.file,
+        shared: true,
+        version: 1,
+        timestamp: entry.timestamp ?? 0,
+        gamesCount: entry.gamesCount ?? 0,
+        winsP1: entry.winsP1 ?? 0,
+        winsP2: entry.winsP2 ?? 0,
+        ties: entry.ties ?? 0,
+        strategyP1: entry.strategyP1 ?? '',
+        strategyP2: entry.strategyP2 ?? '',
+        totalTurns: entry.totalTurns ?? 0,
+        totalJokers: entry.totalJokers ?? 0,
+        seed: entry.seed,
+        results: []
+    };
 }
 
 /**

@@ -5,6 +5,11 @@
     "strategyP1": "Optimiert",
     "strategyP2": "Zufall",
     "gamesCount": 1000,
+    "winsP1": 297,
+    "winsP2": 673,
+    "ties": 30,
+    "totalTurns": 147029,
+    "totalJokers": 15078,
     "seed": 20260613,
     "timestamp": 1794317977444
   }

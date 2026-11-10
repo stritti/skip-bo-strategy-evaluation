@@ -5,6 +5,7 @@ export interface SimulationRun {
     id?: number;
     shared?: boolean;
     version?: number;
+    file?: string;
     timestamp: number;
     gamesCount: number;
     winsP1: number;
