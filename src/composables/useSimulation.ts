@@ -399,7 +399,9 @@ export function useSimulation() {
 
             if (run.results) {
                 // Performance warning: This might be heavy
-                rawData.value.push(...run.results);
+                // Offset ids so aggregated rows keep unique keys across runs
+                const offset = rawData.value.length;
+                rawData.value.push(...run.results.map(r => ({ ...r, id: offset + r.id })));
             }
         });
 

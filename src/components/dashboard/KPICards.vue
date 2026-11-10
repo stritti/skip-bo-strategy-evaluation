@@ -29,7 +29,7 @@ defineProps<{
       </div>
       <div class="text-3xl font-bold text-red-600 dark:text-red-400">{{ (winRateP1 * 100).toFixed(1) }}%</div>
       <div v-if="winRateCI && winRateCI.margin > 0" class="text-xs text-gray-500 dark:text-slate-400 mt-1">
-        ± {{ (winRateCI.margin * 100).toFixed(1) }}% (95% CI)
+        95% CI (Wilson): {{ (winRateCI.lower * 100).toFixed(1) }}% – {{ (winRateCI.upper * 100).toFixed(1) }}%
       </div>
       <div v-if="tieRate && tieRate > 0" class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
         Unentschieden: {{ (tieRate * 100).toFixed(2) }}%

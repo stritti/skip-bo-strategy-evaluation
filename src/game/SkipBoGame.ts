@@ -69,6 +69,7 @@ export class SkipBoGame {
      */
     deal(): void {
         this.createDeck(); // Ensure deck is fresh
+        this.discardPile = []; // Reset leftovers from any previous game
         this.players.forEach(player => {
             player.stockpile = this.drawPile.splice(0, STOCKPILE_SIZE);
             player.hand = [];
@@ -549,6 +550,8 @@ export class SkipBoGame {
      * Simulates a full game and returns the result object.
      */
     run(): GameResult {
+        // This game uses the rng seeded with this.seed; the result records that
+        // seed so the game can be replayed via new SkipBoGame(app, s1, s2, result.seed)
         this.deal();
 
         const startTime = Date.now();
@@ -569,7 +572,7 @@ export class SkipBoGame {
         }
 
         const durationMs = Date.now() - startTime;
-        return {
+        const result: GameResult = {
             id: ++this.gamesPlayed,
             winner: this.winner ? `${this.winner.name} (${this.winner.strategy})` : 'TIE',
             winnerId: this.winner ? this.winner.id : null,
@@ -580,5 +583,11 @@ export class SkipBoGame {
             strategy: this.winner ? this.winner.strategy : 'Zufall',
             seed: this.seed
         };
+
+        // Advance to a fresh per-game seed for the next run() call on this instance
+        this.seed = Math.floor(this.rng() * 4294967296);
+        this.rng = mulberry32(this.seed);
+
+        return result;
     }
 }

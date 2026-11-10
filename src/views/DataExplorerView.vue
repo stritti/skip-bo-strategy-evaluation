@@ -8,10 +8,10 @@ const simulation = useSimulation();
 
 const handleDownloadCSV = () => {
   downloadCSV(
-    simulation.averageTurns.value,
-    simulation.averageJokers.value,
-    simulation.winRateP1.value,
-    1000
+    simulation.rawData.value,
+    simulation.strategyP1.value,
+    simulation.strategyP2.value,
+    simulation.currentSeed.value
   );
 };
 </script>

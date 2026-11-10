@@ -9,6 +9,7 @@ const silentApp = (): SimulationApp => ({
 });
 
 const withoutDuration = ({ duration, ...rest }: GameResult) => rest;
+const withoutVolatile = ({ duration, id, ...rest }: GameResult) => rest;
 
 describe('mulberry32', () => {
     it('produces values in [0, 1) and is deterministic per seed', () => {
@@ -50,10 +51,25 @@ describe('SkipBoGame reproducibility', () => {
 
     it('generates a seed automatically when none is given', () => {
         const game = new SkipBoGame(silentApp());
+        const seedBefore = game.seed;
         const result = game.run();
 
-        expect(result.seed).toBe(game.seed);
+        expect(result.seed).toBe(seedBefore);
         expect(Number.isInteger(result.seed)).toBe(true);
+    });
+
+    it('records a per-game seed so every single result is replayable', () => {
+        const game = new SkipBoGame(silentApp(), 'Zufall', 'Zufall', 20240613);
+        const first = game.run();
+        const second = game.run();
+
+        // each game gets its own seed derived from the run seed
+        expect(first.seed).not.toBe(second.seed);
+
+        // replaying a recorded per-game seed reproduces that exact game
+        const replay = new SkipBoGame(silentApp(), 'Zufall', 'Zufall', second.seed).run();
+        expect(withoutVolatile(replay)).toEqual(withoutVolatile(second));
+        expect(replay.seed).toBe(second.seed);
     });
 
     it('completes games within the turn limit across many seeds', () => {
