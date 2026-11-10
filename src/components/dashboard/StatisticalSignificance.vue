@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n({ useScope: 'global' });
 /**
  * Statistical Significance Badge Component
  * Displays chi-square test results with visual indicators
@@ -16,17 +18,17 @@ interface Props {
 const props = defineProps<Props>();
 
 const significanceLabel = (p: number): string => {
-    if (p < 0.001) return 'Hochsignifikant (p < 0.001)';
-    if (p < 0.01) return 'Sehr signifikant (p < 0.01)';
-    if (p < 0.05) return 'Signifikant (p < 0.05)';
-    return 'Nicht signifikant (p ≥ 0.05)';
+    if (p < 0.001) return t('comp.sigHigh');
+    if (p < 0.01) return t('comp.sigVery');
+    if (p < 0.05) return t('comp.sigYes');
+    return t('comp.sigNo');
 };
 
 const interpretationText = (p: number): string => {
-    if (p < 0.001) return 'Mit 99.9% Sicherheit kein Zufall';
-    if (p < 0.01) return 'Mit 99% Sicherheit kein Zufall';
-    if (p < 0.05) return 'Mit 95% Sicherheit kein Zufall';
-    return 'Unterschied könnte zufällig sein';
+    if (p < 0.001) return t('comp.interpHigh');
+    if (p < 0.01) return t('comp.interpVery');
+    if (p < 0.05) return t('comp.interp95');
+    return t('comp.interpNo');
 };
 </script>
 
@@ -34,7 +36,7 @@ const interpretationText = (p: number): string => {
     <div v-if="applicable" class="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6 shadow-sm">
         <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <i class="ph-bold ph-chart-line-up text-blue-600 dark:text-blue-400"></i>
-            Statistische Signifikanz
+            {{ t('comp.sigTitle') }}
         </h3>
 
         <!-- Significance Badge -->
@@ -55,11 +57,11 @@ const interpretationText = (p: number): string => {
         <!-- Test Details -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
-                <div class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1">χ² Statistik</div>
+                <div class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1">{{ t('comp.chiSq') }}</div>
                 <div class="text-2xl font-mono font-bold text-gray-900 dark:text-white">{{ chiSquare.toFixed(2) }}</div>
             </div>
             <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
-                <div class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1">p-Wert</div>
+                <div class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1">{{ t('comp.pValue') }}</div>
                 <div class="text-2xl font-mono font-bold text-gray-900 dark:text-white">{{ pValue.toFixed(4) }}</div>
             </div>
         </div>
@@ -74,23 +76,19 @@ const interpretationText = (p: number): string => {
             ]"
         >
             <p class="text-sm text-gray-700 dark:text-slate-200">
-                <strong>Interpretation:</strong> {{ interpretationText(pValue) }}
+                <strong>{{ t('comp.interpretation') }}</strong> {{ interpretationText(pValue) }}
             </p>
             <p class="text-xs text-gray-600 dark:text-slate-400 mt-2" v-if="isSignificant">
-                Der Unterschied zwischen <strong>{{ strategyA }}</strong> und <strong>{{ strategyB }}</strong> 
-                ist statistisch nachweisbar und nicht zufällig.
+                {{ t('comp.sigDiff', { a: strategyA, b: strategyB }) }}
             </p>
             <p class="text-xs text-gray-600 dark:text-slate-400 mt-2" v-else>
-                Bei dieser Stichprobengröße kann nicht mit Sicherheit ausgeschlossen werden, 
-                dass der Unterschied zufällig ist. Erhöhen Sie die Anzahl der Spiele für präzisere Aussagen.
+                {{ t('comp.notSig') }}
             </p>
         </div>
         
         <!-- Info Box -->
         <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-xs text-gray-600 dark:text-slate-400">
-            <strong>Hinweis:</strong> Exakter McNemar-Test (Binomialtest über die unentschiedenen Paare)
-            prüft, ob die Gewinnraten-Unterschiede statistisch signifikant sind (H₀: p = 0,5).
-            Korrekt für gepaarte Duelle, bei denen jeder Sieg des einen die Niederlage des anderen ist.
+            <strong>{{ t('comp.note') }}</strong> {{ t('comp.sigNote') }}
         </div>
     </div>
 </template>

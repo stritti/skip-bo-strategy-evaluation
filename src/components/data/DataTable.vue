@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n({ useScope: 'global' });
+import { computed } from 'vue';
 import type { GameResult } from '../../game/types';
 
 defineProps<{
@@ -12,15 +15,15 @@ const emit = defineEmits<{
   toggleSort: [column: keyof GameResult];
 }>();
 
-const headers: { key: keyof GameResult; label: string }[] = [
-  { key: 'id', label: 'Game ID' },
-  { key: 'winner', label: 'Sieger' },
-  { key: 'turns', label: 'Züge' },
-  { key: 'duration', label: 'Dauer (Sim)' },
-  { key: 'starter', label: 'Startspieler' },
-  { key: 'jokers', label: 'Joker benutzt' },
-  { key: 'strategy', label: 'Strategie Typ' },
-];
+const headers = computed<{ key: keyof GameResult; label: string }[]>(() => [
+  { key: 'id', label: t('data.colGameId') },
+  { key: 'winner', label: t('data.colWinner') },
+  { key: 'turns', label: t('data.colTurns') },
+  { key: 'duration', label: t('data.colDuration') },
+  { key: 'starter', label: t('data.colStarter') },
+  { key: 'jokers', label: t('data.colJokers') },
+  { key: 'strategy', label: t('data.colStrategy') },
+]);
 </script>
 
 <template>
@@ -71,8 +74,8 @@ const headers: { key: keyof GameResult; label: string }[] = [
           <td colspan="7" class="h-64 text-center text-gray-400 dark:text-slate-500 bg-gray-50 dark:bg-slate-800/50">
             <div class="flex flex-col items-center justify-center gap-2">
               <i class="ph-duotone ph-table text-4xl mb-2 opacity-50"></i>
-              <p>Keine Daten vorhanden.</p>
-              <p class="text-xs">Bitte starte zuerst die Simulation im Dashboard.</p>
+              <p>{{ t('data.noData') }}</p>
+              <p class="text-xs">{{ t('data.noDataHint') }}</p>
             </div>
           </td>
         </tr>

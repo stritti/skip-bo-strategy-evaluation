@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+const { t, locale } = useI18n({ useScope: 'global' });
+const numFmt = () => (locale.value === 'en' ? 'en-US' : 'de-DE');
 import { ref, computed, nextTick, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import LogDisplay from '../components/dashboard/LogDisplay.vue';
@@ -64,6 +67,12 @@ const handleRunSimulation = () => {
   simulation.runSimulation();
 };
 
+const buttonText = computed(() => {
+  if (simulation.isSimulating.value) return t('dash.simulating');
+  if (simulation.isFinished.value) return t('dash.reset');
+  return t('dash.start', { n: simulation.maxGamesConfig.value.toLocaleString(numFmt()) });
+});
+
 const handleResetSimulation = () => {
   charts.destroyAllCharts();
   simulation.resetSimulation();
@@ -99,24 +108,22 @@ onMounted(() => {
           <i class="ph-fill ph-cards text-4xl text-red-600"></i>
         </div>
         <div class="flex-1">
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Willkommen beim Skip-Bo Strategy Analyzer</h1>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ t('dash.welcomeTitle') }}</h1>
           <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
-            Diese App simuliert <strong>echte Skip-Bo Spiele</strong> mit verschiedenen KI-Strategien und liefert 
-            wissenschaftlich fundierte Analysen. Vergleichen Sie Gewinnraten, analysieren Sie Spielverläufe 
-            und entdecken Sie optimale Strategien.
+            <span v-html="t('dash.welcomeP')"></span>
           </p>
           <div class="flex flex-wrap gap-3">
             <div class="inline-flex items-center gap-2 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-full text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm">
               <i class="ph-fill ph-check-circle text-green-600"></i>
-              100% regelkonform
+              {{ t('dash.badgeCompliance') }}
             </div>
             <div class="inline-flex items-center gap-2 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-full text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm">
               <i class="ph-fill ph-chart-line text-blue-600"></i>
-              Statistische Signifikanz
+              {{ t('dash.badgeSignificance') }}
             </div>
             <div class="inline-flex items-center gap-2 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-full text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm">
               <i class="ph-fill ph-database text-purple-600"></i>
-              Persistente Historie
+              {{ t('dash.badgeHistory') }}
             </div>
           </div>
         </div>
@@ -125,43 +132,43 @@ onMounted(() => {
       <!-- Statistical Highlights -->
       <div v-if="simulation.cumulativeStats.value && simulation.history.value.length > 0"            class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-gray-200 dark:border-slate-700">
         <div class="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm text-center">
-          <div class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">Spiele Total</div>
+          <div class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">{{ t('dash.totalGames') }}</div>
           <div class="text-2xl font-mono font-bold text-gray-900 dark:text-white">
             {{ simulation.cumulativeStats.value.totalGames.toLocaleString('de-DE') }}
           </div>
-          <div class="text-xs text-gray-500 dark:text-slate-400 mt-1">Simuliert</div>
+          <div class="text-xs text-gray-500 dark:text-slate-400 mt-1">{{ t('dash.simulated') }}</div>
         </div>
         <div class="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm text-center">
-          <div class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">Simulationen</div>
+          <div class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">{{ t('dash.runs') }}</div>
           <div class="text-2xl font-mono font-bold text-blue-600 dark:text-blue-400">
             {{ simulation.cumulativeStats.value.totalRuns }}
           </div>
-          <div class="text-xs text-gray-500 dark:text-slate-400 mt-1">Durchläufe</div>
+          <div class="text-xs text-gray-500 dark:text-slate-400 mt-1">{{ t('dash.runsLabel') }}</div>
         </div>
         <div class="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm text-center">
-          <div class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">Ø Züge</div>
+          <div class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">{{ t('dash.avgTurns') }}</div>
           <div class="text-2xl font-mono font-bold text-green-600 dark:text-green-400">
             {{ simulation.cumulativeStats.value.avgTurns.toFixed(1) }}
           </div>
-          <div class="text-xs text-gray-500 dark:text-slate-400 mt-1">Pro Spiel</div>
+          <div class="text-xs text-gray-500 dark:text-slate-400 mt-1">{{ t('dash.perGame') }}</div>
         </div>
         <div class="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm text-center">
-          <div class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">Ø Joker</div>
+          <div class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">{{ t('dash.avgJokers') }}</div>
           <div class="text-2xl font-mono font-bold text-purple-600 dark:text-purple-400">
             {{ simulation.cumulativeStats.value.avgJokers.toFixed(1) }}
           </div>
-          <div class="text-xs text-gray-500 dark:text-slate-400 mt-1">Pro Spiel</div>
+          <div class="text-xs text-gray-500 dark:text-slate-400 mt-1">{{ t('dash.perGame') }}</div>
         </div>
       </div>
 
       <!-- Call to Action (if no data) -->
       <div v-else class="pt-6 border-t border-gray-200 dark:border-slate-700 text-center">
         <p class="text-gray-600 dark:text-gray-400 mb-4">
-          <strong>Noch keine Simulationen durchgeführt.</strong> Starten Sie jetzt Ihre erste Analyse!
+          <strong>{{ t('dash.noSims') }}</strong> {{ t('dash.noSimsP') }}
         </p>
         <div class="inline-flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:bg-red-700 transition cursor-pointer">
           <i class="ph-bold ph-play-circle"></i>
-          Erste Simulation starten
+          {{ t('dash.startFirst') }}
           <i class="ph-bold ph-arrow-down"></i>
         </div>
       </div>
@@ -177,31 +184,31 @@ onMounted(() => {
           </div>
           <div>
             <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
-              🏆 Die 8 Skip-Bo Expertentipps
-              <span class="bg-yellow-400 dark:bg-indigo-600 text-yellow-900 dark:text-indigo-100 text-xs font-bold px-2 py-0.5 rounded-full">NEU</span>
+              🏆 {{ t('dash.tipsTitle') }}
+              <span class="bg-yellow-400 dark:bg-indigo-600 text-yellow-900 dark:text-indigo-100 text-xs font-bold px-2 py-0.5 rounded-full">{{ t('dash.tipsNew') }}</span>
             </h3>
             <p class="text-gray-700 dark:text-gray-300 text-sm">
-              Entdecken Sie die optimalen Strategien basierend auf 1.000.000 simulierten Runden
+              {{ t('dash.tipsP') }}
             </p>
           </div>
         </div>
         <div class="hidden lg:flex items-center gap-2 text-yellow-700 dark:text-indigo-300 font-bold">
-          Jetzt entdecken
+          {{ t('dash.discover') }}
           <i class="ph-bold ph-arrow-right text-xl"></i>
         </div>
       </div>
       <div class="mt-4 flex flex-wrap gap-2">
         <span class="bg-white dark:bg-slate-800 px-3 py-1 rounded-full text-xs font-medium text-gray-700 dark:text-gray-300 shadow-sm">
-          📊 Vorratsstapel-Priorisierung
+          {{ t('dash.tipStock') }}
         </span>
         <span class="bg-white dark:bg-slate-800 px-3 py-1 rounded-full text-xs font-medium text-gray-700 dark:text-gray-300 shadow-sm">
-          🃏 Joker-Strategie
+          {{ t('dash.tipJoker') }}
         </span>
         <span class="bg-white dark:bg-slate-800 px-3 py-1 rounded-full text-xs font-medium text-gray-700 dark:text-gray-300 shadow-sm">
-          📉 Absteigende Ablage
+          {{ t('dash.tipDesc') }}
         </span>
         <span class="bg-white dark:bg-slate-800 px-3 py-1 rounded-full text-xs font-medium text-gray-700 dark:text-gray-300 shadow-sm">
-          ⚡ Maximale Aggression
+          {{ t('dash.tipAggr') }}
         </span>
       </div>
     </div>
@@ -212,20 +219,20 @@ onMounted(() => {
       <div class="border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50 px-6 py-4 flex justify-between items-center rounded-t-2xl">
         <div>
           <h2 class="text-lg font-bold text-gray-900 dark:text-white">
-            {{ simulation.currentRunId.value === -1 ? 'Gesamtanalyse aller Simulationen' : 'Simulation Control Center' }}
+            {{ simulation.currentRunId.value === -1 ? t('dash.controlTitleAll') : t('dash.controlTitle') }}
           </h2>
           <p class="text-sm text-gray-500 dark:text-gray-400">
             {{ simulation.currentRunId.value === -1 
-               ? 'Aggregierte Statistiken über ' + simulation.maxGamesConfig.value.toLocaleString('de-DE') + ' Spiele' 
-               : 'Modellierung von ' + simulation.maxGamesConfig.value.toLocaleString('de-DE') + ' echten Spielrunden' 
+               ? t('dash.controlSubAll', { n: simulation.maxGamesConfig.value.toLocaleString(numFmt()) })
+               : t('dash.controlSub', { n: simulation.maxGamesConfig.value.toLocaleString(numFmt()) }) 
             }}
           </p>
         </div>
         <div class="text-right">
-          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">Fortschritt</div>
+          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ t('dash.progress') }}</div>
           <div class="text-2xl font-mono font-bold text-gray-900 dark:text-white tabular-nums">
             {{ simulation.formattedCounter }}
-            <span class="text-sm text-gray-400 font-normal">/ {{ simulation.maxGamesConfig.value.toLocaleString('de-DE') }}</span>
+            <span class="text-sm text-gray-400 font-normal">/ {{ simulation.maxGamesConfig.value.toLocaleString(numFmt()) }}</span>
           </div>
         </div>
       </div>
@@ -234,12 +241,12 @@ onMounted(() => {
         <!-- Settings -->
         <div class="lg:col-span-1 border-r pr-6 border-gray-100 dark:border-slate-700 hidden lg:block">
           <h3 class="font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-            <i class="ph-bold ph-gear-six text-xl text-skipbo-red"></i>Simulationseinstellungen
+            <i class="ph-bold ph-gear-six text-xl text-skipbo-red"></i>{{ t('dash.settings') }}
           </h3>
           <div class="bg-skipbo-red/5 dark:bg-skipbo-red/10 p-4 rounded-lg border border-skipbo-red/20">
             <label for="gameCountSlider" class="block text-sm font-medium text-skipbo-red mb-2">
-              Anzahl der Spielrunden:
-              <span class="font-bold text-lg">{{ simulation.maxGamesConfig.value.toLocaleString('de-DE') }}</span>
+              {{ t('dash.gameCount') }}
+              <span class="font-bold text-lg">{{ simulation.maxGamesConfig.value.toLocaleString(numFmt()) }}</span>
             </label>
             <input id="gameCountSlider" type="range" v-model.number="simulation.maxGamesConfig.value"
               :min="simulation.minGames" :max="simulation.maxGamesLimit" :step="simulation.stepGames"
@@ -249,7 +256,7 @@ onMounted(() => {
               <span>{{ simulation.maxGamesLimit.toLocaleString('de-DE') }}</span>
             </div>
             <p class="text-xs text-skipbo-red/70 mt-2">
-              Je höher die Zahl, desto genauer die Statistik (aber länger die Laufzeit).
+              {{ t('dash.sliderHint') }}
             </p>
 
             <!-- Strategy Selectors -->
@@ -257,7 +264,7 @@ onMounted(() => {
               <div class="space-y-5">
                 <!-- P1 -->
                 <div>
-                  <label class="block text-xs font-bold text-skipbo-red uppercase tracking-wider mb-2">Strategie Spieler 1</label>
+                  <label class="block text-xs font-bold text-skipbo-red uppercase tracking-wider mb-2">{{ t('dash.strategyP1') }}</label>
                   <StrategySelect 
                     v-model="simulation.strategyP1.value" 
                     :disabled="simulation.isSimulating.value" 
@@ -266,7 +273,7 @@ onMounted(() => {
 
                 <!-- P2 -->
                 <div>
-                  <label class="block text-xs font-bold text-skipbo-red uppercase tracking-wider mb-2">Strategie Spieler 2</label>
+                  <label class="block text-xs font-bold text-skipbo-red uppercase tracking-wider mb-2">{{ t('dash.strategyP2') }}</label>
                   <StrategySelect 
                     v-model="simulation.strategyP2.value" 
                     :disabled="simulation.isSimulating.value" 
@@ -291,11 +298,10 @@ onMounted(() => {
             <i v-if="simulation.isSimulating.value" class="ph-bold ph-spinner animate-spin text-2xl"></i>
             <i v-else-if="simulation.isFinished.value" class="ph-bold ph-arrow-counter-clockwise text-2xl"></i>
             <i v-else class="ph-bold ph-play text-2xl"></i>
-            {{ simulation.buttonText.value }}
+            {{ buttonText }}
           </button>
           <p class="text-xs text-center text-gray-400 dark:text-gray-500 mt-3 px-4">
-            Klicken Sie, um die {{ simulation.maxGamesConfig.value.toLocaleString('de-DE') }} Spiele zu starten oder
-            den Zustand zurückzusetzen.
+            {{ t('dash.buttonHint', { n: simulation.maxGamesConfig.value.toLocaleString(numFmt()) }) }}
           </p>
         </div>
       </div>
@@ -313,28 +319,28 @@ onMounted(() => {
                         <i class="ph-bold ph-chart-pie-slice text-xl"></i>
                     </div>
                     <div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Globale Analyse</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Zusammenfassung aller gespeicherten Simulationen</p>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('dash.globalAnalysis') }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('dash.globalAnalysisSub') }}</p>
                     </div>
                 </div>
                 <!-- Stats Summary -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-blue-100 dark:border-slate-700 shadow-sm">
-                        <div class="text-xs text-gray-400 uppercase font-bold">Gesamte Spiele</div>
-                        <div class="text-3xl font-mono font-bold text-gray-900 dark:text-white">{{ simulation.maxGamesConfig.value.toLocaleString('de-DE') }}</div>
+                        <div class="text-xs text-gray-400 uppercase font-bold">{{ t('dash.totalGamesLabel') }}</div>
+                        <div class="text-3xl font-mono font-bold text-gray-900 dark:text-white">{{ simulation.maxGamesConfig.value.toLocaleString(numFmt()) }}</div>
                     </div>
                     <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-blue-100 dark:border-slate-700 shadow-sm">
-                        <div class="text-xs text-gray-400 uppercase font-bold">Ø Züge / Spiel</div>
+                        <div class="text-xs text-gray-400 uppercase font-bold">{{ t('dash.avgTurnsPerGame') }}</div>
                         <div class="text-3xl font-mono font-bold text-gray-900 dark:text-white">{{ simulation.cumulativeStats.value?.avgTurns.toFixed(1) }}</div>
                     </div>
                     <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-blue-100 dark:border-slate-700 shadow-sm">
-                        <div class="text-xs text-gray-400 uppercase font-bold">Ø Joker / Spiel</div>
+                        <div class="text-xs text-gray-400 uppercase font-bold">{{ t('dash.avgJokersPerGame') }}</div>
                         <div class="text-3xl font-mono font-bold text-gray-900 dark:text-white">{{ simulation.cumulativeStats.value?.avgJokers.toFixed(1) }}</div>
                     </div>
                 </div>
                 
                  <h4 class="font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-                    <i class="ph-bold ph-sword text-skipbo-red"></i> Matchup-Analyse
+                    <i class="ph-bold ph-sword text-skipbo-red"></i> {{ t('dash.matchupAnalysis') }}
                  </h4>
                  <AggregateAnalysis :results="simulation.aggregatedResults.value" />
              </div>
@@ -366,18 +372,18 @@ onMounted(() => {
             <div class="space-y-6">
               <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <i class="ph-bold ph-chart-bar text-blue-600 dark:text-blue-400"></i>
-                Verteilungsanalyse
+                {{ t('dash.distributionAnalysis') }}
               </h3>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <BoxPlotChart
                   :data="simulation.turnsDistribution.value"
-                  label="Züge pro Spiel"
+                  :label="t('dash.turnsPerGame')"
                   color="#3b82f6"
                   unit=""
                 />
                 <BoxPlotChart
                   :data="simulation.durationDistribution.value"
-                  label="Dauer pro Spiel"
+                  :label="t('dash.durationPerGame')"
                   color="#8b5cf6"
                   unit="ms"
                 />
@@ -388,7 +394,7 @@ onMounted(() => {
             <div class="space-y-6">
               <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <i class="ph-bold ph-flask text-purple-600 dark:text-purple-400"></i>
-                Erweiterte Analysen
+                {{ t('dash.advanced') }}
               </h3>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Effect Size -->
@@ -397,7 +403,7 @@ onMounted(() => {
                   :effectSize="simulation.effectSizeResult.value.value"
                   :interpretation="simulation.effectSizeResult.value.interpretation"
                   :magnitude="simulation.effectSizeResult.value.magnitude"
-                  label="Effektstärke (Gewinnrate vs. Zufall)"
+                  :label="t('dash.effectSizeLabel')"
                 />
                 
                 <!-- Data Export -->
@@ -423,13 +429,11 @@ onMounted(() => {
         <div class="bg-skipbo-blue/5 dark:bg-skipbo-blue/10 border border-skipbo-blue/20 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div class="flex items-center gap-3">
             <i class="ph-fill ph-database text-skipbo-blue dark:text-skipbo-blue/80 text-xl"></i>
-            <span class="text-sm text-skipbo-blue dark:text-skipbo-blue/80 font-bold">Die Rohdaten der {{
-              simulation.maxGamesConfig.value.toLocaleString('de-DE') }} Spiele wurden generiert und die Statistik
-              hochgerechnet.</span>
+            <span class="text-sm text-skipbo-blue dark:text-skipbo-blue/80 font-bold">{{ t('dash.rawDataNote', { n: simulation.maxGamesConfig.value.toLocaleString(numFmt()) }) }}</span>
           </div>
           <button @click="router.push('/data')"
             class="text-sm bg-white dark:bg-slate-800 text-skipbo-blue dark:text-blue-300 px-4 py-2 rounded-lg border border-skipbo-blue/20 dark:border-blue-900 font-bold hover:bg-skipbo-blue/10 dark:hover:bg-blue-900/30 shadow-sm transition w-full sm:w-auto">
-            Zur Datentabelle →
+            {{ t('dash.toDataTable') }}
           </button>
         </div>
       </div>

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n({ useScope: 'global' });
 import DataTable from '../components/data/DataTable.vue';
 import Pagination from '../components/data/Pagination.vue';
 import { useSimulation } from '../composables/useSimulation';
@@ -20,20 +22,19 @@ const handleDownloadCSV = () => {
   <div class="max-w-7xl mx-auto px-4 py-8">
     <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Ergebnis-Tabelle</h1>
-        <p class="text-gray-500 dark:text-slate-400 text-sm">Auszug aus der simulierten Datenbank ({{
-          simulation.rawData.value.length.toLocaleString('de-DE') }} Einträge)</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('data.title') }}</h1>
+        <p class="text-gray-500 dark:text-slate-400 text-sm">{{ t('data.sub', { n: simulation.rawData.value.length.toLocaleString('de-DE') }) }}</p>
       </div>
 
       <div class="flex items-center gap-2">
         <span v-if="!simulation.isFinished.value"
           class="text-xs text-orange-500 bg-orange-50 px-2 py-1 rounded font-bold">
-          ⚠ Simulation läuft noch
+          {{ t('data.running') }}
         </span>
         <button @click="handleDownloadCSV" :disabled="!simulation.isFinished.value"
           class="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg font-medium text-sm hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md transition-all">
           <i class="ph-bold ph-download-simple"></i>
-          CSV Exportieren
+          {{ t('data.csvExport') }}
         </button>
       </div>
     </div>
@@ -42,10 +43,10 @@ const handleDownloadCSV = () => {
       <!-- Table Header Filter -->
       <div class="bg-gray-50 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-3 flex gap-4 overflow-x-auto">
         <div class="flex items-center gap-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-xs text-gray-600 dark:text-slate-300">
-          <i class="ph-bold ph-funnel"></i> Filter: Alle
+          <i class="ph-bold ph-funnel"></i> {{ t('data.filterAll') }}
         </div>
         <div class="flex items-center gap-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-xs text-gray-600 dark:text-slate-300">
-          <i class="ph-bold ph-arrows-down-up"></i> Sortierung: {{ simulation.sortColumn.value }} ({{ simulation.sortDirection.value.toUpperCase() }})
+          <i class="ph-bold ph-arrows-down-up"></i> {{ t('data.sorting', { col: simulation.sortColumn.value, dir: simulation.sortDirection.value.toUpperCase() }) }}
         </div>
       </div>
 

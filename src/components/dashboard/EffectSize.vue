@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n({ useScope: 'global' });
 /**
  * Effect Size Display Component
- * Shows Cohen's h (proportions) with visual magnitude indicator
+ * Shows {{ t('comp.cohensH') }} (proportions) with visual magnitude indicator
  */
 
 interface Props {
@@ -45,10 +47,10 @@ const getMagnitudeIcon = (mag: string): string => {
         </div>
         <div class="flex items-baseline gap-2">
             <div class="text-3xl font-mono font-bold text-gray-900">h = {{ effectSize.toFixed(2) }}</div>
-            <div class="text-sm text-gray-500">Cohen's h</div>
+            <div class="text-sm text-gray-500">{{ t('comp.cohensH') }}</div>
         </div>
         <div class="mt-2 text-xs text-gray-600">
-            {{ effectSize >= 0.8 ? 'Praktisch sehr relevant' : effectSize >= 0.5 ? 'Praktisch relevant' : 'Begrenzte praktische Relevanz' }}
+            {{ effectSize >= 0.8 ? t('comp.effHigh') : effectSize >= 0.5 ? t('comp.effMid') : t('comp.effLow') }}
         </div>
     </div>
 </template>

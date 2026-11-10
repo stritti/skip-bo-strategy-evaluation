@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n({ useScope: 'global' });
 /**
  * Data Export Component
  * Allows exporting simulation data as CSV or JSON
@@ -95,10 +97,10 @@ const exportToJSON = () => {
     <div class="bg-white rounded-xl border border-gray-200 p-4">
         <h4 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
             <i class="ph-bold ph-download text-blue-600"></i>
-            Daten exportieren
+            {{ t('comp.exportTitle') }}
         </h4>
         <p class="text-sm text-gray-600 mb-4">
-            Exportieren Sie alle {{ data.length.toLocaleString('de-DE') }} Spielergebnisse für externe Analysen.
+            {{ t('comp.exportP', { n: data.length.toLocaleString('de-DE') }) }}
         </p>
         <div class="flex gap-3">
             <button
@@ -106,8 +108,7 @@ const exportToJSON = () => {
                 :disabled="isDisabled || data.length === 0"
                 class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium text-sm hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
             >
-                <i class="ph-bold ph-file-csv"></i>
-                CSV
+                <i class="ph-bold ph-file-csv"></i>{{ t('data.csv') }}
             </button>
             <button
                 @click="exportToJSON"
@@ -119,7 +120,7 @@ const exportToJSON = () => {
             </button>
         </div>
         <div class="mt-3 text-xs text-gray-500">
-            💡 Nutzen Sie CSV für Excel/R, JSON für Python/JavaScript
+            {{ t('comp.exportHint') }}
         </div>
     </div>
 </template>

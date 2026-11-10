@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n({ useScope: 'global' });
 import { computed } from 'vue';
 import { calculateConfidenceInterval, mcnemarExactTest, holmCorrect } from '../../utils/statistics';
 
@@ -47,12 +49,12 @@ const getBgColor = (rate: number) => {
       <!-- Header match up -->
       <div class="flex items-center justify-between mb-4">
         <div class="flex flex-col items-center">
-            <span class="text-xs uppercase font-bold text-gray-400 mb-1">Spieler 1</span>
+            <span class="text-xs uppercase font-bold text-gray-400 mb-1">{{ t('comp.histP1') }}</span>
             <span class="font-bold text-gray-800 text-lg">{{ item.strategyP1 }}</span>
         </div>
         <div class="text-gray-300 font-bold text-xl">VS</div>
         <div class="flex flex-col items-center">
-            <span class="text-xs uppercase font-bold text-gray-400 mb-1">Spieler 2</span>
+            <span class="text-xs uppercase font-bold text-gray-400 mb-1">{{ t('comp.histP2') }}</span>
             <span class="font-bold text-gray-800 text-lg">{{ item.strategyP2 }}</span>
         </div>
       </div>
@@ -60,27 +62,27 @@ const getBgColor = (rate: number) => {
       <!-- Stats -->
       <div class="space-y-3">
         <div class="flex justify-between items-end border-b border-gray-200/50 pb-2">
-            <span class="text-sm text-gray-500">Gewinnrate P1</span>
+            <span class="text-sm text-gray-500">{{ t('comp.winRateP1') }}</span>
             <span class="text-2xl font-mono font-bold" :class="getColor(item.winRateP1)">
                 {{ (item.winRateP1 * 100).toFixed(1) }}%
             </span>
         </div>
 
         <div class="flex justify-between items-center text-xs text-gray-500">
-            <span>95% CI (Wilson): {{ (item.ci.lower * 100).toFixed(1) }}% – {{ (item.ci.upper * 100).toFixed(1) }}%</span>
+            <span>{{ t('comp.wilsonCI', { lo: (item.ci.lower * 100).toFixed(1), hi: (item.ci.upper * 100).toFixed(1) }) }}</span>
             <span v-if="item.significant" class="font-bold text-green-700 bg-green-100 border border-green-200 px-2 py-0.5 rounded">
-                signifikant (Holm, p={{ item.adjPValue.toExponential(1) }})
+                {{ t('comp.sigHolm', { p: item.adjPValue.toExponential(1) }) }}
             </span>
-            <span v-else-if="item.games >= 30" class="text-gray-400">nicht signifikant (Holm)</span>
+            <span v-else-if="item.games >= 30" class="text-gray-400">{{ t('comp.notSigHolm') }}</span>
         </div>
         
         <div class="grid grid-cols-2 gap-4 text-sm">
             <div>
-                <span class="block text-gray-400 text-xs">Spiele</span>
+                <span class="block text-gray-400 text-xs">{{ t('comp.games') }}</span>
                 <span class="font-bold text-gray-700">{{ item.games.toLocaleString('de-DE') }}</span>
             </div>
             <div class="text-right">
-                <span class="block text-gray-400 text-xs">Siege P1</span>
+                <span class="block text-gray-400 text-xs">{{ t('comp.winsP1') }}</span>
                 <span class="font-bold text-gray-700">{{ item.winsP1.toLocaleString('de-DE') }}</span>
             </div>
         </div>
