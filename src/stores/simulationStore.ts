@@ -16,6 +16,7 @@ import {
     tCriticalValue
 } from '../utils/statistics';
 import { dbService, type SimulationRun } from '../services/dbService';
+import { trackEvent } from '../utils/analytics';
 import { useHistoryStore } from './historyStore';
 
 // Configuration constants
@@ -41,6 +42,8 @@ export const useSimulationStore = defineStore('simulation', () => {
     const sortDirection = ref<'asc' | 'desc'>('desc');
     const strategyP1 = ref<Strategy>('Optimiert');
     const strategyP2 = ref<Strategy>('Zufall');
+    // Strategies of the currently loaded/finished run (the selectors get randomized for the next run)
+    const lastRunStrategies = ref<{ p1: Strategy; p2: Strategy } | null>(null);
 
     // Statistical Results (Current Run)
     const realResults = reactive({
@@ -283,10 +286,12 @@ export const useSimulationStore = defineStore('simulation', () => {
 
         const seed = generateSeed();
         historyStore.currentSeed = seed;
+        lastRunStrategies.value = { p1: strategyP1.value, p2: strategyP2.value };
         const game = new SkipBoGame(verboseApp, strategyP1.value, strategyP2.value, seed);
         const batchSize = 100;
         let totalGamesRun = 0;
 
+        trackEvent('simulation_started', { strategyP1: strategyP1.value, strategyP2: strategyP2.value, games: maxGamesConfig.value });
         logEvent('START', `Starte Echtsimulation von ${maxGamesConfig.value.toLocaleString('de-DE')} Runden (Seed: ${seed})...`);
 
         const processBatch = (): void => {
@@ -373,6 +378,15 @@ export const useSimulationStore = defineStore('simulation', () => {
                 isSimulating.value = false;
                 isFinished.value = true;
 
+                trackEvent('simulation_finished', {
+                    strategyP1: strategyP1.value,
+                    strategyP2: strategyP2.value,
+                    games: totalGamesRun,
+                    winsP1: realResults.winsP1,
+                    winsP2: realResults.winsP2,
+                    ties: realResults.ties,
+                    seed
+                });
                 logEvent('SUCCESS', `Simulation von ${maxGamesConfig.value.toLocaleString('de-DE')} Runden abgeschlossen!`);
             }
         };
@@ -429,6 +443,7 @@ export const useSimulationStore = defineStore('simulation', () => {
         sortDirection,
         strategyP1,
         strategyP2,
+        lastRunStrategies,
         realResults,
 
         // Getters

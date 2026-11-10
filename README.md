@@ -62,6 +62,10 @@ Stellen Sie sicher, dass [Node.js](https://nodejs.org/) installiert ist.
    npm run build
    ```
 
+## 📊 Analytics (datensparsam)
+
+Die App nutzt selbstgehostetes [Plausible](https://plausible.io) (keine Cookies, keine PII) – bereits für Pageviews/Outbound-Links aktiv. Zusätzlich werden Custom Events gesendet: `simulation_started`, `simulation_finished` (Strategien, N, Siege, Seed), `run_loaded`, `runs_aggregated`, `export_csv`, `export_json` (siehe `src/utils/analytics.ts`).
+
 ## 🌐 Sprachen
 
 Die App ist zweisprachig: Deutsch (Default, `/`) und Englisch (`/en/...`) – inkl. hreflang-Alternates, per-route SEO-Metadaten in beiden Sprachen und Sprachumschalter in der Navigation. Übersetzt sind aktuell Navigation, Footer, About, Regeln, Strategie und das Strategie-Duell; Dashboard/Analyse/Data Explorer folgen.

@@ -5,6 +5,7 @@
  */
 
 import type { GameResult } from '../../game/types';
+import { trackEvent } from '../../utils/analytics';
 
 interface Props {
     data: GameResult[];
@@ -20,6 +21,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const exportToCSV = () => {
     if (props.data.length === 0) return;
+
+    trackEvent('export_csv', { games: props.data.length, strategyP1: props.strategyP1, strategyP2: props.strategyP2, seed: props.seed ?? 0 });
 
     // CSV Header
     const headers = ['ID', 'Winner', 'WinnerID', 'Turns', 'Duration (ms)', 'Starter', 'Jokers', 'Strategy', 'Seed'];
@@ -54,6 +57,8 @@ const exportToCSV = () => {
 
 const exportToJSON = () => {
     if (props.data.length === 0) return;
+
+    trackEvent('export_json', { games: props.data.length, strategyP1: props.strategyP1, strategyP2: props.strategyP2, seed: props.seed ?? 0 });
 
     const metadata = {
         exportDate: new Date().toISOString(),

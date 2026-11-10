@@ -38,7 +38,7 @@ export const createApp = ViteSSG(
                 typeof localStorage !== 'undefined' &&
                 localStorage.getItem(LOCALE_STORAGE_KEY) === 'en'
             ) {
-                next('/en')
+                next({ path: '/en', query: to.query })
                 return
             }
             next()

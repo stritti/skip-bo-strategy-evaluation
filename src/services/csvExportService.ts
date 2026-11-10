@@ -4,6 +4,7 @@
  */
 
 import type { GameResult } from '../game/types';
+import { trackEvent } from '../utils/analytics';
 
 const escapeCsv = (value: string | number | null | undefined): string => {
     const s = String(value ?? '');
@@ -21,6 +22,8 @@ export function downloadCSV(
     seed?: number | null
 ): void {
     if (results.length === 0) return;
+
+    trackEvent('export_csv', { games: results.length, strategyP1, strategyP2, seed: seed ?? 0 });
 
     const headers = ['ID', 'Winner', 'WinnerID', 'Turns', 'Duration_ms', 'Starter', 'Jokers', 'Strategy', 'Seed'];
     const metadata = [
