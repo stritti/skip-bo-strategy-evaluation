@@ -16,6 +16,7 @@ import {
     tCriticalValue
 } from '../utils/statistics';
 import { dbService, type SimulationRun } from '../services/dbService';
+import { trackEvent } from '../utils/analytics';
 import { useHistoryStore } from './historyStore';
 
 // Configuration constants
@@ -287,6 +288,7 @@ export const useSimulationStore = defineStore('simulation', () => {
         const batchSize = 100;
         let totalGamesRun = 0;
 
+        trackEvent('simulation_started', { strategyP1: strategyP1.value, strategyP2: strategyP2.value, games: maxGamesConfig.value });
         logEvent('START', `Starte Echtsimulation von ${maxGamesConfig.value.toLocaleString('de-DE')} Runden (Seed: ${seed})...`);
 
         const processBatch = (): void => {
@@ -373,6 +375,15 @@ export const useSimulationStore = defineStore('simulation', () => {
                 isSimulating.value = false;
                 isFinished.value = true;
 
+                trackEvent('simulation_finished', {
+                    strategyP1: strategyP1.value,
+                    strategyP2: strategyP2.value,
+                    games: totalGamesRun,
+                    winsP1: realResults.winsP1,
+                    winsP2: realResults.winsP2,
+                    ties: realResults.ties,
+                    seed
+                });
                 logEvent('SUCCESS', `Simulation von ${maxGamesConfig.value.toLocaleString('de-DE')} Runden abgeschlossen!`);
             }
         };

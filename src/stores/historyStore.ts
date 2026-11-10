@@ -7,6 +7,7 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import { dbService, type SimulationRun } from '../services/dbService';
 import { entryToSummaryRun, normalizeSharedRun, type SharedRunIndexEntry } from '../services/sharedRuns';
+import { trackEvent } from '../utils/analytics';
 import { useSimulationStore } from './simulationStore';
 
 export const useHistoryStore = defineStore('history', () => {
@@ -99,6 +100,7 @@ export const useHistoryStore = defineStore('history', () => {
         sim.isFinished = true;
         sim.progress = 100;
 
+        trackEvent('run_loaded', { shared: !!run.shared, games: run.gamesCount, seed: run.seed ?? 0 });
         sim.logEvent('INFO', `Historischen Lauf vom ${new Date(run.timestamp).toLocaleString('de-DE')} geladen.`);
     };
 
@@ -203,6 +205,7 @@ export const useHistoryStore = defineStore('history', () => {
         sim.isFinished = true;
         sim.progress = 100;
 
+        trackEvent('runs_aggregated', { runs: history.value.length, games: totalGames });
         sim.logEvent('SUCCESS', `${history.value.length} Simulationen erfolgreich aggregiert geladen.`);
     };
 
