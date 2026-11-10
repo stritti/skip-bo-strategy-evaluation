@@ -7,6 +7,7 @@ import schema from '../../schemas/simulation-run.schema.json';
 import { SkipBoGame } from '../game/SkipBoGame';
 import type { GameResult, SimulationApp, Strategy } from '../game/types';
 import { normalizeSharedRun, type SharedRunIndexEntry } from '../services/sharedRuns';
+import { runsIndex } from '../generated/runsIndex';
 
 const runsDir = fileURLToPath(new URL('../../public/data/runs/', import.meta.url));
 const MAX_RUN_FILE_BYTES = 500_000;
@@ -34,6 +35,10 @@ describe('shared runs (public/data/runs) – schema, size, reproducibility', () 
         for (const file of files) {
             expect(index.some(e => e.file === file), `orphan run file not in index.json: ${file}`).toBe(true);
         }
+    });
+
+    it('generated src/generated/runsIndex.ts matches index.json (run npm run runs:index)', () => {
+        expect(runsIndex).toEqual(index);
     });
 
     for (const entry of index) {

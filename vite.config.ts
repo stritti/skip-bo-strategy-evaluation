@@ -1,7 +1,18 @@
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
-import { DEFAULT_SEO, resolveRouteSeo, pageUrl, dePathOf, enPathOf, normalizePath } from './src/utils/seo'
+import {
+    DEFAULT_SEO,
+    resolveRouteSeo,
+    runSeoFor,
+    runJsonLdHtml,
+    runIdOfFile,
+    pageUrl,
+    dePathOf,
+    enPathOf,
+    normalizePath
+} from './src/utils/seo'
+import { runsIndex } from './src/generated/runsIndex'
 
 const escapeAttr = (value: string): string =>
     value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -20,6 +31,9 @@ const replaceLinkHref = (html: string, rel: string, href: string, extraAttr?: st
     )
 }
 
+// Shared runs committed to public/data/runs/ get a prerendered permalink /runs/<runId>
+const runPaths = runsIndex.flatMap(e => [`/runs/${runIdOfFile(e.file)}`, `/en/runs/${runIdOfFile(e.file)}`])
+
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [
@@ -31,13 +45,14 @@ export default defineConfig({
         script: 'async',
         formatting: 'minify',
         dirStyle: 'nested',
-        includeAllRoutes: true,
+        includeAllRoutes: false,
+        includedRoutes: (paths) => [...paths.filter(p => !p.includes(':')), ...runPaths],
         onBeforePageRender(route, indexHTML) {
-            const { seo, locale } = resolveRouteSeo(route)
-            const meta = seo ?? DEFAULT_SEO
             const normalized = normalizePath(route)
-            const url = pageUrl(normalized)
+            const { seo, locale } = resolveRouteSeo(normalized)
             const dePath = dePathOf(normalized)
+            const meta = dePath.startsWith('/runs/') ? (runSeoFor(dePath, locale) ?? seo) : (seo ?? DEFAULT_SEO)
+            const url = pageUrl(normalized)
             let html = indexHTML.replace(
                 /<html lang="[^"]*">/,
                 `<html lang="${locale}">`
@@ -57,6 +72,7 @@ export default defineConfig({
             html = replaceLinkHref(html, 'alternate', pageUrl(dePath), 'hreflang', 'de')
             html = replaceLinkHref(html, 'alternate', pageUrl(enPathOf(dePath)), 'hreflang', 'en')
             html = replaceLinkHref(html, 'alternate', pageUrl(dePath), 'hreflang', 'x-default')
+            html = html.replace('<!--RUN-JSONLD-->', dePath.startsWith('/runs/') ? runJsonLdHtml(dePath, url) : '')
             return html
         }
     }

@@ -145,6 +145,22 @@ export const de = {
         discards: '{name} legt {card} ab.',
         nextTurn: '{name} ist am Zug.',
         vs: 'VS'
+    },
+    run: {
+        title: 'Geteilter Simulationslauf',
+        notFound: 'Kein geteilter Lauf mit diesem Seed gefunden.',
+        matchup: 'Matchup',
+        games: 'Spiele',
+        winRate: 'Gewinnrate P1',
+        wins: 'Siege P1 : P2',
+        ties: 'Unentschieden',
+        seed: 'Seed',
+        timestamp: 'Zeitstempel',
+        avgTurns: 'Züge',
+        permalink: 'Permalink',
+        reproducible: 'Reproduzierbar: Der Seed wird in CI re-simuliert (npm test) und muss exakt übereinstimmen.',
+        download: 'JSON herunterladen',
+        openDashboard: 'Im Dashboard öffnen'
     }
 };
 
@@ -295,6 +311,22 @@ export const en = {
         discards: '{name} discards {card}.',
         nextTurn: "{name}'s turn.",
         vs: 'VS'
+    },
+    run: {
+        title: 'Shared simulation run',
+        notFound: 'No shared run found for this seed.',
+        matchup: 'Matchup',
+        games: 'Games',
+        winRate: 'Win rate P1',
+        wins: 'Wins P1 : P2',
+        ties: 'Ties',
+        seed: 'Seed',
+        timestamp: 'Timestamp',
+        avgTurns: 'Turns',
+        permalink: 'Permalink',
+        reproducible: 'Reproducible: the seed is re-simulated in CI (npm test) and must match exactly.',
+        download: 'Download JSON',
+        openDashboard: 'Open in dashboard'
     }
 };
 
