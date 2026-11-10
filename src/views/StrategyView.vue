@@ -6,7 +6,7 @@ import StrategyDuel from '../components/StrategyDuel.vue';
 <template>
   <div class="max-w-6xl mx-auto px-4 py-8">
     <div class="text-center mb-12">
-      <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Strategie-Profile</h2>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Strategie-Profile</h1>
       <p class="text-gray-500 dark:text-gray-400 text-lg">Wie "denken" die Computerspieler?</p>
     </div>
 

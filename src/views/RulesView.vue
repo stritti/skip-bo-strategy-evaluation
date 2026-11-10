@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-4xl mx-auto px-4 py-8">
     <div class="text-center mb-10">
-      <h2 class="text-2xl font-bold text-gray-900">Offizielle Skip-Bo Spielregeln</h2>
+      <h1 class="text-2xl font-bold text-gray-900">Offizielle Skip-Bo Spielregeln</h1>
       <p class="text-gray-500">Diese Regeln bilden die Grundlage für die statistische Analyse.</p>
     </div>
 
