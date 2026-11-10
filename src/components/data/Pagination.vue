@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n({ useScope: 'global' });
 defineProps<{
   currentPage: number;
   pageSize: number;
@@ -17,7 +19,7 @@ const emit = defineEmits<{
     <div class="text-xs text-gray-500">
       Zeige <span class="font-bold text-gray-900">{{ (currentPage - 1) * pageSize + 1 }}</span>
       bis <span class="font-bold text-gray-900">{{ Math.min(currentPage * pageSize, totalRows) }}</span> 
-      von {{ totalRows.toLocaleString('de-DE') }} Ergebnissen
+      {{ t('data.ofResults', { n: totalRows.toLocaleString('de-DE') }) }}
     </div>
     <div class="flex items-center gap-2">
       <button @click="emit('prevPage')" :disabled="currentPage === 1"

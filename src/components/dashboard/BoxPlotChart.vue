@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n({ useScope: 'global' });
 /**
  * Box Plot Component
  * Displays distribution quartiles, 1.5*IQR whiskers and outliers using custom SVG rendering
@@ -130,7 +132,7 @@ const outliers = computed(() => props.data.outliers ?? []);
                     text-anchor="middle"
                     class="text-xs fill-gray-600"
                 >
-                    Min: {{ data.min.toFixed(1) }}{{ unit }}
+                    {{ t('comp.boxMin', { v: data.min.toFixed(1), u: unit }) }}
                 </text>
                 <text
                     :x="getXPosition(data.median)"
@@ -138,7 +140,7 @@ const outliers = computed(() => props.data.outliers ?? []);
                     text-anchor="middle"
                     class="text-xs fill-gray-900 font-bold"
                 >
-                    Median: {{ data.median.toFixed(1) }}{{ unit }}
+                    {{ t('comp.boxMedian', { v: data.median.toFixed(1), u: unit }) }}
                 </text>
                 <text
                     :x="getXPosition(data.max)"
@@ -146,7 +148,7 @@ const outliers = computed(() => props.data.outliers ?? []);
                     text-anchor="middle"
                     class="text-xs fill-gray-600"
                 >
-                    Max: {{ data.max.toFixed(1) }}{{ unit }}
+                    {{ t('comp.boxMax', { v: data.max.toFixed(1), u: unit }) }}
                 </text>
             </g>
         </svg>
@@ -154,7 +156,7 @@ const outliers = computed(() => props.data.outliers ?? []);
         <!-- Statistics Table -->
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4">
             <div class="bg-gray-50 p-3 rounded-lg text-center">
-                <div class="text-xs text-gray-500 font-medium">Min</div>
+                <div class="text-xs text-gray-500 font-medium">{{ t('comp.min') }}</div>
                 <div class="text-lg font-mono font-bold text-gray-900">{{ data.min.toFixed(1) }}</div>
             </div>
             <div class="bg-gray-50 p-3 rounded-lg text-center">
@@ -162,7 +164,7 @@ const outliers = computed(() => props.data.outliers ?? []);
                 <div class="text-lg font-mono font-bold text-gray-900">{{ data.q1.toFixed(1) }}</div>
             </div>
             <div class="bg-blue-50 p-3 rounded-lg text-center border-2 border-blue-200">
-                <div class="text-xs text-blue-700 font-bold">Median</div>
+                <div class="text-xs text-blue-700 font-bold">{{ t('comp.median') }}</div>
                 <div class="text-lg font-mono font-bold text-blue-900">{{ data.median.toFixed(1) }}</div>
             </div>
             <div class="bg-gray-50 p-3 rounded-lg text-center">
@@ -170,7 +172,7 @@ const outliers = computed(() => props.data.outliers ?? []);
                 <div class="text-lg font-mono font-bold text-gray-900">{{ data.q3.toFixed(1) }}</div>
             </div>
             <div class="bg-gray-50 p-3 rounded-lg text-center">
-                <div class="text-xs text-gray-500 font-medium">Max</div>
+                <div class="text-xs text-gray-500 font-medium">{{ t('comp.max') }}</div>
                 <div class="text-lg font-mono font-bold text-gray-900">{{ data.max.toFixed(1) }}</div>
             </div>
         </div>

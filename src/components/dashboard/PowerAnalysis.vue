@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n({ useScope: 'global' });
 /**
  * Power Analysis Tool Component
  * Calculates required sample size for detecting an effect
@@ -39,7 +41,7 @@ const estimatedPower = computed(() => {
 
         <!-- Sample Size Calculator -->
         <div class="mb-6">
-            <h5 class="font-semibold text-gray-800 mb-3 text-sm">Benötigte Stichprobengröße</h5>
+            <h5 class="font-semibold text-gray-800 mb-3 text-sm">{{ t('comp.powerNeeded') }}</h5>
             
             <div class="space-y-4">
                 <div>
@@ -55,9 +57,9 @@ const estimatedPower = computed(() => {
                         class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
                     />
                     <div class="flex justify-between text-[10px] text-gray-400 mt-1">
-                        <span>Klein (0.2)</span>
-                        <span>Mittel (0.5)</span>
-                        <span>Groß (0.8+)</span>
+                        <span>{{ t('comp.small') }}</span>
+                        <span>{{ t('comp.medium') }}</span>
+                        <span>{{ t('comp.large') }}</span>
                     </div>
                 </div>
 
@@ -77,7 +79,7 @@ const estimatedPower = computed(() => {
             </div>
 
             <div class="mt-4 p-4 bg-purple-50 rounded-lg border-2 border-purple-200">
-                <div class="text-sm text-gray-700 mb-1">Empfohlene Mindestanzahl:</div>
+                <div class="text-sm text-gray-700 mb-1">{{ t('comp.recommendedMin') }}</div>
                 <div class="text-3xl font-mono font-bold text-purple-900">
                     {{ requiredN.toLocaleString('de-DE') }} Spiele
                 </div>
@@ -89,7 +91,7 @@ const estimatedPower = computed(() => {
 
         <!-- Power Estimator -->
         <div class="pt-6 border-t border-gray-200">
-            <h5 class="font-semibold text-gray-800 mb-3 text-sm">Power-Schätzung für aktuelle Simulation</h5>
+            <h5 class="font-semibold text-gray-800 mb-3 text-sm">{{ t('comp.powerCurrent') }}</h5>
             
             <div class="space-y-4">
                 <div>
@@ -122,7 +124,7 @@ const estimatedPower = computed(() => {
             </div>
 
             <div class="mt-4 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
-                <div class="text-sm text-gray-700 mb-1">Geschätzte Power:</div>
+                <div class="text-sm text-gray-700 mb-1">{{ t('comp.estimatedPower') }}</div>
                 <div class="text-3xl font-mono font-bold text-blue-900">
                     {{ (estimatedPower * 100).toFixed(1) }}%
                 </div>

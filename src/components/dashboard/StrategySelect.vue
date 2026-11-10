@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import type { Strategy } from '../../game/types';
+import { useStrategyLabel } from '../../i18n';
 
 const props = defineProps<{
   modelValue: Strategy;
@@ -11,6 +12,7 @@ const emit = defineEmits<{
   'update:modelValue': [value: Strategy];
 }>();
 
+const label = useStrategyLabel();
 const isOpen = ref(false);
 const options: Strategy[] = ['Optimiert', 'Zufall', 'Spontan', 'Fortgeschritten'];
 const containerRef = ref<HTMLElement | null>(null);
@@ -65,7 +67,7 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside));
       :class="{ 'opacity-60 cursor-not-allowed': disabled, 'border-skipbo-red ring-2 ring-skipbo-red/20': isOpen }">
       <span class="flex items-center gap-3">
         <i :class="[getIcon(modelValue), getColor(modelValue)]" class="ph-bold text-xl"></i>
-        <span class="block truncate font-bold text-gray-900 dark:text-white">{{ modelValue }}</span>
+        <span class="block truncate font-bold text-gray-900 dark:text-white">{{ label(modelValue) }}</span>
       </span>
       <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
         <i class="ph-bold ph-caret-down text-skipbo-red transition-transform duration-200" :class="{ 'rotate-180': isOpen }"></i>
@@ -92,7 +94,7 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside));
                class="ph-bold text-xl"></i>
             <span class="font-medium block truncate"
                   :class="option === modelValue ? 'text-skipbo-red font-bold' : 'text-gray-900 dark:text-slate-200'">
-              {{ option }}
+              {{ label(option) }}
             </span>
           </div>
 

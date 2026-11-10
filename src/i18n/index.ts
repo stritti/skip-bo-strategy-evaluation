@@ -1,4 +1,4 @@
-import { createI18n } from 'vue-i18n';
+import { createI18n, useI18n } from 'vue-i18n';
 import { de, en } from './messages';
 
 export type AppLocale = 'de' | 'en';
@@ -16,4 +16,16 @@ export function createAppI18n(initialLocale: AppLocale = 'de') {
 
 export function isEnPath(path: string): boolean {
     return path === '/en' || path.startsWith('/en/');
+}
+
+const strategyKeyMap: Record<string, 'opt' | 'rnd' | 'spo' | 'adv'> = {
+    Optimiert: 'opt',
+    Zufall: 'rnd',
+    Spontan: 'spo',
+    Fortgeschritten: 'adv'
+};
+
+export function useStrategyLabel() {
+    const { t } = useI18n({ useScope: 'global' });
+    return (s: string) => t(`strategy.names.${strategyKeyMap[s] ?? 'opt'}`);
 }

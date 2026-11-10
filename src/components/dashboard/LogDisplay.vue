@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n({ useScope: 'global' });
 import type { LogEntry } from '../../game/types';
 
 defineProps<{
@@ -19,7 +21,7 @@ defineProps<{
     </transition-group>
     
     <div v-if="logs.length === 0" class="flex h-full items-center justify-center text-gray-500 italic">
-      System bereit. Warte auf Startbefehl...
+      {{ t('comp.logEmpty') }}
     </div>
   </div>
 </template>
