@@ -88,8 +88,9 @@ const interpretationText = (p: number): string => {
         
         <!-- Info Box -->
         <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-xs text-gray-600 dark:text-slate-400">
-            <strong>Hinweis:</strong> Chi-Quadrat Test prüft, ob die Gewinnraten-Unterschiede 
-            statistisch signifikant sind (H₀: gleiche Wahrscheinlichkeiten).
+            <strong>Hinweis:</strong> Exakter McNemar-Test (Binomialtest über die unentschiedenen Paare)
+            prüft, ob die Gewinnraten-Unterschiede statistisch signifikant sind (H₀: p = 0,5).
+            Korrekt für gepaarte Duelle, bei denen jeder Sieg des einen die Niederlage des anderen ist.
         </div>
     </div>
 </template>

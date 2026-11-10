@@ -11,8 +11,10 @@ import {
     calculateConfidenceInterval,
     calculateQuartiles,
     chiSquareTest,
-    calculateCohenD,
-    calculateStandardDeviation
+    mcnemarExactTest,
+    mannWhitneyUTest,
+    cohensH,
+    tCriticalValue
 } from '../utils/statistics';
 
 import { dbService, type SimulationRun } from '../services/dbService';
@@ -113,16 +115,14 @@ export function useSimulation() {
         if (rawData.value.length < 30) {
             return { margin: 0, lower: averageTurns.value, upper: averageTurns.value };
         }
-        // For means (not proportions), use t-distribution approximation
-        // Simplified: use proportion CI formula as approximation
+        // For means, use the t-distribution critical value with sample variance (n-1)
         const turns = rawData.value.map(r => r.turns);
         const mean = averageTurns.value;
         const n = turns.length;
 
-        // Standard error of the mean
-        const variance = turns.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / n;
+        const variance = turns.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (n - 1);
         const stdError = Math.sqrt(variance / n);
-        const margin = 1.96 * stdError; // 95% CI
+        const margin = tCriticalValue(0.95, n - 1) * stdError;
 
         return {
             margin,
@@ -170,37 +170,56 @@ export function useSimulation() {
         return { ...result, applicable: true };
     });
 
-    // --- Effect Size (Cohen's d) ---
-    const effectSizeResult = computed(() => {
-        // Only meaningful when comparing different strategies
-        if (strategyP1.value === strategyP2.value || rawData.value.length < 30) {
+    // --- McNemar exact test (correct test for paired duel outcomes) ---
+    const mcnemarResult = computed(() => {
+        const decisive = realResults.winsP1 + realResults.winsP2;
+        if (strategyP1.value === strategyP2.value || decisive < 30) {
             return {
-                d: 0,
+                statistic: 0,
+                pValue: 1,
+                isSignificant: false,
+                discordantPairs: decisive,
+                applicable: false
+            };
+        }
+
+        const result = mcnemarExactTest(realResults.winsP1, realResults.winsP2);
+        return { ...result, applicable: true };
+    });
+
+    // --- Effect Size (Cohen's h on the decisive win rate vs. chance 0.5) ---
+    const effectSizeResult = computed(() => {
+        const decisive = realResults.winsP1 + realResults.winsP2;
+        if (strategyP1.value === strategyP2.value || decisive < 30) {
+            return {
+                value: 0,
                 interpretation: 'Nicht berechenbar',
                 magnitude: 'negligible' as const,
                 applicable: false
             };
         }
 
-        // Calculate turns by strategy
-        const turnsP1 = rawData.value.filter(r => r.winner.includes(strategyP1.value)).map(r => r.turns);
-        const turnsP2 = rawData.value.filter(r => r.winner.includes(strategyP2.value)).map(r => r.turns);
+        const winRateDecisive = realResults.winsP1 / decisive;
+        const result = cohensH(winRateDecisive, 0.5);
+        return {
+            value: result.h,
+            interpretation: result.interpretation,
+            magnitude: result.magnitude,
+            applicable: true
+        };
+    });
 
-        if (turnsP1.length < 10 || turnsP2.length < 10) {
-            return {
-                d: 0,
-                interpretation: 'Zu wenig Daten',
-                magnitude: 'negligible' as const,
-                applicable: false
-            };
-        }
+    // --- Mann-Whitney U test on game length (turns) grouped by winner ---
+    const turnsTestResult = computed(() => {
+        const notApplicable = { u: 0, z: 0, pValue: 1, isSignificant: false, applicable: false };
+        if (strategyP1.value === strategyP2.value) return notApplicable;
 
-        const mean1 = turnsP1.reduce((sum, v) => sum + v, 0) / turnsP1.length;
-        const mean2 = turnsP2.reduce((sum, v) => sum + v, 0) / turnsP2.length;
-        const std1 = calculateStandardDeviation(turnsP1);
-        const std2 = calculateStandardDeviation(turnsP2);
+        const turnsWonP1 = rawData.value.filter(r => r.winnerId === 0).map(r => r.turns);
+        const turnsWonP2 = rawData.value.filter(r => r.winnerId === 1).map(r => r.turns);
 
-        const result = calculateCohenD(mean1, mean2, std1, std2, turnsP1.length, turnsP2.length);
+        if (turnsWonP1.length < 10 || turnsWonP2.length < 10) return notApplicable;
+
+        const result = mannWhitneyUTest(turnsWonP1, turnsWonP2);
         return { ...result, applicable: true };
     });
 
@@ -602,7 +621,9 @@ export function useSimulation() {
         turnsDistribution,
         durationDistribution,
         chiSquareResult,
+        mcnemarResult,
         effectSizeResult,
+        turnsTestResult,
 
         // Methods
         logEvent,
