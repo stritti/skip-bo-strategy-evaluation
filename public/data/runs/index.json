@@ -1,0 +1,11 @@
+[
+  {
+    "file": "reference-optimiert-vs-zufall-seed-20260613.json",
+    "label": "Referenzlauf: Optimiert vs. Zufall, N=1000, Seed 20260613",
+    "strategyP1": "Optimiert",
+    "strategyP2": "Zufall",
+    "gamesCount": 1000,
+    "seed": 20260613,
+    "timestamp": 1794317977444
+  }
+]
