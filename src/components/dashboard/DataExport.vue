@@ -64,6 +64,7 @@ const exportToJSON = () => {
     };
 
     const exportData = {
+        version: 1,
         metadata,
         results: props.data
     };

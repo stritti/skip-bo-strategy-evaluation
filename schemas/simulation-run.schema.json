@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/stritti/skip-bo-strategy-evaluation/schemas/simulation-run.schema.json",
+  "title": "Skip-Bo Simulation Run (shared run file)",
+  "description": "Versioniertes Format für geteilte Simulationsläufe unter public/data/runs/ (Version 1). Akzeptiert wird entweder die kanonische Run-Form oder der Dashboard-JSON-Export ({ metadata, results }). In beiden Formen ist ein numerischer Seed Pflicht, damit CI den Lauf re-simulieren kann.",
+  "anyOf": [
+    { "$ref": "#/$defs/canonicalRun" },
+    { "$ref": "#/$defs/dashboardExport" }
+  ],
+  "$defs": {
+    "strategy": {
+      "type": "string",
+      "enum": ["Optimiert", "Zufall", "Spontan", "Fortgeschritten"]
+    },
+    "gameResult": {
+      "type": "object",
+      "required": ["id", "winner", "winnerId", "turns", "duration", "starter", "jokers", "strategy", "seed"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "integer", "minimum": 1 },
+        "winner": { "type": "string", "minLength": 1 },
+        "winnerId": { "enum": [0, 1, null] },
+        "turns": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "duration": { "type": "integer", "minimum": 0 },
+        "starter": { "type": "string", "enum": ["P1", "P2"] },
+        "jokers": { "type": "integer", "minimum": 0 },
+        "strategy": { "$ref": "#/$defs/strategy" },
+        "seed": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "results": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/gameResult" }
+    },
+    "canonicalRun": {
+      "type": "object",
+      "required": ["timestamp", "gamesCount", "winsP1", "winsP2", "strategyP1", "strategyP2", "totalTurns", "totalJokers", "seed", "results"],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "const": 1 },
+        "shared": { "type": "boolean" },
+        "timestamp": { "type": "integer", "minimum": 0 },
+        "gamesCount": { "type": "integer", "minimum": 1 },
+        "winsP1": { "type": "integer", "minimum": 0 },
+        "winsP2": { "type": "integer", "minimum": 0 },
+        "ties": { "type": "integer", "minimum": 0 },
+        "strategyP1": { "$ref": "#/$defs/strategy" },
+        "strategyP2": { "$ref": "#/$defs/strategy" },
+        "totalTurns": { "type": "integer", "minimum": 0 },
+        "totalJokers": { "type": "integer", "minimum": 0 },
+        "seed": { "type": "integer", "minimum": 0 },
+        "results": { "$ref": "#/$defs/results" }
+      }
+    },
+    "dashboardExport": {
+      "type": "object",
+      "required": ["metadata", "results"],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "const": 1 },
+        "metadata": {
+          "type": "object",
+          "required": ["strategyP1", "strategyP2", "seed"],
+          "additionalProperties": true,
+          "properties": {
+            "exportDate": { "type": "string" },
+            "totalGames": { "type": "integer", "minimum": 1 },
+            "strategyP1": { "$ref": "#/$defs/strategy" },
+            "strategyP2": { "$ref": "#/$defs/strategy" },
+            "seed": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "results": { "$ref": "#/$defs/results" }
+      }
+    }
+  }
+}
