@@ -7,11 +7,16 @@ const theme = ref<Theme>('auto');
 
 export function useTheme() {
 
+    const prefersDarkScheme = (): boolean =>
+        typeof window !== 'undefined' &&
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches;
+
     // Apply theme to HTML element
     const applyTheme = () => {
         const root = document.documentElement;
         const isDark = theme.value === 'dark' ||
-            (theme.value === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            (theme.value === 'auto' && prefersDarkScheme());
 
         if (isDark) {
             root.classList.add('dark');
@@ -34,11 +39,13 @@ export function useTheme() {
         applyTheme();
 
         // Listen for system changes if auto
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-            if (theme.value === 'auto') {
-                applyTheme();
-            }
-        });
+        if (typeof window.matchMedia === 'function') {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                if (theme.value === 'auto') {
+                    applyTheme();
+                }
+            });
+        }
     };
 
     return {

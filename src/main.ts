@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { ViteSSG } from 'vite-ssg'
 import '@phosphor-icons/web/regular'
 import '@phosphor-icons/web/bold'
 import '@phosphor-icons/web/fill'
@@ -14,6 +14,15 @@ import '@fontsource/jetbrains-mono/700.css'
 import './assets/styles/main.css'
 import './assets/styles/custom.css'
 import App from './App.vue'
-import router from './router'
+import { routes } from './router'
+import { applyPageSeo, DEFAULT_SEO } from './utils/seo'
 
-createApp(App).use(router).mount('#app')
+export const createApp = ViteSSG(
+    App,
+    { routes, base: import.meta.env.BASE_URL },
+    ({ router }) => {
+        router.afterEach((to) => {
+            applyPageSeo(to.meta.seo ?? DEFAULT_SEO, to.path);
+        });
+    }
+)

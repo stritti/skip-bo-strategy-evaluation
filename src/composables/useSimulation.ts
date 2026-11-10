@@ -496,6 +496,7 @@ export function useSimulation() {
                 // Simulation finished
                 // Save to DB
                 const runData: SimulationRun = {
+                    version: 1,
                     timestamp: Date.now(),
                     gamesCount: totalGamesRun,
                     winsP1: realResults.winsP1,
@@ -510,14 +511,18 @@ export function useSimulation() {
                 };
 
                 dbService.saveRun(runData).then(async (newId) => {
-                    logEvent('SUCCESS', 'Ergebnis in Historie gespeichert.');
+                    if (newId === null) {
+                        logEvent('WARN', 'Lokale Speicherung nicht verfügbar – Lauf wird nicht in der Historie abgelegt.');
+                    } else {
+                        logEvent('SUCCESS', 'Ergebnis in Historie gespeichert.');
 
-                    // Update history list
-                    await loadHistory();
+                        // Update history list
+                        await loadHistory();
 
-                    // Auto-load the new run directly
-                    const runWithId = { ...runData, id: newId };
-                    loadRun(runWithId);
+                        // Auto-load the new run directly
+                        const runWithId = { ...runData, id: newId };
+                        loadRun(runWithId);
+                    }
 
                     // Randomize strategies for the next run (Request from User)
                     const strategies: Strategy[] = ['Optimiert', 'Zufall', 'Spontan', 'Fortgeschritten'];
