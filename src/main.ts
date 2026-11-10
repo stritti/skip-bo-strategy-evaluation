@@ -15,14 +15,35 @@ import './assets/styles/main.css'
 import './assets/styles/custom.css'
 import App from './App.vue'
 import { routes } from './router'
-import { applyPageSeo, DEFAULT_SEO } from './utils/seo'
+import { createAppI18n, isEnPath, LOCALE_STORAGE_KEY } from './i18n'
+import { applyPageSeo, resolveRouteSeo } from './utils/seo'
 
 export const createApp = ViteSSG(
     App,
     { routes, base: import.meta.env.BASE_URL },
-    ({ router }) => {
+    ({ app, router, head }) => {
+        const i18n = createAppI18n()
+        app.use(i18n)
+
+        router.beforeEach((to, _from, next) => {
+            const locale = isEnPath(to.path) ? 'en' : 'de'
+            i18n.global.locale.value = locale
+            // override unhead's default htmlAttrs lang ("en") with the route locale
+            head?.push({ htmlAttrs: { lang: locale } })
+            if (
+                !import.meta.env.SSR &&
+                to.path === '/' &&
+                typeof localStorage !== 'undefined' &&
+                localStorage.getItem(LOCALE_STORAGE_KEY) === 'en'
+            ) {
+                next('/en')
+                return
+            }
+            next()
+        })
+
         router.afterEach((to) => {
-            applyPageSeo(to.meta.seo ?? DEFAULT_SEO, to.path);
-        });
+            applyPageSeo(resolveRouteSeo(to.path).seo, to.path)
+        })
     }
 )

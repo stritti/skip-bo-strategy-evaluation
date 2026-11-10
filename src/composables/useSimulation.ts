@@ -46,6 +46,7 @@ const strategyP2 = ref<Strategy>('Zufall');
 const history = ref<SimulationRun[]>([]);
 const currentRunId = ref<number | null>(null);
 const currentSeed = ref<number | null>(null);
+const loadRequestCounter = ref(0);
 
 // Statistical Results (Current Run)
 const realResults = reactive({
@@ -295,10 +296,17 @@ export function useSimulation() {
 
     // --- History Actions ---
     const loadRun = async (run: SimulationRun) => {
+        const requestId = ++loadRequestCounter.value;
+
         // Shared runs arrive as summaries from the index; fetch full results lazily
         if (run.shared && run.file && run.results.length === 0) {
             const full = await fetchSharedRunDetails(run.file);
-            if (full) run = { ...full, id: run.id, file: run.file };
+            if (requestId !== loadRequestCounter.value) return; // a newer selection superseded this request
+            if (!full) {
+                logEvent('WARN', `Details für geteilten Lauf "${run.file}" konnten nicht geladen werden.`);
+                return;
+            }
+            run = { ...full, id: run.id, file: run.file };
         }
 
         // Restore configuration and state
@@ -345,8 +353,17 @@ export function useSimulation() {
         winRateP1: number;
     }[]>([]);
 
-    const loadAllRuns = () => {
+    const loadAllRuns = async () => {
         if (history.value.length === 0) return;
+
+        // Shared runs only carry summaries in the index; fetch their details so the
+        // aggregate view includes their games in rawData (Data Explorer, exports, charts)
+        await Promise.all(history.value.map(async (run) => {
+            if (run.shared && run.file && run.results.length === 0) {
+                const full = await fetchSharedRunDetails(run.file);
+                if (full) run.results = full.results;
+            }
+        }));
 
         // Prevent watcher from triggering reset during update
         isFinished.value = false;

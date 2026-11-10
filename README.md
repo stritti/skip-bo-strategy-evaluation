@@ -62,6 +62,10 @@ Stellen Sie sicher, dass [Node.js](https://nodejs.org/) installiert ist.
    npm run build
    ```
 
+## 🌐 Sprachen
+
+Die App ist zweisprachig: Deutsch (Default, `/`) und Englisch (`/en/...`) – inkl. hreflang-Alternates, per-route SEO-Metadaten in beiden Sprachen und Sprachumschalter in der Navigation. Übersetzt sind aktuell Navigation, Footer, About, Regeln, Strategie und das Strategie-Duell; Dashboard/Analyse/Data Explorer folgen.
+
 ## 🎮 Benutzung
 
 1. **Konfiguration**: Öffnen Sie das Dashboard und stellen Sie die Anzahl der zu simulierenden Spiele ein (z.B. 10.000).
