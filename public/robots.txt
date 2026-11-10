@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://skip-bo-strategy-analysis.netlify.app/sitemap.xml

@@ -80,7 +80,7 @@ const handleResetSimulation = () => {
           <i class="ph-fill ph-cards text-4xl text-red-600"></i>
         </div>
         <div class="flex-1">
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Willkommen beim Skip-Bo Strategy Analyzer</h2>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Willkommen beim Skip-Bo Strategy Analyzer</h1>
           <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
             Diese App simuliert <strong>echte Skip-Bo Spiele</strong> mit verschiedenen KI-Strategien und liefert 
             wissenschaftlich fundierte Analysen. Vergleichen Sie Gewinnraten, analysieren Sie Spielverläufe 
