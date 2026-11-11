@@ -83,6 +83,21 @@ Alle Runs bleiben lokal in der IndexedDB des Browsers. Damit Runs **allen** zur 
 
 **Qualitätssicherung in CI:** Geteilte Runs müssen dem versionierten Schema `schemas/simulation-run.schema.json` (`version: 1`) entsprechen und werden in `npm test` automatisch mit ihrem Seed **re-simuliert** – Aggregatwerte und Einzelergebnisse müssen exakt reproduzierbar sein (Reproduzierbarkeits-Gate, siehe `src/test/sharedRunsValidation.test.ts`). Die App lädt nur die Aggregat-Summaries aus `index.json` (schnell); die Einzelergebnisse eines geteilten Runs werden erst beim Öffnen lazy nachgeladen (`npm run runs:index` regeneriert den Index).
 
+### Open Dataset (Hugging Face / Parquet)
+
+Alle geteilten Runs lassen sich als flaches Parquet-Dataset exportieren und auf Hugging Face teilen:
+
+```bash
+npm run runs:parquet   # erzeugt datasets/skip-bo-runs/{runs.parquet, games.parquet, README.md (Dataset-Card)}
+huggingface-cli upload <user>/skip-bo-runs ./datasets/skip-bo-runs --repo-type dataset
+```
+
+- `runs.parquet`: eine Zeile pro Run (Aggregatwerte, Strategien, Seed, Timestamp)
+- `games.parquet`: eine Zeile pro Spiel (`winner_id`, `turns`, `jokers`, `starter`, Per-Game-Seed, …)
+- Das Dataset-Card-`README.md` (Lizenz MIT, Config/Splits, `load_dataset`-Beispiel) wird automatisch mitgeneriert; `datasets/` ist gitignored.
+- Upload benötigt einen HF-Account und ein Write-Token als `HF_TOKEN` (nie committen); das Dataset-Repo einmalig anlegen: `huggingface-cli repo create <user>/skip-bo-runs --repo-type dataset`.
+- Laden: `load_dataset("<user>/skip-bo-runs")` liefert die Splits `runs` und `games`.
+
 > **KI-Transparenz (EU AI Act, Art. 50):** Diese App wurde mit KI-Unterstützung (Gemini 3 Pro via Antigravity) erstellt. Simulationsergebnisse sind deterministisch über Seeds replizierbar.
 
 ## Zitieren
