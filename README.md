@@ -64,7 +64,7 @@ Stellen Sie sicher, dass [Node.js](https://nodejs.org/) installiert ist.
 
 ## 📊 Analytics (datensparsam)
 
-Die App nutzt selbstgehostetes [Plausible](https://plausible.io) (keine Cookies, keine PII) – bereits für Pageviews/Outbound-Links aktiv. Zusätzlich werden Custom Events gesendet: `simulation_started`, `simulation_finished` (Strategien, N, Siege, Seed), `run_loaded`, `runs_aggregated`, `export_csv`, `export_json` (siehe `src/utils/analytics.ts`).
+Die App nutzt selbstgehostetes [Plausible](https://plausible.io) (keine Cookies, keine PII) – bereits für Pageviews/Outbound-Links aktiv. Zusätzlich werden Custom Events gesendet: `simulation_started`, `simulation_finished` (Strategien, N, Siege, Seed), `run_loaded`, `runs_aggregated`, `export_csv`, `export_json`, `share_run` (siehe `src/utils/analytics.ts`).
 
 ## 🌐 Sprachen
 
@@ -79,7 +79,9 @@ Die App ist zweisprachig: Deutsch (Default, `/`) und Englisch (`/en/...`) – in
 
 ## 🤝 Geteilte Simulationsläufe
 
-Alle Runs bleiben lokal in der IndexedDB des Browsers. Damit Runs **allen** zur Verfügung stehen, können sie ins Repository committed werden: JSON-Export eines Laufs nach `public/data/runs/` legen und in `public/data/runs/index.json` eintragen (siehe `public/data/runs/README.md`). Die App lädt diese geteilten Runs automatisch und zeigt sie in der Historie als „geteilt" an. Eine serverseitige Speicherung (für echtes automatisches Teilen aller Runs) würde einen Backend-Endpunkt benötigen – bei statischem Hosting ist der Repository-Weg die datensparsame Variante.
+Alle Runs bleiben lokal in der IndexedDB des Browsers. Damit Runs **allen** zur Verfügung stehen, können sie ins Repository committed werden: JSON-Export eines Laufs nach `public/data/runs/` legen und in `public/data/runs/index.json` eintragen (siehe `public/data/runs/README.md`). Die App lädt diese geteilten Runs automatisch und zeigt sie in der Historie als „geteilt" an. ### Sicher direkt aus der App teilen
+
+Über den **Teilen**-Button in der DataExport-Karte des Dashboards kann ein lokal simulierter Lauf direkt an die Netlify Function `/.netlify/functions/share-run` gesendet werden. Die Function prüft Bearer-Token (`SHARE_TOKEN`), Origin-Allowlist, Body-Größe (max. 500 KB) und das JSON-Schema inkl. Seed-Pflicht, committet den Lauf auf einen `share/run-*`-Branch und öffnet einen Pull Request. Der Workflow `.github/workflows/runs-index.yml` regeneriert in solchen PRs automatisch `index.json` / `runsIndex.ts` / `sitemap.xml`; das bestehende Test-Gate re-simuliert den Lauf anschließend aus dem Seed. Env-Variablen siehe [DEPLOYMENT.md](DEPLOYMENT.md). Runs enthalten keine PII – nur Spiel-Statistiken und Seeds.
 
 **Qualitätssicherung in CI:** Geteilte Runs müssen dem versionierten Schema `schemas/simulation-run.schema.json` (`version: 1`) entsprechen und werden in `npm test` automatisch mit ihrem Seed **re-simuliert** – Aggregatwerte und Einzelergebnisse müssen exakt reproduzierbar sein (Reproduzierbarkeits-Gate, siehe `src/test/sharedRunsValidation.test.ts`). Die App lädt nur die Aggregat-Summaries aus `index.json` (schnell); die Einzelergebnisse eines geteilten Runs werden erst beim Öffnen lazy nachgeladen (`npm run runs:index` regeneriert den Index).
 

@@ -22,6 +22,10 @@ Deshalb ist ein **numerischer Seed Pflicht** – Läufe ohne Seed schlagen in CI
 
 ## Eigenen Run teilen
 
+**Direkt aus der App (empfohlen):** „Teilen"-Button in der DataExport-Karte des Dashboards – sendet den Lauf an die Netlify Function `/.netlify/functions/share-run` (Token-geschützt, schema-validiert, max. 500 KB), die einen `share/run-*`-Branch + Pull Request erstellt. CI regeneriert in solchen PRs automatisch `index.json` (`runs-index.yml`) und re-simuliert den Lauf.
+
+**Manuell:**
+
 1. In der App einen Lauf simulieren und im Dashboard als **JSON exportieren**
    (enthält `version`, Metadaten inkl. Seed und alle Einzelergebnisse mit Per-Game-Seeds).
 2. Die Datei hier als `<name>.json` ablegen.

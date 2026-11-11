@@ -10,6 +10,17 @@ Die Skip-Bo Strategy Evaluation App ist produktionsreif. Konfiguriert ist **Netl
    - Publish directory: `dist`
 3. Jeder Push auf `main` (und jeder PR mit Deploy-Preview) baut und deployed die App.
 
+## Sicheres Teilen von Runs (Netlify Function)
+
+Lokale Runs können direkt aus dem Frontend geteilt werden: `/.netlify/functions/share-run` (`netlify/functions/share-run.ts`) validiert die Anfrage und öffnet Branch + Pull Request. Dafür in den Netlify-Umgebungsvariablen des Sites setzen:
+
+- `SHARE_TOKEN` – gemeinsames Secret; Nutzer geben es im Teilen-Dialog der App ein (wird nur als Bearer-Token gesendet und nie geloggt)
+- `GITHUB_TOKEN` – Fine-Grained PAT mit `contents: write` und `pull-requests: write` auf diesem Repository (erstellt Branch/PR)
+- optional `GITHUB_REPOSITORY` (Default: `stritti/skip-bo-strategy-evaluation`)
+- optional `SHARE_ALLOWED_ORIGINS` – kommagetrennte Origin-Allowlist (Default: Produktions-URL; lokales `netlify dev` braucht zusätzlich `http://localhost:8888`)
+
+Sicherheit: HTTPS-only (Netlify), timing-sicherer Token-Vergleich, Origin-Allowlist, Body-Cap 500 KB (= CI-Limit), AJV-Validierung gegen `schemas/simulation-run.schema.json` inkl. Seed-Pflicht, Duplikat-Abweisung (409). Vor dem Merge greifen PR-Review + CI (Index-Regenerierung via `runs-index.yml`, Re-Simulation via Test-Gate). Runs enthalten keine PII.
+
 ## Alternative: GitHub Pages
 
 Dafür fehlt noch ein Workflow `.github/workflows/deploy.yml` (z. B. `actions/deploy-pages`). Danach in den Repo-Settings unter **Pages** die Source auf "GitHub Actions" stellen. Der `base`-Pfad in `vite.config.ts` muss dann auf `/skip-bo-strategy-evaluation/` gesetzt werden.
