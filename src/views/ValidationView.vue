@@ -131,7 +131,7 @@ const { t } = useI18n({ useScope: 'global' });
         <p class="text-sm text-gray-600 mb-4">
           {{ t('validation.uni') }}
         </p>
-        <a href="https://gki.informatik.uni-freiburg.de/papers/studienarbeiten/jahnke-studienarbeit-07.pdf" 
+        <a href="/documents/jahnke-studienarbeit-07.pdf" 
            target="_blank" 
            rel="noopener noreferrer"
            class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm">
