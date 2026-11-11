@@ -128,6 +128,24 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://skip-bo-strategy-analysis.netlify.app/references</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://skip-bo-strategy-analysis.netlify.app/references"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://skip-bo-strategy-analysis.netlify.app/en/references"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://skip-bo-strategy-analysis.netlify.app/references"/>
+    <lastmod>2026-11-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://skip-bo-strategy-analysis.netlify.app/en/references</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://skip-bo-strategy-analysis.netlify.app/references"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://skip-bo-strategy-analysis.netlify.app/en/references"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://skip-bo-strategy-analysis.netlify.app/references"/>
+    <lastmod>2026-11-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://skip-bo-strategy-analysis.netlify.app/runs/reference-optimiert-vs-zufall-seed-20260613</loc>
     <xhtml:link rel="alternate" hreflang="de" href="https://skip-bo-strategy-analysis.netlify.app/runs/reference-optimiert-vs-zufall-seed-20260613"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://skip-bo-strategy-analysis.netlify.app/en/runs/reference-optimiert-vs-zufall-seed-20260613"/>
