@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import StatsExplainer from '../components/dashboard/StatsExplainer.vue';
 const { t } = useI18n({ useScope: 'global' });
 // Scientific Validation View - Displays methodology and accuracy verification
 </script>
@@ -230,6 +231,9 @@ const { t } = useI18n({ useScope: 'global' });
         </div>
       </div>
     </section>
+
+    <!-- Plain-language statistics glossary -->
+    <StatsExplainer />
 
     <!-- Certification Footer -->
     <div class="text-center p-8 bg-gray-50 rounded-2xl border border-gray-200">
