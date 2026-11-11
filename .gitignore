@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Generated Hugging Face dataset export (uploaded via huggingface-cli, not committed)
+datasets/
+
 # LaTeX build artifacts (compiled in CI / via npm run docs:compile, published copies live in public/documents/)
 docs/thesis/Deterministic_SkipBo_HPVP_Agent_Analysis.pdf
 docs/thesis/skipbo_mit_layout.pdf
