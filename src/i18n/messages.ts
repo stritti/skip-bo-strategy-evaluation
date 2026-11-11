@@ -9,6 +9,7 @@ export const de = {
         strategy: 'Strategie',
         rules: 'Regeln',
         validation: 'Validierung',
+        references: 'Referenzen',
         about: 'Über',
         github: 'GitHub Repository',
         openMenu: 'Menü öffnen',
@@ -463,6 +464,27 @@ export const de = {
         validatedOn: 'Validiert am: 2025-12-11',
         methodology: 'Methodik: Code Review + Rule Verification + Mathematical Analysis'
     },
+    references: {
+        title: 'Referenzen & weiterführende Links',
+        sub: 'Offizielle Regeln, wissenschaftliche Grundlagen und Quellen dieses Projekts – alle Links geprüft.',
+        rulesH: 'Offizielle Regeln & Spiel',
+        mattel: 'Offizielle Skip-Bo Regeln (Mattel)',
+        mattelSub: 'Original-Spielanleitung als PDF',
+        wiki: 'Skip-Bo – Wikipedia',
+        wikiSub: 'Spielprinzip, Geschichte und Varianten',
+        sciH: 'Wissenschaftliche Grundlagen (TD-λ)',
+        jahnke: 'Jahnke, S. (2007): Entwicklung eines TD(λ)-basierten Skip-Bo-Spielers',
+        jahnkeSub: 'Studienarbeit, Universität Freiburg – lokal gehostetes PDF',
+        sutton88: 'Sutton, R. S. (1988): Learning to Predict by the Methods of Temporal Differences',
+        sutton88Sub: 'Machine Learning 3(1), 9–44 – die TD(λ)-Grundlage',
+        suttonBarto: 'Sutton & Barto: Reinforcement Learning – An Introduction (2. Aufl.)',
+        suttonBartoSub: 'Standardwerk zum Reinforcement Learning – kostenloses PDF',
+        projectH: 'Dieses Projekt',
+        paper: 'Research Paper: Deterministic Skip-Bo HPVP Agent Analysis',
+        paperSub: 'Lokal gehostetes PDF',
+        repo: 'Quellcode auf GitHub',
+        repoSub: 'MIT-Lizenz · Vue 3 + Vite'
+    },
 };
 
 export const en = {
@@ -476,6 +498,7 @@ export const en = {
         strategy: 'Strategy',
         rules: 'Rules',
         validation: 'Validation',
+        references: 'References',
         about: 'About',
         github: 'GitHub Repository',
         openMenu: 'Open menu',
@@ -929,6 +952,27 @@ export const en = {
         approved: 'APPROVED FOR SCIENTIFIC USE',
         validatedOn: 'Validated on: 2025-12-11',
         methodology: 'Methodology: code review + rule verification + mathematical analysis'
+    },
+    references: {
+        title: 'References & further reading',
+        sub: 'Official rules, scientific foundations and sources of this project – all links checked.',
+        rulesH: 'Official rules & game',
+        mattel: 'Official Skip-Bo rules (Mattel)',
+        mattelSub: 'Original instruction sheet as PDF',
+        wiki: 'Skip-Bo – Wikipedia',
+        wikiSub: 'Gameplay, history and variants',
+        sciH: 'Scientific foundations (TD-λ)',
+        jahnke: 'Jahnke, S. (2007): Development of a TD(λ)-based Skip-Bo player',
+        jahnkeSub: 'Term paper, University of Freiburg – locally hosted PDF',
+        sutton88: 'Sutton, R. S. (1988): Learning to Predict by the Methods of Temporal Differences',
+        sutton88Sub: 'Machine Learning 3(1), 9–44 – the TD(λ) foundation',
+        suttonBarto: 'Sutton & Barto: Reinforcement Learning – An Introduction (2nd ed.)',
+        suttonBartoSub: 'The standard reinforcement learning textbook – free PDF',
+        projectH: 'This project',
+        paper: 'Research paper: Deterministic Skip-Bo HPVP Agent Analysis',
+        paperSub: 'Locally hosted PDF',
+        repo: 'Source code on GitHub',
+        repoSub: 'MIT license · Vue 3 + Vite'
     },
 };
 

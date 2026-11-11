@@ -256,6 +256,18 @@ export const routeSeo: Record<string, { de: PageSeo; en: PageSeo }> = {
                 'How the Skip-Bo simulations are scientifically validated: statistical significance, paired tests, effect sizes and power analysis.'
         }
     },
+    '/references': {
+        de: {
+            title: 'Referenzen & weiterführende Links | Skip-Bo Strategy Analyzer',
+            description:
+                'Offizielle Skip-Bo Regeln (Mattel), wissenschaftliche TD(λ)-Grundlagen (Jahnke 2007, Sutton 1988, Sutton & Barto) und Quellen dieses Projekts.'
+        },
+        en: {
+            title: 'References & further reading | Skip-Bo Strategy Analyzer',
+            description:
+                'Official Skip-Bo rules (Mattel), scientific TD(λ) foundations (Jahnke 2007, Sutton 1988, Sutton & Barto) and sources of this project.'
+        }
+    },
     '/runs/:runId': {
         de: {
             title: 'Geteilter Simulationslauf | Skip-Bo Strategy Analyzer',

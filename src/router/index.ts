@@ -5,6 +5,7 @@ import RulesView from '../views/RulesView.vue';
 import StrategyView from '../views/StrategyView.vue';
 import AnalysisView from '../views/AnalysisView.vue';
 import ValidationView from '../views/ValidationView.vue';
+import ReferencesView from '../views/ReferencesView.vue';
 import AboutView from '../views/AboutView.vue';
 import RunView from '../views/RunView.vue';
 
@@ -23,6 +24,7 @@ const baseRoutes = [
     { path: '/strategy', name: 'strategy', component: StrategyView },
     { path: '/analysis', name: 'analysis', component: AnalysisView },
     { path: '/validation', name: 'validation', component: ValidationView },
+    { path: '/references', name: 'references', component: ReferencesView },
     { path: '/runs/:runId', name: 'run', component: RunView }
 ] as const;
 
