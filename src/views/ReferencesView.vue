@@ -80,6 +80,15 @@ const wikiUrl = computed(() =>
           </a>
         </li>
         <li>
+          <a href="https://gki.informatik.uni-freiburg.de/papers/studienarbeiten/jahnke-studienarbeit-07.pdf"
+             target="_blank" rel="noopener noreferrer"
+             class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-300 hover:bg-blue-50 transition-colors group text-sm">
+            <i class="ph-bold ph-link text-lg text-blue-600"></i>
+            <span class="flex-1 text-gray-600">{{ t('references.jahnkeOriginal') }}</span>
+            <i class="ph-bold ph-arrow-square-out text-gray-400 group-hover:text-blue-600 text-xs"></i>
+          </a>
+        </li>
+        <li>
           <a href="https://jmvidal.cse.sc.edu/library/sutton88a.pdf"
              target="_blank" rel="noopener noreferrer"
              class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-300 hover:bg-blue-50 transition-colors group">
