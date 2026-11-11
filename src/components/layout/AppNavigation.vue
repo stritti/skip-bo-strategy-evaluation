@@ -90,6 +90,10 @@ const switchLocale = () => {
                     class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-skipbo-red dark:hover:text-red-400 flex items-center gap-2 transition-colors">
                     <i class="ph ph-seal-check"></i> {{ t('nav.validation') }}
                   </router-link>
+                  <router-link :to="`${lp}/references`" active-class="bg-red-50 dark:bg-red-900/40 text-skipbo-red dark:text-red-400 font-bold"
+                    class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-skipbo-red dark:hover:text-red-400 flex items-center gap-2 transition-colors">
+                    <i class="ph ph-books"></i> {{ t('nav.references') }}
+                  </router-link>
               </div>
           </div>
 
@@ -182,6 +186,11 @@ const switchLocale = () => {
                 active-class="bg-skipbo-red/10 dark:bg-red-900/30 text-skipbo-red dark:text-red-400 font-bold"
                 class="px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-skipbo-red dark:hover:text-red-400 transition-colors ml-2 border-l-2 border-gray-100 dark:border-slate-800 pl-4">
                 {{ t('nav.validation') }}
+              </router-link>
+              <router-link :to="`${lp}/references`" @click="closeMobileMenu"
+                active-class="bg-skipbo-red/10 dark:bg-red-900/30 text-skipbo-red dark:text-red-400 font-bold"
+                class="px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-skipbo-red dark:hover:text-red-400 transition-colors ml-2 border-l-2 border-gray-100 dark:border-slate-800 pl-4">
+                {{ t('nav.references') }}
               </router-link>
           </div>
 
