@@ -84,11 +84,11 @@ export const useSimulationStore = defineStore('simulation', () => {
         const history = useHistoryStore().history;
         if (history.length === 0) return null;
 
-        const totalGames = history.reduce((sum, run) => sum + run.gamesCount, 0);
-        const totalWinsP1 = history.reduce((sum, run) => sum + run.winsP1, 0);
-        const totalTies = history.reduce((sum, run) => sum + (run.ties ?? 0), 0);
-        const totalTurns = history.reduce((sum, run) => sum + run.totalTurns, 0);
-        const totalJokers = history.reduce((sum, run) => sum + run.totalJokers, 0);
+        const totalGames = history.reduce((sum: number, run: { gamesCount: number }) => sum + run.gamesCount, 0);
+        const totalWinsP1 = history.reduce((sum: number, run: { winsP1: number }) => sum + run.winsP1, 0);
+        const totalTies = history.reduce((sum: number, run: { ties?: number }) => sum + (run.ties ?? 0), 0);
+        const totalTurns = history.reduce((sum: number, run: { totalTurns: number }) => sum + run.totalTurns, 0);
+        const totalJokers = history.reduce((sum: number, run: { totalJokers: number }) => sum + run.totalJokers, 0);
 
         return {
             totalRuns: history.length,

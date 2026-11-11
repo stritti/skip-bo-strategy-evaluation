@@ -16,6 +16,7 @@ import BoxPlotChart from '../components/dashboard/BoxPlotChart.vue';
 import EffectSize from '../components/dashboard/EffectSize.vue';
 import DataExport from '../components/dashboard/DataExport.vue';
 import PowerAnalysis from '../components/dashboard/PowerAnalysis.vue';
+import StatsExplainer from '../components/dashboard/StatsExplainer.vue';
 import StrategySelect from '../components/dashboard/StrategySelect.vue';
 import { useSimulation } from '../composables/useSimulation';
 import { useCharts } from '../composables/useCharts';
@@ -417,6 +418,9 @@ onMounted(() => {
 
               <!-- Power Analysis -->
               <PowerAnalysis />
+
+              <!-- Plain-language statistics glossary -->
+              <StatsExplainer />
             </div>
 
             <!-- Charts Grid -->

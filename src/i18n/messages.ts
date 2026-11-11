@@ -310,6 +310,34 @@ export const de = {
         interpVery: 'Mit 99% Sicherheit kein Zufall',
         interp95: 'Mit 95% Sicherheit kein Zufall',
         interpNo: 'Unterschied könnte zufällig sein',
+        glossary: {
+            title: 'Statistik einfach erklärt',
+            sub: 'Die Kennzahlen im Dashboard in Alltagssprache – mit Quellen zum Nachlesen.',
+            winrate: {
+                h: 'Gewinnrate & Konfidenzintervall (95 % CI)',
+                p: 'Die Gewinnrate ist der Anteil gewonnener Spiele. Das Intervall drumherum bedeutet: „Bei vielen Wiederholungen läge die wahre Gewinnrate mit 95 % Wahrscheinlichkeit in diesem Bereich.“ Wir verwenden das Wilson-Intervall – zuverlässiger als die einfache ±-Formel, besonders bei sehr hohen oder niedrigen Raten. <a href="https://de.wikipedia.org/wiki/Konfidenzintervall" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-medium">Quelle: Wikipedia – Konfidenzintervall ↗</a>'
+            },
+            mcnemar: {
+                h: 'Signifikanz (exakter McNemar-Test)',
+                p: 'Jedes Spiel ist ein Duell: Ein Sieg von Spieler 1 ist automatisch eine Niederlage von Spieler 2. Deshalb testen wir mit dem exakten McNemar-Test (ein Binomialtest der Siege gegen 50 %) – ein Chi-Quadrat-Test würde fälschlich zwei unabhängige Gruppen annehmen. p < 0,05 heißt: Der Unterschied ist mit über 95 % Wahrscheinlichkeit echt und kein Zufall. <a href="https://de.wikipedia.org/wiki/McNemar-Test" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-medium">Quelle: Wikipedia – McNemar-Test ↗</a>'
+            },
+            effect: {
+                h: 'Effektstärke (Cohens h)',
+                p: 'p-Werte sagen nur, ob ein Unterschied existiert – nicht wie groß er ist. Cohens h vergleicht die Gewinnrate mit der Zufallserwartung von 50 %: ab 0,2 klein, ab 0,5 mittel, ab 0,8 groß. <a href="https://de.wikipedia.org/wiki/Effektstärke" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-medium">Quelle: Wikipedia – Effektstärke ↗</a>'
+            },
+            power: {
+                h: 'Power & nötige Anzahl Spiele',
+                p: 'Die Power ist die Wahrscheinlichkeit, einen vorhandenen Effekt auch wirklich zu finden (Standard: 80 %). Je kleiner der erwartete Unterschied, desto mehr Spiele sind nötig. Das Tool rechnet daraus die nötige Anzahl Spiele. <a href="https://de.wikipedia.org/wiki/Teststärke" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-medium">Quelle: Wikipedia – Teststärke ↗</a>'
+            },
+            boxplot: {
+                h: 'Boxplot (Verteilung von Zügen & Dauer)',
+                p: 'Die Box umfasst die mittleren 50 % aller Werte, die Linie darin ist der Median. Die Whisker reichen bis 1,5× IQR, Punkte außerhalb sind Ausreißer. So sieht man auf einen Blick, ob Spiele meist ähnlich lang sind oder stark streuen. <a href="https://de.wikipedia.org/wiki/Box-Plot" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-medium">Quelle: Wikipedia – Box-Plot ↗</a>'
+            },
+            seed: {
+                h: 'Reproduzierbarkeit (Seed)',
+                p: 'Jeder Lauf erhält eine Seed-Zahl. Gleicher Seed = gleiche Kartenmischung = exakt gleiche Ergebnisse; so ist jeder Lauf und jedes Einzelspiel nachspielbar (Generator: mulberry32). <a href="https://de.wikipedia.org/wiki/Zufallszahlengenerator" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-medium">Quelle: Wikipedia – Zufallszahlengenerator ↗</a>'
+            }
+        }
     },
     analysis: {
         heroBadge: 'Computational Analysis',
@@ -694,7 +722,35 @@ export const en = {
         colAction: 'Action',
         load: 'Load',
         active: 'Active',
-        shared: 'shared'
+        shared: 'shared',
+        glossary: {
+            title: 'Statistics explained simply',
+            sub: 'The dashboard metrics in plain language – with sources to read up on.',
+            winrate: {
+                h: 'Win rate & confidence interval (95% CI)',
+                p: 'The win rate is the share of games won. The interval around it means: “if we repeated the experiment many times, the true win rate would lie in this range with 95% probability.” We use the Wilson interval – more reliable than the simple ± formula, especially for very high or low rates. <a href="https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-medium">Source: Wikipedia – confidence interval ↗</a>'
+            },
+            mcnemar: {
+                h: 'Significance (exact McNemar test)',
+                p: 'Every game is a duel: a win for player 1 is automatically a loss for player 2. That is why we use the exact McNemar test (a binomial test of wins against 50%) – a chi-square test would wrongly assume two independent groups. p < 0.05 means: the difference is real with over 95% probability, not chance. <a href="https://en.wikipedia.org/wiki/McNemar%27s_test" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-medium">Source: Wikipedia – McNemar’s test ↗</a>'
+            },
+            effect: {
+                h: 'Effect size (Cohen’s h)',
+                p: 'p-values only tell whether a difference exists – not how large it is. Cohen’s h compares the win rate to the 50% chance expectation: from 0.2 small, 0.5 medium, 0.8 large. <a href="https://en.wikipedia.org/wiki/Effect_size" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-medium">Source: Wikipedia – effect size ↗</a>'
+            },
+            power: {
+                h: 'Power & required number of games',
+                p: 'Power is the probability of actually detecting an effect that exists (standard: 80%). The smaller the expected difference, the more games you need. The tool computes the required number of games from this. <a href="https://en.wikipedia.org/wiki/Statistical_power" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-medium">Source: Wikipedia – statistical power ↗</a>'
+            },
+            boxplot: {
+                h: 'Box plot (distribution of turns & duration)',
+                p: 'The box covers the middle 50% of all values, the line inside is the median. The whiskers reach up to 1.5× IQR; points beyond them are outliers. This shows at a glance whether games are usually similar in length or vary widely. <a href="https://en.wikipedia.org/wiki/Box_plot" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-medium">Source: Wikipedia – box plot ↗</a>'
+            },
+            seed: {
+                h: 'Reproducibility (seed)',
+                p: 'Every run gets a seed number. Same seed = same shuffle = exactly the same results; every run and every single game can be replayed (generator: mulberry32). <a href="https://en.wikipedia.org/wiki/Pseudorandom_number_generator" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-medium">Source: Wikipedia – pseudorandom generator ↗</a>'
+            }
+        }
     },
     data: {
         title: 'Results table',
