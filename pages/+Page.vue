@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import AppNavigation from './components/layout/AppNavigation.vue';
-import AppFooter from './components/layout/AppFooter.vue';
-import { useHistoryStore } from './stores/historyStore';
+import AppNavigation from '../src/components/layout/AppNavigation.vue';
+import AppFooter from '../src/components/layout/AppFooter.vue';
+import { useHistoryStore } from '../src/stores/historyStore';
 
 onMounted(() => {
     const historyStore = useHistoryStore();

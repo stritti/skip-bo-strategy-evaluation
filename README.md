@@ -23,8 +23,8 @@ Eine moderne Web-Anwendung zur Simulation und Auswertung verschiedener Strategie
 - **Kumulative Statistik**: Sehen Sie aggregierte Kennzahlen über alle geladenen Simulationen hinweg.
 
 ### Auffindbarkeit (SEO/SSG)
-- **Statisches Prerendering**: Der Build (`vite-ssg build`) erzeugt pro Route eine statische HTML-Seite (`dist/<route>/index.html`) inklusive Critical CSS – Suchmaschinen indexieren den vollen Inhalt ohne JS.
-- **Per-route SEO-Metadaten**: Titel, Beschreibung, Canonical, hreflang, Open Graph und Twitter Cards pro Route – im prerendered HTML (via `ssgOptions.onBeforePageRender`) und clientseitig bei Navigation (`applyPageSeo` in `src/utils/seo.ts`).
+- **Statisches Prerendering**: Der Build (`vike build`) erzeugt pro Route eine statische HTML-Seite (`dist/client/<route>/index.html`) – Suchmaschinen indexieren den vollen Inhalt ohne JS.
+- **Per-route SEO-Metadaten**: Titel, Beschreibung, Canonical, hreflang, Open Graph und Twitter Cards pro Route – im prerendered HTML (via `+onRenderHtml`/`applyServerSeo`) und clientseitig bei Navigation (`applyPageSeo` in `src/utils/seo.ts`).
 
 ## 🛠 Tech Stack
 

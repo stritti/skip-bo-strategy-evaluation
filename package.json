@@ -4,24 +4,24 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite-ssg build",
-    "preview": "vite preview",
+    "dev": "vike dev",
+    "build": "tsc && vike build",
+    "preview": "vike preview",
     "test": "vitest run",
     "test:watch": "vitest",
     "docs:compile": "node scripts/compile-latex.js",
     "runs:index": "node scripts/update-runs-index.mjs"
   },
   "devDependencies": {
+    "@vue/server-renderer": "^3.5.27",
     "ajv": "^8.20.0",
     "autoprefixer": "^10.6.2",
-    "beasties": "^0.3.5",
     "postcss": "^8.5.32",
     "prettier": "^3.9.10",
     "tailwindcss": "^4.1.18",
     "typescript": "~7.0.2",
+    "vike": "^0.4.270",
     "vite": "^8.3.7",
-    "vite-ssg": "^28.3.0",
     "vitest": "^5.1.0"
   },
   "dependencies": {
@@ -34,6 +34,7 @@
     "chart.js": "^4.6.1",
     "idb": "^8.0.4",
     "pinia": "^4.1.0",
+    "vue": "^3.5.27",
     "vue-i18n": "^11.4.18",
     "vue-router": "^5.4.0"
   }
