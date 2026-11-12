@@ -281,3 +281,45 @@ export const routeSeo: Record<string, { de: PageSeo; en: PageSeo }> = {
         }
     }
 };
+
+const escapeAttr = (value: string): string =>
+    value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+function replaceMetaContent(html: string, attr: 'name' | 'property', key: string, content: string): string {
+    return html.replace(
+        new RegExp(`(<meta\\s+${attr}="${key}"\\s+content=")[^"]*(")`),
+        `$1${escapeAttr(content)}$2`
+    );
+}
+
+function replaceLinkHref(html: string, rel: string, href: string, extraAttr?: string, extraValue?: string): string {
+    const extra = extraAttr ? `\\s+${extraAttr}="${extraValue}"` : '';
+    return html.replace(
+        new RegExp(`(<link\\s+rel="${rel}"${extra}\\s+href=")[^"]*(")`),
+        `$1${escapeAttr(href)}$2`
+    );
+}
+
+// Server-side (pre-render) equivalent of applyPageSeo: rewrites the index.html shell per route.
+export function applyServerSeo(html: string, rawPath: string): string {
+    const normalized = normalizePath(rawPath);
+    const { seo, locale } = resolveRouteSeo(normalized);
+    const dePath = dePathOf(normalized);
+    const meta = dePath.startsWith('/runs/') ? (runSeoFor(dePath, locale) ?? seo) : seo;
+    const url = pageUrl(normalized);
+    let out = html.replace(/<html lang="[^"]*">/, `<html lang="${locale}">`);
+    out = out.replace(/<title>[^<]*<\/title>/, `<title>${escapeAttr(meta.title)}</title>`);
+    out = replaceMetaContent(out, 'name', 'description', meta.description);
+    out = replaceMetaContent(out, 'property', 'og:locale', locale === 'en' ? 'en_US' : 'de_DE');
+    out = replaceMetaContent(out, 'property', 'og:title', meta.title);
+    out = replaceMetaContent(out, 'property', 'og:description', meta.description);
+    out = replaceMetaContent(out, 'property', 'og:url', url);
+    out = replaceMetaContent(out, 'name', 'twitter:title', meta.title);
+    out = replaceMetaContent(out, 'name', 'twitter:description', meta.description);
+    out = replaceLinkHref(out, 'canonical', url);
+    out = replaceLinkHref(out, 'alternate', pageUrl(dePath), 'hreflang', 'de');
+    out = replaceLinkHref(out, 'alternate', pageUrl(enPathOf(dePath)), 'hreflang', 'en');
+    out = replaceLinkHref(out, 'alternate', pageUrl(dePath), 'hreflang', 'x-default');
+    out = out.replace('<!--RUN-JSONLD-->', dePath.startsWith('/runs/') ? runJsonLdHtml(dePath, url) : '');
+    return out;
+}

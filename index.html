@@ -73,7 +73,7 @@
   }
   </script>
 
-  <!-- Per-run Dataset JSON-LD is injected here for /runs/:seed pages (vite-ssg onBeforePageRender) -->
+  <!-- Per-run Dataset JSON-LD is injected here for /runs/:runId pages (vike +onRenderHtml) -->
   <!--RUN-JSONLD-->
 
   <!-- Fonts are self-hosted via @fontsource (see src/main.ts) -->
@@ -86,7 +86,6 @@
 
 <body class="antialiased">
   <div id="app"></div>
-  <script type="module" src="/src/main.ts"></script>
 </body>
 
 </html>

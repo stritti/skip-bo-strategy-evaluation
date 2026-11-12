@@ -1,4 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router';
+import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router';
 import DashboardView from '../views/DashboardView.vue';
 import DataExplorerView from '../views/DataExplorerView.vue';
 import RulesView from '../views/RulesView.vue';
@@ -42,3 +43,12 @@ export const routes: RouteRecordRaw[] = baseRoutes.flatMap((r) => [
         meta: { seoKey: r.path, locale: 'en' as const }
     }
 ]);
+
+export function createAppRouter() {
+    return createRouter({
+        // use appropriate history implementation for server/client
+        // import.meta.env.SSR is injected by Vite.
+        history: import.meta.env.SSR ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL),
+        routes
+    });
+}
